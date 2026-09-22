@@ -32,6 +32,12 @@ Ví trình duyệt: Phantom hoặc Solflare. Người chơi ký challenge Ed2551
 backend trả bearer token. Không có ví hoặc từ chối ký sẽ báo lỗi, không tạo ví giả.
 Phiên đăng nhập cũ không đúng chain được loại bỏ khi tải lại trang.
 
+## Quản lý secret
+
+`.env.example` chỉ chứa địa chỉ blockchain công khai và placeholder trống; file này an toàn để commit.
+API key, private key, seed phrase và mật khẩu thật chỉ được đặt trong `.env` cục bộ đã bị Git bỏ qua.
+Chạy `python scripts/check-secrets.py` trước khi commit; GitHub Actions cũng chạy kiểm tra này trên mỗi push và pull request.
+
 ## Blockchain đang có gì?
 
 - Contract `blockchain/solana/programs/history_game` lưu `AssetProof`.
