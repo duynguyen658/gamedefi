@@ -23,6 +23,7 @@ import {
   TREASURY_FLOWS,
 } from '../../data/defi';
 import { DexSwapPanel } from './DexSwapPanel';
+import { GameTokenCard } from './GameTokenCard';
 
 interface DefiHubProps {
   player: Player;
@@ -125,6 +126,7 @@ export const DefiHub: React.FC<DefiHubProps> = ({ player, onBack, onPlayDrum }) 
             <li className="flex items-center space-x-2"><ShieldCheck className="w-3.5 h-3.5 text-imperial-gold" /><span>Trạng thái đọc được trước khi xác nhận.</span></li>
             <li className="flex items-center space-x-2"><Wallet className="w-3.5 h-3.5 text-imperial-gold" /><span>Ngôn ngữ tiếng Việt, số liệu đơn giản, phí hiển thị trước.</span></li>
           </ul>
+          <GameTokenCard player={player} />
         </div>
 
         <div className="lg:col-span-3 bg-imperial-lacquer/90 border border-imperial-border rounded-2xl p-6">

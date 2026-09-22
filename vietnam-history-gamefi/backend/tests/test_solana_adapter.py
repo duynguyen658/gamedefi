@@ -104,3 +104,58 @@ def test_verifies_exact_mint_instruction_for_wallet_pda_and_faction():
     assert not adapter.verify_faction_mint(
         VECTOR["wallet"], VECTOR["program_id"], VECTOR["faction_id"], "signature"
     )
+
+
+def test_reads_fixed_supply_game_token_mint():
+    def handler(request):
+        body = json.loads(request.content)
+        assert body["method"] == "getAccountInfo"
+        assert body["params"][0] == "45kZL6u62pbEmLiiZuUeuPWcotqZb8DLMmaPD5tNs1qm"
+        assert body["params"][1]["encoding"] == "jsonParsed"
+        return httpx.Response(200, json={"result": {"value": {
+            "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+            "data": {"program": "spl-token", "parsed": {"type": "mint", "info": {
+                "decimals": 6,
+                "supply": "1000000000000000",
+                "isInitialized": True,
+                "mintAuthority": None,
+                "freezeAuthority": None,
+            }}},
+        }}})
+
+    adapter = SolanaAdapter(Settings(), httpx.Client(transport=httpx.MockTransport(handler)))
+    info = adapter.get_token_mint_info("45kZL6u62pbEmLiiZuUeuPWcotqZb8DLMmaPD5tNs1qm")
+    assert info["supply"] == "1000000000000000"
+    assert info["decimals"] == 6
+    assert info["mint_authority"] is None
+    assert info["freeze_authority"] is None
+
+
+@pytest.mark.parametrize("value", [None, {"owner": VECTOR["program_id"], "data": {}},
+    {"owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA", "data": {"parsed": {"type": "account", "info": {}}}}])
+def test_rejects_missing_or_spoofed_game_token_mint(value):
+    response = httpx.Response(200, json={"result": {"value": value}})
+    adapter = SolanaAdapter(Settings(), httpx.Client(transport=httpx.MockTransport(lambda request: response)))
+    with pytest.raises(SolanaAdapterError):
+        adapter.get_token_mint_info("45kZL6u62pbEmLiiZuUeuPWcotqZb8DLMmaPD5tNs1qm")
+
+
+def test_reads_game_token_treasury_account():
+    def handler(request):
+        body = json.loads(request.content)
+        assert body["method"] == "getAccountInfo"
+        return httpx.Response(200, json={"result": {"value": {
+            "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+            "data": {"program": "spl-token", "parsed": {"type": "account", "info": {
+                "mint": "45kZL6u62pbEmLiiZuUeuPWcotqZb8DLMmaPD5tNs1qm",
+                "owner": "HUQHQv86C6sqqEWMpq8VcUs6kmQo78EsDV9cgEC9GaLK",
+                "state": "initialized",
+                "tokenAmount": {"amount": "1000000000000000", "decimals": 6},
+            }}},
+        }}})
+
+    adapter = SolanaAdapter(Settings(), httpx.Client(transport=httpx.MockTransport(handler)))
+    info = adapter.get_token_account_info("3d3aVnwqsre4AfnvVCMvkLvLZ7YbxY3A6P5Er3wKg1Sp")
+    assert info["mint"] == "45kZL6u62pbEmLiiZuUeuPWcotqZb8DLMmaPD5tNs1qm"
+    assert info["owner"] == "HUQHQv86C6sqqEWMpq8VcUs6kmQo78EsDV9cgEC9GaLK"
+    assert info["amount"] == "1000000000000000"

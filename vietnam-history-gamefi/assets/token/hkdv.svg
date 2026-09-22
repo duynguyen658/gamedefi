@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Hào Khí Đại Việt token</title>
+  <desc id="desc">Gold Đông Sơn drum pattern and star on a lacquer red field.</desc>
+  <defs>
+    <radialGradient id="field" cx="50%" cy="42%" r="64%">
+      <stop offset="0" stop-color="#9f2d2d"/>
+      <stop offset="1" stop-color="#3a0909"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff1a8"/>
+      <stop offset="0.5" stop-color="#e7b94f"/>
+      <stop offset="1" stop-color="#9f6815"/>
+    </linearGradient>
+  </defs>
+  <circle cx="256" cy="256" r="246" fill="url(#field)" stroke="url(#gold)" stroke-width="20"/>
+  <circle cx="256" cy="256" r="190" fill="none" stroke="#d9a936" stroke-width="10" stroke-dasharray="8 13"/>
+  <circle cx="256" cy="256" r="148" fill="none" stroke="#d9a936" stroke-width="6"/>
+  <g fill="url(#gold)">
+    <path d="M256 91l29 95 99-21-70 75 68 76-98-23-28 96-28-96-98 23 68-76-70-75 99 21z"/>
+    <circle cx="256" cy="256" r="36" fill="#561010"/>
+    <circle cx="256" cy="256" r="19"/>
+  </g>
+  <text x="256" y="458" text-anchor="middle" fill="#f7dc8a" font-family="Georgia,serif" font-size="42" font-weight="700" letter-spacing="8">HKDV</text>
+</svg>

@@ -183,3 +183,14 @@ def test_solana_login_uses_base58_signature(client):
     assert player["chain"] == "solana"
     assert player["wallet"] == wallet
     assert player["access_token"]
+
+
+def test_game_token_config_is_verified(client):
+    response = client.get("/blockchain/solana/game-token")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["symbol"] == "HKDV"
+    assert payload["network"] == "devnet"
+    assert payload["verified"] is True
+    assert payload["on_chain"]["mint_authority"] is None
+    assert payload["on_chain"]["freeze_authority"] is None

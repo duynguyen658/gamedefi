@@ -17,6 +17,9 @@ from app.blockchain.interface import BlockchainAdapter, NftInfo, TransactionInfo
 from app.core.config import Settings
 
 
+SPL_TOKEN_PROGRAM_ID = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+
+
 class SolanaAdapterError(RuntimeError):
     pass
 
@@ -58,6 +61,70 @@ class SolanaAdapter(BlockchainAdapter):
             timestamp_ms=(result.get("blockTime") or 0) * 1000 or None,
             events=[], raw=result,
         )
+
+
+    def get_token_mint_info(self, mint: str) -> dict[str, Any]:
+        try:
+            mint = str(Pubkey.from_string(mint))
+        except ValueError as exc:
+            raise SolanaAdapterError("GAME_TOKEN_MINT không phải địa chỉ Solana hợp lệ") from exc
+        result = self._rpc("getAccountInfo", [mint, {
+            "encoding": "jsonParsed", "commitment": "confirmed",
+        }])
+        account = (result or {}).get("value")
+        if not isinstance(account, dict) or account.get("owner") != SPL_TOKEN_PROGRAM_ID:
+            raise SolanaAdapterError("Không tìm thấy SPL game token trên RPC đã cấu hình")
+        data = account.get("data")
+        parsed = data.get("parsed") if isinstance(data, dict) else None
+        info = parsed.get("info") if isinstance(parsed, dict) and parsed.get("type") == "mint" else None
+        if not isinstance(info, dict):
+            raise SolanaAdapterError("RPC không trả mint account hợp lệ")
+        try:
+            supply = str(int(info["supply"]))
+            decimals = int(info["decimals"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise SolanaAdapterError("RPC trả thông tin supply hoặc decimals không hợp lệ") from exc
+        return {
+            "mint": mint,
+            "program_id": SPL_TOKEN_PROGRAM_ID,
+            "supply": supply,
+            "decimals": decimals,
+            "is_initialized": bool(info.get("isInitialized")),
+            "mint_authority": info.get("mintAuthority"),
+            "freeze_authority": info.get("freezeAuthority"),
+        }
+
+
+    def get_token_account_info(self, address: str) -> dict[str, Any]:
+        try:
+            address = str(Pubkey.from_string(address))
+        except ValueError as exc:
+            raise SolanaAdapterError("GAME_TOKEN_TREASURY_ACCOUNT không phải địa chỉ Solana hợp lệ") from exc
+        result = self._rpc("getAccountInfo", [address, {
+            "encoding": "jsonParsed", "commitment": "confirmed",
+        }])
+        account = (result or {}).get("value")
+        if not isinstance(account, dict) or account.get("owner") != SPL_TOKEN_PROGRAM_ID:
+            raise SolanaAdapterError("Không tìm thấy treasury token account trên RPC đã cấu hình")
+        data = account.get("data")
+        parsed = data.get("parsed") if isinstance(data, dict) else None
+        info = parsed.get("info") if isinstance(parsed, dict) and parsed.get("type") == "account" else None
+        amount = info.get("tokenAmount") if isinstance(info, dict) else None
+        if not isinstance(amount, dict):
+            raise SolanaAdapterError("RPC không trả treasury token account hợp lệ")
+        try:
+            raw_amount = str(int(amount["amount"]))
+            decimals = int(amount["decimals"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise SolanaAdapterError("RPC trả số dư treasury không hợp lệ") from exc
+        return {
+            "address": address,
+            "mint": str(info.get("mint") or ""),
+            "owner": str(info.get("owner") or ""),
+            "amount": raw_amount,
+            "decimals": decimals,
+            "state": str(info.get("state") or ""),
+        }
 
     def _get_proof(self, address: Pubkey) -> tuple[str, str, str, str] | None:
         result = self._rpc("getAccountInfo", [str(address), {

@@ -60,7 +60,7 @@ export const solanaAdapter = {
     if (program.equals(SystemProgram.programId)) throw new Error('Program ID vẫn là placeholder; cần deploy program thật.');
     const connection = new Connection(SOLANA_RPC_URL, 'finalized');
     const genesis: Record<string, string> = {
-      devnet: 'EtWTRABZaYq6iMfeYKouRu166VU2xqa1',
+      devnet: 'EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG',
       testnet: '4uhcVJyU9pJkvQyS88uRDiswHXSCkY3zQawwpjk2NsNY',
       'mainnet-beta': '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
     };

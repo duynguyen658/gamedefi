@@ -50,6 +50,29 @@ class FakeAdapter(BlockchainAdapter):
     def get_transaction(self, digest: str) -> TransactionInfo | None:
         return self.txs.get(digest)
 
+
+    def get_token_mint_info(self, mint: str) -> dict:
+        return {
+            "mint": mint,
+            "program_id": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+            "supply": "1000000000000000",
+            "decimals": 6,
+            "is_initialized": True,
+            "mint_authority": None,
+            "freeze_authority": None,
+        }
+
+
+    def get_token_account_info(self, address: str) -> dict:
+        return {
+            "address": address,
+            "mint": "45kZL6u62pbEmLiiZuUeuPWcotqZb8DLMmaPD5tNs1qm",
+            "owner": "HUQHQv86C6sqqEWMpq8VcUs6kmQo78EsDV9cgEC9GaLK",
+            "amount": "1000000000000000",
+            "decimals": 6,
+            "state": "initialized",
+        }
+
     def verify_ownership(self, wallet: str, object_id: str) -> bool:
         return self.ownership.get(object_id) == self._norm(wallet)
 

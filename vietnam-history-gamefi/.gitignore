@@ -61,3 +61,6 @@ Thumbs.db
 blockchain/solana/target/
 blockchain/solana/.anchor/
 .npm-cache/
+
+# Local Solana authority files
+*-keypair.json

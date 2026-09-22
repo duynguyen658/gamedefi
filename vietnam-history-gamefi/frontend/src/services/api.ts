@@ -5,6 +5,7 @@ import {
   ChainType,
   Faction,
   FactionRegisterRequest,
+  GameTokenInfo,
   LeaderboardEntry,
   MarketplaceListing,
   NonceResponse,
@@ -407,6 +408,13 @@ class GameApiService {
       console.warn('Error fetching quests:', e);
       return [];
     }
+  }
+
+
+  async getGameToken(): Promise<GameTokenInfo> {
+    const res = await fetch(`${API_BASE_URL}/blockchain/solana/game-token`);
+    if (!res.ok) throw await apiError(res);
+    return await res.json();
   }
 
   // -------------------------------------------------------------------------

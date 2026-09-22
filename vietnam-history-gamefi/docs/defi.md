@@ -4,6 +4,8 @@
 
 - Giai đoạn 1 hoàn thành: DEX có đường điều hướng trong game, đọc số dư SOL/USDC từ RPC và không còn hiển thị tỷ giá, TVL hoặc chữ ký mô phỏng.
 - Giai đoạn 2 hoàn thành: backend chọn mock provider không thực thi trên Devnet và Jupiter `/order` + `/execute` trên Mainnet; frontend hỗ trợ báo giá, ký versioned transaction và hiển thị kết quả.
+- Giai đoạn 3 hoàn thành: swap intent, idempotency, trạng thái thực thi và reconciliation được lưu qua SQLAlchemy/PostgreSQL.
+- Giai đoạn 4 hoàn thành: SPL token HKDV cung cố định đã được phát hành trên Devnet; backend xác minh mint và treasury qua RPC, frontend hiển thị số dư ví.
 
 Hướng thiết kế: **tài chính phi tập trung minh bạch, an toàn, dễ tiếp cận**.
 

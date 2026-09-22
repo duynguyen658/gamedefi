@@ -11,6 +11,7 @@ Chain duy nhất là `solana`; địa chỉ base58 phân biệt hoa/thường.
 - `POST /players/{wallet}/faction`: `{faction_id, nft_object_id, tx_digest}`, ví đã xác thực;
   `nft_object_id` là địa chỉ PDA faction proof, `tx_digest` là transaction signature Solana.
 - `GET /blockchain/solana/config`: `{chain, network, program_id}`; không lộ RPC credentials.
+- `GET /blockchain/solana/game-token`: thông số HKDV và kết quả xác minh live mint/treasury trên Devnet (`45kZL6u62pbEmLiiZuUeuPWcotqZb8DLMmaPD5tNs1qm`).
 - `GET /blockchain/solana/transaction/{signature}`: `success`, `failure`, `pending`; 404 nếu chưa tìm thấy.
 - `GET /players/{wallet}/army`, `POST /players/{wallet}/army/equip-advisor`: cần session đúng ví.
 - `POST /battles`: `{player_wallet, scenario_id, tactical_formation, advisor_id?}` → kết quả off-chain.

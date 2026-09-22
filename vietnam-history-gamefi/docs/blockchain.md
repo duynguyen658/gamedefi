@@ -67,3 +67,8 @@ anchor test --provider.cluster localnet
 ```
 
 Các unit test không gửi giao dịch public network. Build/test contract cần toolchain riêng.
+
+
+## HKDV SPL game token
+
+Giai đoạn 4 đã tạo mint Devnet `45kZL6u62pbEmLiiZuUeuPWcotqZb8DLMmaPD5tNs1qm` với 6 decimals và tổng cung cố định 1 tỷ HKDV. Mint authority đã bị vô hiệu hóa và freeze authority không tồn tại. Toàn bộ cung hiện ở treasury ATA `3d3aVnwqsre4AfnvVCMvkLvLZ7YbxY3A6P5Er3wKg1Sp`; xem [thiết kế và vận hành token](game-token.md).

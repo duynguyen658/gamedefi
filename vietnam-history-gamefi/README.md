@@ -60,6 +60,7 @@ Không commit keypair trong `target/`. Không có deployment được tự thự
 ## Giới hạn hiện tại
 
 - Program `8qUBTgX99v5EhxbAaxuqS94rgfRhnLrTgW66Gh9BvLKN` đã deploy trên Devnet; ví development hiện là upgrade authority.
+- SPL game token `HKDV` (`45kZL6u62pbEmLiiZuUeuPWcotqZb8DLMmaPD5tNs1qm`) đã deploy trên Devnet với tổng cung cố định 1 tỷ; mint/freeze authority đều không còn.
 - Player, session, battle và reward references vẫn dùng RAM nên mất khi backend restart.
 - Vòng đời DEX đã nối SQLAlchemy/PostgreSQL; production cần chạy migration `database/migrations/001_dex_swaps.sql`. Nếu không cấu hình `DATABASE_URL`, môi trường local dùng SQLite `gamefi-dev.db`.
 - Battle engine/API đã có, nhưng bàn cờ frontend còn mô phỏng cục bộ, chưa gọi API battle để lưu kết quả.
@@ -68,4 +69,4 @@ Không commit keypair trong `target/`. Không có deployment được tự thự
 - DEX dùng mock provider được gắn nhãn trên Devnet và Jupiter trên Mainnet; swap intent, trạng thái và signature được lưu trong PostgreSQL, có idempotency và đối soát Solana RPC. Cần `JUPITER_API_KEY` ở backend để bật giao dịch Mainnet.
 - Unity là client thử nghiệm, cần bridge tới ví Solana; không phải client chính.
 
-Chi tiết: [Blockchain](docs/blockchain.md), [API](docs/api.md), [Kiến trúc](docs/architecture.md).
+Chi tiết: [Blockchain](docs/blockchain.md), [HKDV token](docs/game-token.md), [API](docs/api.md), [Kiến trúc](docs/architecture.md).

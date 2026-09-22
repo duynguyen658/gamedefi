@@ -1,0 +1,38 @@
+{
+  "name": "Hao Khi Dai Viet",
+  "symbol": "HKDV",
+  "description": "Fixed-supply utility token for the Hao Khi Dai Viet strategy GameFi economy on Solana Devnet.",
+  "image": "https://raw.githubusercontent.com/duynguyen658/gamedefi/main/vietnam-history-gamefi/assets/token/hkdv.svg",
+  "external_url": "https://github.com/duynguyen658/gamedefi",
+  "attributes": [
+    {
+      "trait_type": "Network",
+      "value": "Solana Devnet"
+    },
+    {
+      "trait_type": "Decimals",
+      "value": 6
+    },
+    {
+      "trait_type": "Fixed Supply",
+      "value": "1,000,000,000"
+    },
+    {
+      "trait_type": "Mint Authority",
+      "value": "Disabled"
+    },
+    {
+      "trait_type": "Freeze Authority",
+      "value": "None"
+    }
+  ],
+  "properties": {
+    "category": "fungible",
+    "files": [
+      {
+        "uri": "https://raw.githubusercontent.com/duynguyen658/gamedefi/main/vietnam-history-gamefi/assets/token/hkdv.svg",
+        "type": "image/svg+xml"
+      }
+    ]
+  }
+}
