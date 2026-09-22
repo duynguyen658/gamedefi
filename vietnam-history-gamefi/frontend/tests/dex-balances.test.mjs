@@ -1,6 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { formatBaseUnits, maximumSpendable, validateSwapAmount } from '../src/services/dexMath.ts';
+import { formatBaseUnits, maximumSpendable, uiAmountToBaseUnits, validateSwapAmount } from '../src/services/dexMath.ts';
+
+test('converts UI amounts to exact base units', () => {
+  assert.equal(uiAmountToBaseUnits('1.25', 9), '1250000000');
+  assert.equal(uiAmountToBaseUnits('.5', 6), '500000');
+  assert.throws(() => uiAmountToBaseUnits('1.0000001', 6));
+});
 
 test('formats on-chain base units without floating point rounding', () => {
   assert.equal(formatBaseUnits(12_345_678_900n, 9, 6), '12.345678');

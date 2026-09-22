@@ -1,6 +1,7 @@
 import React from 'react';
 import { Volume2, VolumeX, Radio, Wallet, LogOut, Crown, ShoppingBag, ArrowLeftRight } from 'lucide-react';
 import { ChainType, Player } from '../../types';
+import { SOLANA_NETWORK } from '../../services/solana';
 
 interface HeaderProps {
   chain: ChainType;
@@ -79,7 +80,7 @@ export const Header: React.FC<HeaderProps> = ({
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                Solana Devnet
+                Solana {SOLANA_NETWORK === 'mainnet-beta' ? 'Mainnet' : SOLANA_NETWORK}
               </button>
             </div>
           </div>

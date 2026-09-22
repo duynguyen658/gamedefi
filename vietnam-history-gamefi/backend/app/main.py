@@ -3,10 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.blockchain.solana_adapter import SolanaAdapterError
 
-from app.api import advisor, army, auth, battle, blockchain, faction, leaderboard, marketplace, quest, reward
+from app.api import advisor, army, auth, battle, blockchain, dex, faction, leaderboard, marketplace, quest, reward
 from app.blockchain.adapter_resolver import AdapterResolver
 from app.core.config import get_settings
 from app.core.security import NonceStore, SessionStore
+from app.dex.order_store import PendingOrderStore
+from app.dex.resolver import create_dex_provider
 
 
 def create_app() -> FastAPI:
@@ -27,6 +29,8 @@ def create_app() -> FastAPI:
     app.state.resolver = AdapterResolver(settings)
     app.state.nonce_store = NonceStore(settings.nonce_ttl_seconds)
     app.state.session_store = SessionStore(settings.session_ttl_seconds)
+    app.state.dex_provider = create_dex_provider(settings)
+    app.state.dex_orders = PendingOrderStore(settings.dex_order_ttl_seconds)
 
     # Core Game Domain routers (100% off-chain)
     app.include_router(auth.router)
@@ -41,6 +45,7 @@ def create_app() -> FastAPI:
     app.include_router(marketplace.router)
     app.include_router(blockchain.router)
     app.include_router(reward.router)
+    app.include_router(dex.router)
 
     @app.get("/health")
     def health() -> dict:

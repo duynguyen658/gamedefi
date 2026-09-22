@@ -64,7 +64,7 @@ Không commit keypair trong `target/`. Không có deployment được tự thự
 - Battle engine/API đã có, nhưng bàn cờ frontend còn mô phỏng cục bộ, chưa gọi API battle để lưu kết quả.
 - Reward SOL chưa có treasury/claim program: API trả 409 rõ ràng, không giả lập đã chuyển tiền.
 - Marketplace/P2P chặn thao tác ghi bằng 503; danh sách ban đầu trống, không seed ownership giả.
-- DEX đã đọc số dư SOL/USDC thật từ RPC; báo giá và thực thi swap sẽ được nối qua `DexProvider` ở giai đoạn tiếp theo.
+- DEX dùng mock provider được gắn nhãn trên Devnet và Jupiter trên Mainnet; cần `JUPITER_API_KEY` ở backend để bật giao dịch Mainnet.
 - Unity là client thử nghiệm, cần bridge tới ví Solana; không phải client chính.
 
 Chi tiết: [Blockchain](docs/blockchain.md), [API](docs/api.md), [Kiến trúc](docs/architecture.md).

@@ -15,6 +15,14 @@ class Settings(BaseSettings):
     solana_gas_budget_lamports: int = 5_000_000
     reward_amount_lamports: int = 5_000_000
 
+    # --- DEX ---
+    # The Jupiter key remains backend-only. Non-mainnet environments use the
+    # explicitly labelled, non-executable mock provider.
+    jupiter_api_key: str = ""
+    jupiter_base_url: str = "https://api.jup.ag/swap/v2"
+    dex_mock_sol_usdc_rate: float = 100.0
+    dex_order_ttl_seconds: int = 120
+
     nonce_ttl_seconds: int = 300
     session_ttl_seconds: int = 3_600
     # Comma-separated browser origins.  Keep this explicit because every

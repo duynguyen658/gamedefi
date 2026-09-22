@@ -1,5 +1,18 @@
 type DexTokenSymbol = 'SOL' | 'USDC';
 
+export function uiAmountToBaseUnits(value: string, decimals: number): string {
+  const amount = value.trim();
+  if (!/^(?:\d+|\d*\.\d+)$/.test(amount)) throw new Error('Số lượng không hợp lệ.');
+  const [wholePart, fractionPart = ''] = amount.split('.');
+  if (fractionPart.length > decimals) throw new Error(`Tối đa ${decimals} chữ số thập phân.`);
+  const scale = 10n ** BigInt(decimals);
+  const whole = BigInt(wholePart || '0') * scale;
+  const fraction = BigInt((fractionPart.padEnd(decimals, '0') || '0'));
+  const raw = whole + fraction;
+  if (raw <= 0n) throw new Error('Số lượng phải lớn hơn 0.');
+  return raw.toString();
+}
+
 export function formatBaseUnits(rawAmount: bigint, decimals: number, visibleDecimals = 6): string {
   const digits = rawAmount.toString().padStart(decimals + 1, '0');
   const whole = digits.slice(0, -decimals) || '0';

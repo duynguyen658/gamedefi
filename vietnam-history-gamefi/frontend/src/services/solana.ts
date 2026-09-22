@@ -1,4 +1,4 @@
-import { Connection, PublicKey, SystemProgram, Transaction, TransactionInstruction } from '@solana/web3.js';
+import { Connection, PublicKey, SystemProgram, Transaction, TransactionInstruction, VersionedTransaction } from '@solana/web3.js';
 import { Buffer } from 'buffer';
 import bs58 from 'bs58';
 import { encodeMintFaction, factionAddress, readFactionProof } from './solanaProtocol';
@@ -11,7 +11,7 @@ interface WalletProvider {
   publicKey?: PublicKey;
   connect(): Promise<{ publicKey: PublicKey }>;
   signMessage(message: Uint8Array, encoding?: string): Promise<{ signature: Uint8Array }>;
-  signTransaction(transaction: Transaction): Promise<Transaction>;
+  signTransaction<T extends Transaction | VersionedTransaction>(transaction: T): Promise<T>;
   disconnect?(): Promise<void>;
 }
 
@@ -31,6 +31,21 @@ export const solanaAdapter = {
   signMessage: async (message: string): Promise<string> => {
     const signed = await provider().signMessage(new TextEncoder().encode(message), 'utf8');
     return bs58.encode(signed.signature);
+  },
+  signVersionedTransaction: async (transactionBase64: string, expectedWallet: string): Promise<string> => {
+    const wallet = provider();
+    const owner = (await wallet.connect()).publicKey;
+    if (owner.toBase58() !== expectedWallet) throw new Error('Ví đã đổi tài khoản. Hãy đăng nhập lại.');
+    let transaction: VersionedTransaction;
+    try {
+      transaction = VersionedTransaction.deserialize(Buffer.from(transactionBase64, 'base64'));
+    } catch {
+      throw new Error('DEX trả transaction không hợp lệ.');
+    }
+    const feePayer = transaction.message.staticAccountKeys[0];
+    if (!feePayer?.equals(owner)) throw new Error('Ví ký không phải fee payer của giao dịch DEX.');
+    const signed = await wallet.signTransaction(transaction);
+    return Buffer.from(signed.serialize()).toString('base64');
   },
   mintFactionNft: async (factionId: number, expectedWallet: string): Promise<{ tx_digest: string; nft_object_id: string }> => {
     const wallet = provider();

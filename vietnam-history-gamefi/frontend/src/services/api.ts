@@ -13,8 +13,18 @@ import {
   TradeProposal,
   WalletVerifyRequest,
 } from '../types';
+import type { DexExecution, DexOrder, DexOrderRequest } from '../types/dex';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+
+async function apiError(response: Response): Promise<Error> {
+  try {
+    const payload = await response.json();
+    return new Error(typeof payload?.detail === 'string' ? payload.detail : `HTTP error ${response.status}`);
+  } catch {
+    return new Error(`HTTP error ${response.status}`);
+  }
+}
 
 export const DEFAULT_FACTIONS: Faction[] = [
   {
@@ -397,6 +407,34 @@ class GameApiService {
       console.warn('Error fetching quests:', e);
       return [];
     }
+  }
+
+  // -------------------------------------------------------------------------
+  // DEX provider gateway
+  // -------------------------------------------------------------------------
+
+  async createDexOrder(payload: DexOrderRequest): Promise<DexOrder> {
+    const res = await fetch(`${API_BASE_URL}/dex/order`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...this.authHeaders() },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw await apiError(res);
+    return await res.json();
+  }
+
+  async executeDexOrder(payload: {
+    wallet: string;
+    request_id: string;
+    signed_transaction: string;
+  }): Promise<DexExecution> {
+    const res = await fetch(`${API_BASE_URL}/dex/execute`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...this.authHeaders() },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw await apiError(res);
+    return await res.json();
   }
 
   // -------------------------------------------------------------------------
