@@ -84,6 +84,7 @@ export TOKEN_NAME TOKEN_SYMBOL TOKEN_DECIMALS TOKEN_SUPPLY TOKEN_SUPPLY_BASE_UNI
 python3 - <<'PY'
 import json
 import os
+from decimal import Decimal
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -94,8 +95,12 @@ if display.get("freezeAuthority") is not None:
     raise SystemExit("Freeze authority is unexpectedly enabled")
 if os.environ["SUPPLY_AFTER"] != os.environ["TOKEN_SUPPLY"]:
     raise SystemExit("On-chain supply does not match the fixed supply")
-if os.environ["BALANCE_AFTER"] != os.environ["TOKEN_SUPPLY"]:
-    raise SystemExit("Treasury balance does not hold the complete fixed supply")
+if Decimal(os.environ["BALANCE_AFTER"]) > Decimal(os.environ["TOKEN_SUPPLY"]):
+    raise SystemExit("Treasury balance cannot exceed the fixed token supply")
+
+path = Path(os.environ["DEPLOYMENT"])
+previous = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+now = datetime.now(timezone.utc).isoformat()
 
 payload = {
     "schema_version": 1,
@@ -112,13 +117,14 @@ payload = {
     "freeze_authority": None,
     "treasury_owner": os.environ["TREASURY"],
     "treasury_token_account": os.environ["TREASURY_ATA"],
+    "treasury_balance": os.environ["BALANCE_AFTER"],
     "fee_payer": os.environ["FEE_PAYER"],
     "metadata_uri": os.environ["METADATA_URI"],
     "on_chain_metadata": False,
-    "deployed_at": datetime.now(timezone.utc).isoformat(),
+    "deployed_at": previous.get("deployed_at", now),
+    "verified_at": now,
     "explorer_url": f"https://explorer.solana.com/address/{os.environ['MINT']}?cluster=devnet",
 }
-path = Path(os.environ["DEPLOYMENT"])
 path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 PY
 

@@ -12,11 +12,12 @@ Chain duy nhất là `solana`; địa chỉ base58 phân biệt hoa/thường.
   `nft_object_id` là địa chỉ PDA faction proof, `tx_digest` là transaction signature Solana.
 - `GET /blockchain/solana/config`: `{chain, network, program_id}`; không lộ RPC credentials.
 - `GET /blockchain/solana/game-token`: thông số HKDV và kết quả xác minh live mint/treasury trên Devnet (`45kZL6u62pbEmLiiZuUeuPWcotqZb8DLMmaPD5tNs1qm`).
+- `GET /blockchain/solana/reward-distributor`: config, vault, số dư và kết quả xác minh live reward distributor trên Devnet.
 - `GET /blockchain/solana/transaction/{signature}`: `success`, `failure`, `pending`; 404 nếu chưa tìm thấy.
 - `GET /players/{wallet}/army`, `POST /players/{wallet}/army/equip-advisor`: cần session đúng ví.
 - `POST /battles`: `{player_wallet, scenario_id, tactical_formation, advisor_id?}` → kết quả off-chain.
 - `GET /battles/{battle_id}`, `GET /advisors`, `GET /quests`, `GET /leaderboard`: dữ liệu game.
-- `POST /rewards/claim`: `{wallet, battle_id}`; hiện trả 409 cho ví đủ điều kiện vì chưa có payout SOL.
+- `POST /rewards/claim`: `{wallet, battle_id}`; giai đoạn 5 vẫn trả 409 cho ví đủ điều kiện vì battle/quest integration và distributor signing thuộc giai đoạn 6.
 - `GET /players/{wallet}/rewards`: cần session đúng ví.
 - `GET /marketplace`: danh sách rỗng cho đến khi có escrow; API ghi marketplace/trades trả 503.
 

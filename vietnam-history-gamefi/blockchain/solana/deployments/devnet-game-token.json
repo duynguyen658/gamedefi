@@ -13,9 +13,11 @@
   "freeze_authority": null,
   "treasury_owner": "HUQHQv86C6sqqEWMpq8VcUs6kmQo78EsDV9cgEC9GaLK",
   "treasury_token_account": "3d3aVnwqsre4AfnvVCMvkLvLZ7YbxY3A6P5Er3wKg1Sp",
+  "treasury_balance": "999000000",
   "fee_payer": "oV3Y4Z6DvPvBWGvbgLvfjxHoyVbWZkr1KHmNMHLDA7T",
   "metadata_uri": "https://raw.githubusercontent.com/duynguyen658/gamedefi/main/vietnam-history-gamefi/assets/token/hkdv.json",
   "on_chain_metadata": false,
   "deployed_at": "2026-09-22T15:59:04.401437+00:00",
+  "verified_at": "2026-09-22T17:02:24.981893+00:00",
   "explorer_url": "https://explorer.solana.com/address/45kZL6u62pbEmLiiZuUeuPWcotqZb8DLMmaPD5tNs1qm?cluster=devnet"
 }

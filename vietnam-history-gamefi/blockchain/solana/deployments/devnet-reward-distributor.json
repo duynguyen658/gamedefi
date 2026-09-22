@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "network": "devnet",
+  "status": "active",
+  "program_id": "8qUBTgX99v5EhxbAaxuqS94rgfRhnLrTgW66Gh9BvLKN",
+  "config": "3MHpXEzsFkeJeYdPMmnL8LMCY3r3Ew3wm753fZacTCuw",
+  "config_bump": 254,
+  "mint": "45kZL6u62pbEmLiiZuUeuPWcotqZb8DLMmaPD5tNs1qm",
+  "vault": "9ngszc2V6RBRxgtagHCsn6s369aZoKWHb8uXShZAhoS7",
+  "admin": "oV3Y4Z6DvPvBWGvbgLvfjxHoyVbWZkr1KHmNMHLDA7T",
+  "distributor": "6RigAPgKTdEwxmRqaoMiJj6GYnkipTSwRRc9Wkw79rTv",
+  "paused": false,
+  "max_reward_per_claim": "1000",
+  "max_reward_per_claim_base_units": "1000000000",
+  "vault_allocation": "1000000",
+  "vault_allocation_base_units": "1000000000000",
+  "vault_balance": "1000000",
+  "vault_balance_base_units": "1000000000000",
+  "total_distributed_base_units": "0",
+  "claims_count": 0,
+  "initialize_signature": "2fsHRUWe1ggDmbyGWQG9evhTcB253Xc56t3dDS74YfToB1B8pRByZaRdqXRNiLPt2yzhQGAe27b4jVQJjEAyyFJL",
+  "fund_signatures": [
+    "4goSwpMScz3KeiC5cGNHQEA45yMAKHgX7isTt27KHnsPN7SdWRJ3qmKJ8de59t82F9QMzjrtbCNZYqfZ1uBBCrst"
+  ],
+  "initial_funding_complete": true,
+  "deployed_at": "2026-09-22T16:52:09.613026+00:00",
+  "verified_at": "2026-09-22T17:06:37.028020+00:00",
+  "config_explorer_url": "https://explorer.solana.com/address/3MHpXEzsFkeJeYdPMmnL8LMCY3r3Ew3wm753fZacTCuw?cluster=devnet",
+  "vault_explorer_url": "https://explorer.solana.com/address/9ngszc2V6RBRxgtagHCsn6s369aZoKWHb8uXShZAhoS7?cluster=devnet"
+}

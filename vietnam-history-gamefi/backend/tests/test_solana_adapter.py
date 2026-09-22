@@ -5,6 +5,8 @@ from pathlib import Path
 import httpx
 import pytest
 import base58
+from solders.pubkey import Pubkey
+from app.blockchain.borsh_utils import BorshWriter, anchor_discriminator
 from app.blockchain.solana_adapter import SolanaAdapter, SolanaAdapterError
 from app.core.config import Settings
 
@@ -159,3 +161,65 @@ def test_reads_game_token_treasury_account():
     assert info["mint"] == "45kZL6u62pbEmLiiZuUeuPWcotqZb8DLMmaPD5tNs1qm"
     assert info["owner"] == "HUQHQv86C6sqqEWMpq8VcUs6kmQo78EsDV9cgEC9GaLK"
     assert info["amount"] == "1000000000000000"
+
+def test_reads_reward_distributor_config():
+    program_id = "8qUBTgX99v5EhxbAaxuqS94rgfRhnLrTgW66Gh9BvLKN"
+    admin = "oV3Y4Z6DvPvBWGvbgLvfjxHoyVbWZkr1KHmNMHLDA7T"
+    distributor = "6RigAPgKTdEwxmRqaoMiJj6GYnkipTSwRRc9Wkw79rTv"
+    mint = "45kZL6u62pbEmLiiZuUeuPWcotqZb8DLMmaPD5tNs1qm"
+    vault = "9ngszc2V6RBRxgtagHCsn6s369aZoKWHb8uXShZAhoS7"
+    raw = anchor_discriminator("account", "RewardConfig") + (
+        BorshWriter()
+        .pubkey(bytes(Pubkey.from_string(admin)))
+        .pubkey(bytes(Pubkey.from_string(distributor)))
+        .pubkey(bytes(Pubkey.from_string(mint)))
+        .pubkey(bytes(Pubkey.from_string(vault)))
+        .u8(254)
+        .u8(0)
+        .u64(1_000_000_000)
+        .u64(5_000_000)
+        .u64(1)
+        .bytes()
+    )
+
+    def handler(request):
+        body = json.loads(request.content)
+        assert body["method"] == "getAccountInfo"
+        return httpx.Response(200, json={"result": {"value": {
+            "owner": program_id,
+            "executable": False,
+            "data": [base64.b64encode(raw).decode(), "base64"],
+        }}})
+
+    adapter = SolanaAdapter(
+        Settings(solana_program_id=program_id),
+        httpx.Client(transport=httpx.MockTransport(handler)),
+    )
+    info = adapter.get_reward_distributor_info(
+        "3MHpXEzsFkeJeYdPMmnL8LMCY3r3Ew3wm753fZacTCuw"
+    )
+    assert info["admin"] == admin
+    assert info["distributor"] == distributor
+    assert info["mint"] == mint
+    assert info["vault"] == vault
+    assert info["max_reward_amount"] == "1000000000"
+    assert info["total_distributed"] == "5000000"
+    assert info["claims_count"] == 1
+
+
+@pytest.mark.parametrize("raw", [b"bad", anchor_discriminator("account", "RewardConfig") + bytes(10)])
+def test_rejects_invalid_reward_distributor_config(raw):
+    program_id = "8qUBTgX99v5EhxbAaxuqS94rgfRhnLrTgW66Gh9BvLKN"
+    response = httpx.Response(200, json={"result": {"value": {
+        "owner": program_id,
+        "executable": False,
+        "data": [base64.b64encode(raw).decode(), "base64"],
+    }}})
+    adapter = SolanaAdapter(
+        Settings(solana_program_id=program_id),
+        httpx.Client(transport=httpx.MockTransport(lambda request: response)),
+    )
+    with pytest.raises(SolanaAdapterError):
+        adapter.get_reward_distributor_info(
+            "3MHpXEzsFkeJeYdPMmnL8LMCY3r3Ew3wm753fZacTCuw"
+        )

@@ -30,13 +30,9 @@ Backend xác minh transaction thành công cùng proof đúng chủ program/disc
 
 ## Reward, advisor, trading
 
-Program hiện chỉ mở instruction `mint_faction`. Không có instruction tự khai reward,
-advisor hoặc trade; các chức năng đó chờ authority, treasury và escrow được thiết kế.
+Reward distributor HKDV đã triển khai trên Devnet. Vault do config PDA sở hữu; chỉ distributor đã cấu hình được payout và mỗi `claim_id` có receipt PDA dùng một lần. Admin có thể pause, rotate distributor, đổi giới hạn và thu hồi số dư chưa phân phối. Chi tiết tại [reward distributor](reward-distributor.md).
 
-`POST /rewards/claim` kiểm tra session/trận thắng rồi trả 409 vì chưa có luồng payout SOL.
-Marketplace/P2P trả 503 cho thao tác ghi, chờ escrow contract.
-Muốn trả thưởng thực cần treasury, quyền cấp thưởng và claim ID dùng một lần trên chain;
-không ghi một proof tự khai thay cho chuyển tiền.
+`POST /rewards/claim` vẫn trả 409 trong giai đoạn 5 vì kết nối battle/quest với distributor signer thuộc giai đoạn 6. Marketplace/P2P trả 503 cho thao tác ghi, chờ escrow contract.
 
 ## Cấu hình / deploy
 
@@ -66,7 +62,7 @@ cd blockchain/solana
 anchor test --provider.cluster localnet
 ```
 
-Các unit test không gửi giao dịch public network. Build/test contract cần toolchain riêng.
+`bash scripts/test-solana-localnet.sh` build program, preload SBF vào local validator và kiểm tra faction cùng reward SPL end-to-end. Unit test không gửi giao dịch public network.
 
 
 ## HKDV SPL game token

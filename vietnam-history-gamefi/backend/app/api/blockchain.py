@@ -32,7 +32,7 @@ def solana_game_token(request: Request):
         and on_chain["is_initialized"]
         and treasury_on_chain["mint"] == settings.game_token_mint
         and treasury_on_chain["owner"] == settings.game_token_treasury_owner
-        and treasury_on_chain["amount"] == expected_supply
+        and 0 <= int(treasury_on_chain["amount"]) <= int(expected_supply)
         and treasury_on_chain["decimals"] == settings.game_token_decimals
         and treasury_on_chain["state"] == "initialized"
     )
@@ -51,6 +51,48 @@ def solana_game_token(request: Request):
         "verified": verified,
         "on_chain": on_chain,
         "treasury_on_chain": treasury_on_chain,
+    }
+
+
+@router.get("/solana/reward-distributor")
+def solana_reward_distributor(request: Request):
+    settings = request.app.state.settings
+    adapter = request.app.state.resolver.get("solana")
+    on_chain = adapter.get_reward_distributor_info(settings.reward_distributor_config)
+    vault_on_chain = adapter.get_token_account_info(settings.reward_distributor_vault)
+    verified = (
+        settings.solana_network == "devnet"
+        and on_chain["address"] == settings.reward_distributor_config
+        and on_chain["admin"] == settings.reward_distributor_admin
+        and on_chain["distributor"] == settings.reward_distributor_authority
+        and on_chain["mint"] == settings.game_token_mint
+        and on_chain["vault"] == settings.reward_distributor_vault
+        and on_chain["max_reward_amount"] == str(settings.reward_max_amount_base_units)
+        and vault_on_chain["mint"] == settings.game_token_mint
+        and vault_on_chain["owner"] == settings.reward_distributor_config
+        and vault_on_chain["decimals"] == settings.game_token_decimals
+        and vault_on_chain["state"] == "initialized"
+    )
+    return {
+        "network": settings.solana_network,
+        "program_id": settings.solana_program_id,
+        "config": settings.reward_distributor_config,
+        "vault": settings.reward_distributor_vault,
+        "mint": settings.game_token_mint,
+        "distributor": settings.reward_distributor_authority,
+        "allocation_base_units": str(settings.reward_vault_allocation_base_units),
+        "verified": verified,
+        "active": verified and not on_chain["paused"],
+        "on_chain": on_chain,
+        "vault_on_chain": vault_on_chain,
+        "config_explorer_url": (
+            f"https://explorer.solana.com/address/{settings.reward_distributor_config}"
+            f"?cluster={settings.solana_network}"
+        ),
+        "vault_explorer_url": (
+            f"https://explorer.solana.com/address/{settings.reward_distributor_vault}"
+            f"?cluster={settings.solana_network}"
+        ),
     }
 
 

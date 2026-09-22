@@ -64,13 +64,32 @@ class FakeAdapter(BlockchainAdapter):
 
 
     def get_token_account_info(self, address: str) -> dict:
+        is_reward_vault = address == "9ngszc2V6RBRxgtagHCsn6s369aZoKWHb8uXShZAhoS7"
         return {
             "address": address,
             "mint": "45kZL6u62pbEmLiiZuUeuPWcotqZb8DLMmaPD5tNs1qm",
-            "owner": "HUQHQv86C6sqqEWMpq8VcUs6kmQo78EsDV9cgEC9GaLK",
-            "amount": "1000000000000000",
+            "owner": (
+                "3MHpXEzsFkeJeYdPMmnL8LMCY3r3Ew3wm753fZacTCuw"
+                if is_reward_vault
+                else "HUQHQv86C6sqqEWMpq8VcUs6kmQo78EsDV9cgEC9GaLK"
+            ),
+            "amount": "1000000000000" if is_reward_vault else "999000000000000",
             "decimals": 6,
             "state": "initialized",
+        }
+
+    def get_reward_distributor_info(self, address: str) -> dict:
+        return {
+            "address": address,
+            "admin": "oV3Y4Z6DvPvBWGvbgLvfjxHoyVbWZkr1KHmNMHLDA7T",
+            "distributor": "6RigAPgKTdEwxmRqaoMiJj6GYnkipTSwRRc9Wkw79rTv",
+            "mint": "45kZL6u62pbEmLiiZuUeuPWcotqZb8DLMmaPD5tNs1qm",
+            "vault": "9ngszc2V6RBRxgtagHCsn6s369aZoKWHb8uXShZAhoS7",
+            "bump": 254,
+            "paused": False,
+            "max_reward_amount": "1000000000",
+            "total_distributed": "0",
+            "claims_count": 0,
         }
 
     def verify_ownership(self, wallet: str, object_id: str) -> bool:

@@ -61,7 +61,7 @@ export const GameTokenCard: React.FC<GameTokenCardProps> = ({ player }) => {
             <ShieldCheck className="h-3 w-3" />
             Cung cố định 1 tỷ · Không mint thêm · Không đóng băng ví
           </div>
-          <p className="mt-2 text-[10px] leading-relaxed text-slate-500">Phần thưởng HKDV sẽ được mở ở giai đoạn reward distributor.</p>
+          <p className="mt-2 text-[10px] leading-relaxed text-slate-500">Reward vault đã sẵn sàng; battle và quest sẽ kết nối ở giai đoạn 6.</p>
         </>
       )}
       {error && <p className="mt-2 text-[10px] text-red-300">{error}</p>}

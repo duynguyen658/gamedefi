@@ -105,18 +105,18 @@ class SolanaAdapter(BlockchainAdapter):
         }])
         account = (result or {}).get("value")
         if not isinstance(account, dict) or account.get("owner") != SPL_TOKEN_PROGRAM_ID:
-            raise SolanaAdapterError("Không tìm thấy treasury token account trên RPC đã cấu hình")
+            raise SolanaAdapterError("Không tìm thấy SPL token account trên RPC đã cấu hình")
         data = account.get("data")
         parsed = data.get("parsed") if isinstance(data, dict) else None
         info = parsed.get("info") if isinstance(parsed, dict) and parsed.get("type") == "account" else None
         amount = info.get("tokenAmount") if isinstance(info, dict) else None
         if not isinstance(amount, dict):
-            raise SolanaAdapterError("RPC không trả treasury token account hợp lệ")
+            raise SolanaAdapterError("RPC không trả SPL token account hợp lệ")
         try:
             raw_amount = str(int(amount["amount"]))
             decimals = int(amount["decimals"])
         except (KeyError, TypeError, ValueError) as exc:
-            raise SolanaAdapterError("RPC trả số dư treasury không hợp lệ") from exc
+            raise SolanaAdapterError("RPC trả số dư token account không hợp lệ") from exc
         return {
             "address": address,
             "mint": str(info.get("mint") or ""),
@@ -124,6 +124,54 @@ class SolanaAdapter(BlockchainAdapter):
             "amount": raw_amount,
             "decimals": decimals,
             "state": str(info.get("state") or ""),
+        }
+
+    def get_reward_distributor_info(self, address: str) -> dict[str, Any]:
+        try:
+            address = str(Pubkey.from_string(address))
+        except ValueError as exc:
+            raise SolanaAdapterError(
+                "REWARD_DISTRIBUTOR_CONFIG không phải địa chỉ Solana hợp lệ"
+            ) from exc
+        result = self._rpc("getAccountInfo", [address, {
+            "encoding": "base64", "commitment": "confirmed",
+        }])
+        account = (result or {}).get("value")
+        if (
+            not isinstance(account, dict)
+            or account.get("owner") != str(self._program_id())
+            or account.get("executable")
+        ):
+            raise SolanaAdapterError("Không tìm thấy reward distributor config hợp lệ")
+        try:
+            raw = base64.b64decode(account["data"][0], validate=True)
+            if raw[:8] != anchor_discriminator("account", "RewardConfig"):
+                raise ValueError("invalid discriminator")
+            reader = BorshReader(raw, offset=8)
+            admin = str(Pubkey.from_bytes(reader.read_pubkey()))
+            distributor = str(Pubkey.from_bytes(reader.read_pubkey()))
+            mint = str(Pubkey.from_bytes(reader.read_pubkey()))
+            vault = str(Pubkey.from_bytes(reader.read_pubkey()))
+            bump = reader.read_u8()
+            paused_raw = reader.read_u8()
+            if paused_raw not in (0, 1):
+                raise ValueError("invalid paused flag")
+            max_reward_amount = reader.read_u64()
+            total_distributed = reader.read_u64()
+            claims_count = reader.read_u64()
+        except (ValueError, IndexError, KeyError, TypeError, binascii.Error) as exc:
+            raise SolanaAdapterError("RPC trả reward distributor config không hợp lệ") from exc
+        return {
+            "address": address,
+            "admin": admin,
+            "distributor": distributor,
+            "mint": mint,
+            "vault": vault,
+            "bump": bump,
+            "paused": bool(paused_raw),
+            "max_reward_amount": str(max_reward_amount),
+            "total_distributed": str(total_distributed),
+            "claims_count": claims_count,
         }
 
     def _get_proof(self, address: Pubkey) -> tuple[str, str, str, str] | None:

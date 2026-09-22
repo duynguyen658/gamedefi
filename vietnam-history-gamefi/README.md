@@ -40,8 +40,8 @@ Phiên đăng nhập cũ không đúng chain được loại bỏ khi tải lạ
 - Frontend đọc program ID từ backend, kiểm tra mạng RPC, ví ký giao dịch và chờ xác nhận.
 - Backend kiểm tra PDA, chủ program, discriminator, chủ ví và faction trước khi lưu.
 - Các tên API cũ `nft_object_id`, `get_faction_nfts` được giữ để tương thích; giá trị là địa chỉ proof account.
-- Program hiện chỉ mở instruction `mint_faction`. Reward, advisor và marketplace chưa có
-  instruction on-chain cho đến khi authority, treasury và escrow được triển khai an toàn.
+- Program mở `mint_faction` và reward distributor HKDV với vault PDA, giới hạn mỗi claim, pause, rotation và receipt chống replay.
+- Advisor và marketplace chưa có instruction on-chain cho đến khi escrow được triển khai an toàn.
 
 ## Deploy
 
@@ -50,6 +50,7 @@ Chạy từ repo bằng Bash khi đã có ví deploy và SOL Devnet:
 
 ```sh
 bash scripts/deploy-solana.sh devnet
+python3 scripts/initialize-reward-distributor.py devnet
 ```
 
 Script tạo program keypair nếu chưa có, đồng bộ ID **trước** build/deploy.
@@ -64,9 +65,9 @@ Không commit keypair trong `target/`. Không có deployment được tự thự
 - Player, session, battle và reward references vẫn dùng RAM nên mất khi backend restart.
 - Vòng đời DEX đã nối SQLAlchemy/PostgreSQL; production cần chạy migration `database/migrations/001_dex_swaps.sql`. Nếu không cấu hình `DATABASE_URL`, môi trường local dùng SQLite `gamefi-dev.db`.
 - Battle engine/API đã có, nhưng bàn cờ frontend còn mô phỏng cục bộ, chưa gọi API battle để lưu kết quả.
-- Reward SOL chưa có treasury/claim program: API trả 409 rõ ràng, không giả lập đã chuyển tiền.
+- Reward distributor HKDV và vault đã hoạt động trên Devnet; API battle/quest chưa gửi payout cho đến giai đoạn 6 và vẫn trả 409 rõ ràng.
 - Marketplace/P2P chặn thao tác ghi bằng 503; danh sách ban đầu trống, không seed ownership giả.
 - DEX dùng mock provider được gắn nhãn trên Devnet và Jupiter trên Mainnet; swap intent, trạng thái và signature được lưu trong PostgreSQL, có idempotency và đối soát Solana RPC. Cần `JUPITER_API_KEY` ở backend để bật giao dịch Mainnet.
 - Unity là client thử nghiệm, cần bridge tới ví Solana; không phải client chính.
 
-Chi tiết: [Blockchain](docs/blockchain.md), [HKDV token](docs/game-token.md), [API](docs/api.md), [Kiến trúc](docs/architecture.md).
+Chi tiết: [Blockchain](docs/blockchain.md), [HKDV token](docs/game-token.md), [Reward distributor](docs/reward-distributor.md), [API](docs/api.md), [Kiến trúc](docs/architecture.md).

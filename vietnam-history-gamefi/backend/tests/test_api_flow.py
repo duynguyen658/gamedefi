@@ -194,3 +194,14 @@ def test_game_token_config_is_verified(client):
     assert payload["verified"] is True
     assert payload["on_chain"]["mint_authority"] is None
     assert payload["on_chain"]["freeze_authority"] is None
+
+def test_reward_distributor_config_is_verified(client):
+    response = client.get("/blockchain/solana/reward-distributor")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["verified"] is True
+    assert payload["active"] is True
+    assert payload["mint"] == "45kZL6u62pbEmLiiZuUeuPWcotqZb8DLMmaPD5tNs1qm"
+    assert payload["on_chain"]["paused"] is False
+    assert payload["on_chain"]["claims_count"] == 0
+    assert payload["vault_on_chain"]["amount"] == "1000000000000"

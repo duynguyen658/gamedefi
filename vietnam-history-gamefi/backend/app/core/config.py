@@ -30,6 +30,15 @@ class Settings(BaseSettings):
     game_token_treasury_account: str = "3d3aVnwqsre4AfnvVCMvkLvLZ7YbxY3A6P5Er3wKg1Sp"
     game_token_metadata_uri: str = "https://raw.githubusercontent.com/duynguyen658/gamedefi/main/vietnam-history-gamefi/assets/token/hkdv.json"
 
+
+    # --- Program-controlled HKDV reward vault (Solana Devnet, phase 5) ---
+    reward_distributor_config: str = "3MHpXEzsFkeJeYdPMmnL8LMCY3r3Ew3wm753fZacTCuw"
+    reward_distributor_admin: str = "oV3Y4Z6DvPvBWGvbgLvfjxHoyVbWZkr1KHmNMHLDA7T"
+    reward_distributor_vault: str = "9ngszc2V6RBRxgtagHCsn6s369aZoKWHb8uXShZAhoS7"
+    reward_distributor_authority: str = "6RigAPgKTdEwxmRqaoMiJj6GYnkipTSwRRc9Wkw79rTv"
+    reward_max_amount_base_units: int = 1_000_000_000
+    reward_vault_allocation_base_units: int = 1_000_000_000_000
+
     # --- DEX ---
     # The Jupiter key remains backend-only. Non-mainnet environments use the
     # explicitly labelled, non-executable mock provider.

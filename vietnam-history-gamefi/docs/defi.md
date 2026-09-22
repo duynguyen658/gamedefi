@@ -6,6 +6,7 @@
 - Giai đoạn 2 hoàn thành: backend chọn mock provider không thực thi trên Devnet và Jupiter `/order` + `/execute` trên Mainnet; frontend hỗ trợ báo giá, ký versioned transaction và hiển thị kết quả.
 - Giai đoạn 3 hoàn thành: swap intent, idempotency, trạng thái thực thi và reconciliation được lưu qua SQLAlchemy/PostgreSQL.
 - Giai đoạn 4 hoàn thành: SPL token HKDV cung cố định đã được phát hành trên Devnet; backend xác minh mint và treasury qua RPC, frontend hiển thị số dư ví.
+- Giai đoạn 5 hoàn thành: reward distributor và vault PDA đã deploy; có authority tách biệt, pause/rotation, giới hạn payout và receipt chống replay.
 
 Hướng thiết kế: **tài chính phi tập trung minh bạch, an toàn, dễ tiếp cận**.
 

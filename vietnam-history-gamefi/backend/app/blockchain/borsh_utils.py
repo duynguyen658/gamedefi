@@ -62,14 +62,10 @@ class BorshReader:
         return v
 
     def read_u64(self) -> int:
-        v = struct.unpack_from("<Q", self.data, self.offset)[0]
-        self.offset += 8
-        return v
+        return struct.unpack("<Q", self._take(8))[0]
 
     def read_i64(self) -> int:
-        v = struct.unpack_from("<q", self.data, self.offset)[0]
-        self.offset += 8
-        return v
+        return struct.unpack("<q", self._take(8))[0]
 
     def read_string(self) -> str:
         length = struct.unpack("<I", self._take(4))[0]

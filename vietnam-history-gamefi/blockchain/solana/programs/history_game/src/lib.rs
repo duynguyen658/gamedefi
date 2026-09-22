@@ -23,6 +23,39 @@ pub mod history_game {
             metadata_uri,
         )
     }
+
+    pub fn initialize_reward_distributor(
+        ctx: Context<InitializeRewardDistributor>,
+        distributor: Pubkey,
+        max_reward_amount: u64,
+    ) -> Result<()> {
+        reward::initialize(ctx, distributor, max_reward_amount)
+    }
+
+    pub fn fund_reward_vault(ctx: Context<FundRewardVault>, amount: u64) -> Result<()> {
+        reward::fund(ctx, amount)
+    }
+
+    pub fn distribute_reward(
+        ctx: Context<DistributeReward>,
+        claim_id: [u8; 32],
+        amount: u64,
+    ) -> Result<()> {
+        reward::distribute(ctx, claim_id, amount)
+    }
+
+    pub fn update_reward_distributor(
+        ctx: Context<AdministerRewardDistributor>,
+        distributor: Pubkey,
+        max_reward_amount: u64,
+        paused: bool,
+    ) -> Result<()> {
+        reward::update(ctx, distributor, max_reward_amount, paused)
+    }
+
+    pub fn withdraw_reward_tokens(ctx: Context<WithdrawRewardTokens>, amount: u64) -> Result<()> {
+        reward::withdraw(ctx, amount)
+    }
 }
 
 // One non-transferable faction proof per wallet, not a Metaplex/SPL token.

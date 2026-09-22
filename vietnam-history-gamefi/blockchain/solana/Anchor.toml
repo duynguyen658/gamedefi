@@ -13,7 +13,7 @@ cluster = "Devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
-test = "python3 ../../scripts/test_solana_program.py"
+test = "python3 ../../scripts/test_solana_program.py && python3 ../../scripts/test_reward_distributor.py"
 
 [test]
 startup_wait = 10000
