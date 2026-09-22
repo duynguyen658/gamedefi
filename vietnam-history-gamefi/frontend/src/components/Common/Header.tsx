@@ -1,5 +1,5 @@
 import React from 'react';
-import { Volume2, VolumeX, Radio, Wallet, LogOut, Crown, ShoppingBag } from 'lucide-react';
+import { Volume2, VolumeX, Radio, Wallet, LogOut, Crown, ShoppingBag, ArrowLeftRight } from 'lucide-react';
 import { ChainType, Player } from '../../types';
 
 interface HeaderProps {
@@ -14,6 +14,7 @@ interface HeaderProps {
   serverOnline?: boolean;
   onOpenAdvisorCouncil?: () => void;
   onOpenMarketplace?: () => void;
+  onOpenDefiHub?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -28,6 +29,7 @@ export const Header: React.FC<HeaderProps> = ({
   serverOnline = true,
   onOpenAdvisorCouncil,
   onOpenMarketplace,
+  onOpenDefiHub,
 }) => {
   return (
     <header className="sticky top-0 z-40 w-full bg-imperial-obsidian/90 backdrop-blur-md border-b border-imperial-border/80 px-4 lg:px-8 py-3 transition-all">
@@ -102,6 +104,16 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <ShoppingBag className="w-3.5 h-3.5 text-purple-300" />
               <span>Chợ Tướng</span>
+            </button>
+          )}
+
+          {onOpenDefiHub && (
+            <button
+              onClick={onOpenDefiHub}
+              className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-600/40 text-emerald-200 text-xs font-semibold cursor-pointer"
+            >
+              <ArrowLeftRight className="w-3.5 h-3.5 text-emerald-300" />
+              <span>Giao Thương</span>
             </button>
           )}
 

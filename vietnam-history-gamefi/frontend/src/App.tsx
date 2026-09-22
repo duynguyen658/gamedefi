@@ -14,6 +14,7 @@ import { CampaignMap } from './components/Campaign/CampaignMap';
 import { BattleScreen } from './components/Battle/BattleScreen';
 import { AdvisorCouncil } from './components/Advisor/AdvisorCouncil';
 import { AdvisorMarketplace } from './components/Marketplace/AdvisorMarketplace';
+import { DefiHub } from './components/Defi/DefiHub';
 
 export const App: React.FC = () => {
   const [step, setStep] = useState<PreGameStep>('splash');
@@ -127,6 +128,10 @@ export const App: React.FC = () => {
         serverOnline={serverOnline}
         onOpenAdvisorCouncil={() => setStep('advisor_council')}
         onOpenMarketplace={() => setStep('marketplace')}
+        onOpenDefiHub={() => {
+          if (!effectivePlayer || effectivePlayer.is_guest) setIsWalletModalOpen(true);
+          else setStep('defi');
+        }}
       />
 
       {/* Main Pre-Game Flow Routing */}
@@ -172,6 +177,7 @@ export const App: React.FC = () => {
             onEnterBattle={() => setStep('battle_transition')}
             onOpenAdvisorCouncil={() => setStep('advisor_council')}
             onOpenMarketplace={() => setStep('marketplace')}
+            onOpenDefiHub={() => setStep('defi')}
             onPlayDrum={playDrum}
             onPlayGong={playGong}
             onPlaySword={playSwordShink}
@@ -196,6 +202,14 @@ export const App: React.FC = () => {
             onOpenWalletModal={() => setIsWalletModalOpen(true)}
             onPlayDrum={playDrum}
             onPlaySword={playSwordShink}
+          />
+        )}
+
+        {step === 'defi' && effectivePlayer && (
+          <DefiHub
+            player={effectivePlayer}
+            onBack={() => setStep(effectivePlayer.faction_id ? 'lobby' : 'splash')}
+            onPlayDrum={playDrum}
           />
         )}
 

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
   ArrowLeftRight,
   ArrowRight,
@@ -17,12 +17,12 @@ import { DefiModule, Player } from '../../types';
 import {
   DAO_PROPOSALS,
   DEFI_MODULES,
-  DEX_PAIRS,
   LENDING_MARKETS,
   PAYMENT_HISTORY,
   SAVINGS_VAULTS,
   TREASURY_FLOWS,
 } from '../../data/defi';
+import { DexSwapPanel } from './DexSwapPanel';
 
 interface DefiHubProps {
   player: Player;
@@ -48,19 +48,13 @@ function simulatedSolanaSignature(): string {
 }
 
 export const DefiHub: React.FC<DefiHubProps> = ({ player, onBack, onPlayDrum }) => {
-  const [module, setModule] = useState<DefiModule>('payments');
+  const [module, setModule] = useState<DefiModule>('dex');
   const [payAmount, setPayAmount] = useState('5.00');
   const [payTo, setPayTo] = useState('');
-  const [swapFrom, setSwapFrom] = useState('10');
   const [receipt, setReceipt] = useState<string | null>(null);
 
   const active = DEFI_MODULES.find((m) => m.id === module)!;
   const shortWallet = `${player.wallet.substring(0, 6)}…${player.wallet.substring(player.wallet.length - 4)}`;
-
-  const estimatedReceive = useMemo(() => {
-    const n = Number(swapFrom) || 0;
-    return (n * 1.84 * 0.997).toFixed(2);
-  }, [swapFrom]);
 
   const simulateAction = (label: string) => {
     onPlayDrum();
@@ -239,34 +233,7 @@ export const DefiHub: React.FC<DefiHubProps> = ({ player, onBack, onPlayDrum }) 
           )}
 
           {module === 'dex' && (
-            <div>
-              <label className="block text-[11px] text-slate-400 mb-1">Bán (SOL)</label>
-              <input
-                value={swapFrom}
-                onChange={(e) => setSwapFrom(e.target.value)}
-                className="w-full mb-3 bg-black/40 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-imperial-gold"
-              />
-              <div className="flex justify-center my-1 text-slate-500"><ArrowRight className="w-4 h-4 rotate-90" /></div>
-              <label className="block text-[11px] text-slate-400 mb-1">Nhận (USDC, sau phí 0.30%)</label>
-              <div className="w-full mb-3 bg-black/40 border border-slate-700 rounded-xl px-3 py-2 text-sm text-imperial-lightgold font-mono">
-                {estimatedReceive}
-              </div>
-              <p className="text-[11px] text-slate-400 mb-4">Giá pool 1 SOL = 1.84 USDC • Slippage tối đa 0.50% • Impact ước tính thấp</p>
-              <button
-                onClick={() => simulateAction(`Swap ${swapFrom} SOL → ${estimatedReceive} USDC`)}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-800 to-blue-900 border border-cyan-400/40 text-white font-bold text-sm"
-              >
-                Xem tuyến đường rồi đổi
-              </button>
-              <div className="mt-4 space-y-1 text-[11px] text-slate-400">
-                {DEX_PAIRS.map((p) => (
-                  <div key={p.pair} className="flex justify-between">
-                    <span>{p.pair}</span>
-                    <span>phí {p.fee} • TVL {p.tvl}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <DexSwapPanel player={player} onPlayDrum={onPlayDrum} />
           )}
 
           {module === 'treasury' && (

@@ -62,12 +62,6 @@ export const LENDING_MARKETS = [
   { asset: 'GOLD', supplyApy: '2.0%', borrowApy: '12.4%', ltv: '50%', liquidity: '18k' },
 ];
 
-export const DEX_PAIRS = [
-  { pair: 'SOL / USDC', price: '1.84', fee: '0.30%', tvl: '42,100' },
-  { pair: 'GOLD / SOL', price: '0.12', fee: '0.50%', tvl: '8,640' },
-  { pair: 'RICE / USDC', price: '0.41', fee: '0.30%', tvl: '6,220' },
-];
-
 export const TREASURY_FLOWS = [
   { label: 'Phí DEX', amount: '+1,240 SOL', proof: '9fKa…aa12' },
   { label: 'Lãi két tiết kiệm', amount: '+420 SOL', proof: '2bQx…77Kx' },

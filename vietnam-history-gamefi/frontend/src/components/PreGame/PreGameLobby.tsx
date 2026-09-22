@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Army, Faction, Player } from '../../types';
-import { Swords, Users, Play, CheckCircle2, RefreshCw, ChevronRight, Compass, Crown, ShoppingBag, Shield, Flame } from 'lucide-react';
+import { Swords, Users, Play, CheckCircle2, RefreshCw, ChevronRight, Compass, Crown, ShoppingBag, ArrowLeftRight } from 'lucide-react';
 import { apiService } from '../../services/api';
 
 interface PreGameLobbyProps {
@@ -10,6 +10,7 @@ interface PreGameLobbyProps {
   onEnterBattle: () => void;
   onOpenAdvisorCouncil: () => void;
   onOpenMarketplace: () => void;
+  onOpenDefiHub: () => void;
   onPlayDrum: () => void;
   onPlayGong: () => void;
   onPlaySword: () => void;
@@ -22,6 +23,7 @@ export const PreGameLobby: React.FC<PreGameLobbyProps> = ({
   onEnterBattle,
   onOpenAdvisorCouncil,
   onOpenMarketplace,
+  onOpenDefiHub,
   onPlayDrum,
   onPlayGong,
   onPlaySword,
@@ -246,6 +248,14 @@ export const PreGameLobby: React.FC<PreGameLobbyProps> = ({
             >
               <ShoppingBag className="w-4 h-4" />
               <span>Mở Chợ Tướng Cố Vấn (Marketplace)</span>
+            </button>
+
+            <button
+              onClick={() => { onPlayDrum(); onOpenDefiHub(); }}
+              className="w-full py-2.5 px-4 rounded-xl bg-emerald-950/50 hover:bg-emerald-900/40 text-emerald-200 font-semibold text-xs border border-emerald-600/50 flex items-center justify-center space-x-2 transition-all cursor-pointer"
+            >
+              <ArrowLeftRight className="w-4 h-4" />
+              <span>Mở Khu Giao Thương (DEX)</span>
             </button>
           </div>
 

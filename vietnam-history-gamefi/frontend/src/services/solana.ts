@@ -3,8 +3,8 @@ import { Buffer } from 'buffer';
 import bs58 from 'bs58';
 import { encodeMintFaction, factionAddress, readFactionProof } from './solanaProtocol';
 
-export const SOLANA_NETWORK = import.meta.env.VITE_SOLANA_NETWORK || 'devnet';
-const RPC_URL = import.meta.env.VITE_SOLANA_RPC_URL || 'https://api.devnet.solana.com';
+export const SOLANA_NETWORK = import.meta.env?.VITE_SOLANA_NETWORK || 'devnet';
+export const SOLANA_RPC_URL = import.meta.env?.VITE_SOLANA_RPC_URL || 'https://api.devnet.solana.com';
 const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
 interface WalletProvider {
@@ -43,7 +43,7 @@ export const solanaAdapter = {
     if (!config.program_id) throw new Error('Cần deploy program và cấu hình SOLANA_PROGRAM_ID trước khi mint.');
     const program = new PublicKey(config.program_id);
     if (program.equals(SystemProgram.programId)) throw new Error('Program ID vẫn là placeholder; cần deploy program thật.');
-    const connection = new Connection(RPC_URL, 'finalized');
+    const connection = new Connection(SOLANA_RPC_URL, 'finalized');
     const genesis: Record<string, string> = {
       devnet: 'EtWTRABZaYq6iMfeYKouRu166VU2xqa1',
       testnet: '4uhcVJyU9pJkvQyS88uRDiswHXSCkY3zQawwpjk2NsNY',

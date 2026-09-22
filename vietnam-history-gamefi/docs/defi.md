@@ -1,5 +1,10 @@
 # DeFi product direction
 
+## Trạng thái triển khai
+
+- Giai đoạn 1 hoàn thành: DEX có đường điều hướng trong game, đọc số dư SOL/USDC từ RPC và không còn hiển thị tỷ giá, TVL hoặc chữ ký mô phỏng.
+- Giai đoạn 2 tiếp theo: nối `DexProvider` để lấy báo giá và thực thi swap qua bộ định tuyến được cấu hình.
+
 Hướng thiết kế: **tài chính phi tập trung minh bạch, an toàn, dễ tiếp cận**.
 
 Game chiến thuật / Faction NFT là lớp nhận diện. Sáu module dưới đây là lớp sản phẩm tài chính. UI hiện tại (`frontend` → Kinh tế on-chain) mô phỏng luồng người dùng; chưa phải smart contract production.
