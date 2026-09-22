@@ -1,0 +1,259 @@
+{
+  "note": "Cấu hình Tướng Cố Vấn (Advisor Generals) - Cầu nối duy nhất giữa Gameplay và Blockchain. Dữ liệu chiến thuật thuộc quyền kiểm soát của Game Engine, blockchain chỉ chứng minh quyền sở hữu.",
+  "advisors": [
+    {
+      "id": "tran_hung_dao",
+      "name": "Trần Hưng Đạo (Trần Quốc Tuấn)",
+      "faction_id": 5,
+      "faction_name": "Nhà Trần",
+      "rarity": "legendary",
+      "title": "Tiết Chế Quốc Công",
+      "historical_lore": "Danh tướng kiệt xuất lãnh đạo quân dân Đại Việt 3 lần đại thắng giặc Nguyên Mông. Tác giả của Hịch Tướng Sĩ và Vạn Kiếp Tông Bí Truyền Thư.",
+      "image": "https://assets.vnhistory.gamefi/advisors/tran_hung_dao.png",
+      "passive_name": "Vạn Kiếp Thần Trận",
+      "passive_effect": "+25% Phòng thủ khi tác chiến tại địa hình sông nước (river) và bãi cọc ngầm (stakes). Giảm 20% sát thương từ kỵ binh địch.",
+      "passive_modifiers": {
+        "river_def_bonus": 0.25,
+        "stakes_def_bonus": 0.25,
+        "cavalry_dmg_reduction": 0.20
+      },
+      "active_skill": "Hịch Tướng Sĩ",
+      "skill_description": "Tăng 30% Sĩ khí và 15% Sức tấn công cho toàn quân trong 2 lượt.",
+      "base_tactics": 98,
+      "base_leadership": 100,
+      "base_valor": 92
+    },
+    {
+      "id": "tran_khanh_du",
+      "name": "Trần Khánh Dư",
+      "faction_id": 5,
+      "faction_name": "Nhà Trần",
+      "rarity": "epic",
+      "title": "Nhân Huệ Vương",
+      "historical_lore": "Tướng thủy quân mưu lược lừng danh, người lập chiến công hiển hách tiêu diệt đoàn thuyền lương của Trương Văn Hổ tại Vân Đồn năm 1288.",
+      "image": "https://assets.vnhistory.gamefi/advisors/tran_khanh_du.png",
+      "passive_name": "Đoạn Tuyệt Lương Thảo",
+      "passive_effect": "+20% Sát thương khi phục kích trên địa hình đầm lầy (mud) và cửa biển.",
+      "passive_modifiers": {
+        "mud_atk_bonus": 0.20,
+        "river_atk_bonus": 0.15
+      },
+      "active_skill": "Tập Kích Vân Đồn",
+      "skill_description": "Gây sát thương lớn vào hậu cần địch, làm giảm 25% sát thương tấn công của địch trong lượt tiếp theo.",
+      "base_tactics": 91,
+      "base_leadership": 86,
+      "base_valor": 88
+    },
+    {
+      "id": "ly_thuong_kiet",
+      "name": "Lý Thường Kiệt",
+      "faction_id": 4,
+      "faction_name": "Nhà Lý",
+      "rarity": "legendary",
+      "title": "Thái Úy Quốc Công",
+      "historical_lore": "Danh tướng văn võ song toàn, chủ động đánh đòn phủ đầu sang đất Tống và dựng phòng tuyến sông Như Nguyệt lẫy lừng.",
+      "image": "https://assets.vnhistory.gamefi/advisors/ly_thuong_kiet.png",
+      "passive_name": "Nam Quốc Sơn Hà",
+      "passive_effect": "+20% Tấn công khi tác chiến trong lãnh thổ phòng thủ; quân sĩ không bao giờ bị giảm sĩ khí dưới 50%.",
+      "passive_modifiers": {
+        "home_territory_atk": 0.20,
+        "min_morale": 50
+      },
+      "active_skill": "Phòng Tuyến Như Nguyệt",
+      "skill_description": "Dựng chông hào kiên cố, phản đòn 35% sát thương cận chiến của kẻ địch trong 2 lượt.",
+      "base_tactics": 99,
+      "base_leadership": 97,
+      "base_valor": 89
+    },
+    {
+      "id": "to_hien_thanh",
+      "name": "Tô Hiến Thành",
+      "faction_id": 4,
+      "faction_name": "Nhà Lý",
+      "rarity": "rare",
+      "title": "Thái Phó",
+      "historical_lore": "Đại thần cương trực, kỷ luật quân nghiêm như sắt đá, giữ vững sự ổn định giang sơn thời Lý.",
+      "image": "https://assets.vnhistory.gamefi/advisors/to_hien_thanh.png",
+      "passive_name": "Quân Lệnh Như Sơn",
+      "passive_effect": "+15% Phòng thủ đội hình, giảm 20% chi phí hao tổn lương thảo trong chiến dịch.",
+      "passive_modifiers": {
+        "formation_def": 0.15,
+        "supply_save": 0.20
+      },
+      "active_skill": "Thiết Diện Trận",
+      "skill_description": "Tăng khả năng chống đỡ đòn đánh chí mạng của quân địch thêm 40% trong 1 lượt.",
+      "base_tactics": 88,
+      "base_leadership": 95,
+      "base_valor": 80
+    },
+    {
+      "id": "quang_trung",
+      "name": "Quang Trung (Nguyễn Huệ)",
+      "faction_id": 7,
+      "faction_name": "Tây Sơn",
+      "rarity": "legendary",
+      "title": "Bắc Bình Vương • Hoàng Đế Quang Trung",
+      "historical_lore": "Thiên tài quân sự bách chiến bách thắng của dân tộc Việt Nam. Nghệ thuật hành quân thần tốc và phối hợp hỏa khí đỉnh cao.",
+      "image": "https://assets.vnhistory.gamefi/advisors/quang_trung.png",
+      "passive_name": "Thần Tốc Bách Thắng",
+      "passive_effect": "+1 Tầm di chuyển (Movement) cho toàn bộ đơn vị quân; +30% Sát thương đòn đánh đầu tiên trong trận chiến.",
+      "passive_modifiers": {
+        "movement_bonus": 1,
+        "first_strike_atk": 0.30
+      },
+      "active_skill": "Hỏa Hổ Thần Công",
+      "skill_description": "Phun hỏa khí và đại bác diện rộng, thiêu đốt các ô lục giác lân cận, gây sát thương lớn và làm hoảng loạn hàng ngũ địch.",
+      "base_tactics": 100,
+      "base_leadership": 98,
+      "base_valor": 99
+    },
+    {
+      "id": "ngo_thi_nham",
+      "name": "Ngô Thì Nhậm",
+      "faction_id": 7,
+      "faction_name": "Tây Sơn",
+      "rarity": "epic",
+      "title": "Thượng Thư Bộ Binh",
+      "historical_lore": "Quân sư lỗi lạc đề xuất kế sách lui quân bảo toàn lực lượng tại phòng tuyến Tam Điệp - Biện Sơn, tạo tiền đề cho đại thắng Kỷ Dậu 1789.",
+      "image": "https://assets.vnhistory.gamefi/advisors/ngo_thi_nham.png",
+      "passive_name": "Kế Phòng Tam Điệp",
+      "passive_effect": "-15% Sát thương nhận vào khi đóng quân trên gò đồi (hill) hoặc công sự (fort).",
+      "passive_modifiers": {
+        "hill_def_bonus": 0.20,
+        "fort_def_bonus": 0.25
+      },
+      "active_skill": "Vườn Không Nhà Trống",
+      "skill_description": "Khiến kẻ địch bị phân tán lực lượng và giảm 20% khả năng tấn công tầm xa trong 2 lượt.",
+      "base_tactics": 94,
+      "base_leadership": 85,
+      "base_valor": 70
+    },
+    {
+      "id": "le_loi",
+      "name": "Lê Lợi (Lê Thái Tổ)",
+      "faction_id": 6,
+      "faction_name": "Hậu Lê – Lam Sơn",
+      "rarity": "legendary",
+      "title": "Bình Định Vương",
+      "historical_lore": "Thủ lĩnh khởi nghĩa Lam Sơn, lãnh đạo nhân dân 10 năm nếm mật nằm gai đánh đuổi giặc Minh, lập nên vương triều Hậu Lê huy hoàng.",
+      "image": "https://assets.vnhistory.gamefi/advisors/le_loi.png",
+      "passive_name": "Lam Sơn Tụ Nghĩa",
+      "passive_effect": "Hồi phục 15% Quân số mỗi khi tiêu diệt một đơn vị địch. Tăng 20% khả năng sống sót của quân lính trong rừng rậm (forest).",
+      "passive_modifiers": {
+        "kill_regen_rate": 0.15,
+        "forest_survival": 0.20
+      },
+      "active_skill": "Thuận Thiên Kiếm Khí",
+      "skill_description": "Trút đòn sấm sét phá hủy hoàn toàn lớp phòng ngự của mục tiêu chỉ định trong 1 lượt.",
+      "base_tactics": 95,
+      "base_leadership": 99,
+      "base_valor": 94
+    },
+    {
+      "id": "nguyen_trai",
+      "name": "Nguyễn Trãi",
+      "faction_id": 6,
+      "faction_name": "Hậu Lê – Lam Sơn",
+      "rarity": "legendary",
+      "title": "Quan Phục Hầu • Danh Nhân Văn Hóa",
+      "historical_lore": "Quân sư kiệt xuất của khởi nghĩa Lam Sơn với tư tưởng 'Lấy đại nghĩa thắng hung tàn, lấy chí nhân thay cường bạo'. Tác giả Bình Ngô Đại Cáo.",
+      "image": "https://assets.vnhistory.gamefi/advisors/nguyen_trai.png",
+      "passive_name": "Tâm Công Vi Thượng",
+      "passive_effect": "Giảm 25% tỷ lệ đào ngũ; địch bị giảm 10% sát thương khi đối đầu với quân ta trong trạng thái phòng ngự.",
+      "passive_modifiers": {
+        "desertion_reduction": 0.25,
+        "enemy_atk_debuff": 0.10
+      },
+      "active_skill": "Bình Ngô Đại Cáo",
+      "skill_description": "Kích phát sĩ khí cực đại toàn quân (+50 Morale), đồng thời giải trừ mọi trạng thái tiêu cực.",
+      "base_tactics": 99,
+      "base_leadership": 92,
+      "base_valor": 68
+    },
+    {
+      "id": "hai_ba_trung",
+      "name": "Trưng Trắc & Trưng Nhị",
+      "faction_id": 2,
+      "faction_name": "Hai Bà Trưng – Bà Triệu",
+      "rarity": "epic",
+      "title": "Trưng Nữ Vương",
+      "historical_lore": "Hai nữ anh hùng khởi nghĩa Mê Linh, đánh đuổi Tô Định, khôi phục chủ quyền 65 thành trì đất Việt.",
+      "image": "https://assets.vnhistory.gamefi/advisors/hai_ba_trung.png",
+      "passive_name": "Mê Linh Hùng Khí",
+      "passive_effect": "+30% Sức tấn công và phòng thủ cho đơn vị Chiến Tượng (War Elephant).",
+      "passive_modifiers": {
+        "elephant_atk_bonus": 0.30,
+        "elephant_def_bonus": 0.30
+      },
+      "active_skill": "Xuất Trận Hát Môn",
+      "skill_description": "Thúc quân voi tràn lên phía trước, đẩy lùi quân địch 1 ô và gây choáng trong 1 lượt.",
+      "base_tactics": 90,
+      "base_leadership": 96,
+      "base_valor": 93
+    },
+    {
+      "id": "ngo_quyen",
+      "name": "Ngô Quyền",
+      "faction_id": 3,
+      "faction_name": "Nhà Ngô – Nhà Đinh",
+      "rarity": "legendary",
+      "title": "Tiền Ngô Vương",
+      "historical_lore": "Vị vua mở nền độc lập vững bền cho Tổ quốc với mưu kế cắm cọc vạt nhọn dưới lòng sông Bạch Đằng đè bẹp quân Nam Hán.",
+      "image": "https://assets.vnhistory.gamefi/advisors/ngo_quyen.png",
+      "passive_name": "Bạch Đằng Phục Binh",
+      "passive_effect": "+35% Sát thương bẫy cọc ngầm (stakes). Khi thủy triều rút (ebbing/low tide), tăng 25% sát thương tổng lực cho toàn đội hình.",
+      "passive_modifiers": {
+        "stakes_trap_bonus": 0.35,
+        "low_tide_atk_bonus": 0.25
+      },
+      "active_skill": "Tiệt Kích Triều Rút",
+      "skill_description": "Ép thủy triều lập tức chuyển sang trạng thái rút (Ebbing/Low), cô lập các đơn vị thuyền chiến của địch trên bãi cọc.",
+      "base_tactics": 98,
+      "base_leadership": 97,
+      "base_valor": 95
+    },
+    {
+      "id": "cao_lo",
+      "name": "Cao Lỗ",
+      "faction_id": 1,
+      "faction_name": "Văn Lang – Âu Lạc",
+      "rarity": "epic",
+      "title": "Đô Lỗ Tướng Quân",
+      "historical_lore": "Tướng tài dưới trướng An Dương Vương, người chế tạo ra Nỏ Thần Liên Cơ ('Linh quang kim trảo thần nỏ') bắn một phát ra trăm mũi tên.",
+      "image": "https://assets.vnhistory.gamefi/advisors/cao_lo.png",
+      "passive_name": "Kỹ Nghệ Cổ Loa",
+      "passive_effect": "+1 Tầm bắn và +25% Sát thương cho tất cả đơn vị Xạ Thủ / Bắn Cung (Archer).",
+      "passive_modifiers": {
+        "archer_range_bonus": 1,
+        "archer_atk_bonus": 0.25
+      },
+      "active_skill": "Vạn Tiễn Quy Tâm",
+      "skill_description": "Bắn mưa tên liên tiếp vào vùng chỉ định, gây sát thương tầm xa cho tối đa 3 đơn vị quân địch.",
+      "base_tactics": 93,
+      "base_leadership": 84,
+      "base_valor": 86
+    },
+    {
+      "id": "nguyen_tri_phuong",
+      "name": "Nguyễn Tri Phương",
+      "faction_id": 8,
+      "faction_name": "Nhà Nguyễn",
+      "rarity": "epic",
+      "title": "Tráng Liệt Bá",
+      "historical_lore": "Đại tướng quân triều Nguyễn, kiên cường chỉ huy phòng thủ phòng tuyến Đà Nẵng, đại đồn Chí Hòa và thành Hà Nội.",
+      "image": "https://assets.vnhistory.gamefi/advisors/nguyen_tri_phuong.png",
+      "passive_name": "Đại Đồn Kiên Cố",
+      "passive_effect": "+30% Phòng thủ khi phòng thủ trong công sự (fort) hoặc thành trì. Kháng 25% sát thương hỏa pháo tầm xa.",
+      "passive_modifiers": {
+        "fort_def_bonus": 0.30,
+        "artillery_resilience": 0.25
+      },
+      "active_skill": "Thần Công Khai Hỏa",
+      "skill_description": "Khai hỏa Cửu Vị Thần Công gây sát thương tầm xa cực lớn và giảm phòng ngự của công sự đối phương.",
+      "base_tactics": 89,
+      "base_leadership": 93,
+      "base_valor": 91
+    }
+  ]
+}
+

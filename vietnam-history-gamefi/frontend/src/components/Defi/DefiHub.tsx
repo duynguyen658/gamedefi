@@ -1,0 +1,336 @@
+import React, { useMemo, useState } from 'react';
+import {
+  ArrowLeftRight,
+  ArrowRight,
+  Landmark,
+  PiggyBank,
+  Scale,
+  Send,
+  ShieldCheck,
+  Vote,
+  Wallet,
+  ChevronLeft,
+  Eye,
+  Lock,
+} from 'lucide-react';
+import { DefiModule, Player } from '../../types';
+import {
+  DAO_PROPOSALS,
+  DEFI_MODULES,
+  DEX_PAIRS,
+  LENDING_MARKETS,
+  PAYMENT_HISTORY,
+  SAVINGS_VAULTS,
+  TREASURY_FLOWS,
+} from '../../data/defi';
+
+interface DefiHubProps {
+  player: Player;
+  onBack: () => void;
+  onPlayDrum: () => void;
+}
+
+const MODULE_ICONS: Record<DefiModule, React.ReactNode> = {
+  payments: <Send className="w-5 h-5" />,
+  savings: <PiggyBank className="w-5 h-5" />,
+  lending: <Scale className="w-5 h-5" />,
+  dex: <ArrowLeftRight className="w-5 h-5" />,
+  treasury: <Landmark className="w-5 h-5" />,
+  dao: <Vote className="w-5 h-5" />,
+};
+
+const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+
+function simulatedSolanaSignature(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(12));
+  const value = Array.from(bytes, (byte) => BASE58_ALPHABET[byte % BASE58_ALPHABET.length]).join('');
+  return `${value.slice(0, 8)}…${value.slice(-4)}`;
+}
+
+export const DefiHub: React.FC<DefiHubProps> = ({ player, onBack, onPlayDrum }) => {
+  const [module, setModule] = useState<DefiModule>('payments');
+  const [payAmount, setPayAmount] = useState('5.00');
+  const [payTo, setPayTo] = useState('');
+  const [swapFrom, setSwapFrom] = useState('10');
+  const [receipt, setReceipt] = useState<string | null>(null);
+
+  const active = DEFI_MODULES.find((m) => m.id === module)!;
+  const shortWallet = `${player.wallet.substring(0, 6)}…${player.wallet.substring(player.wallet.length - 4)}`;
+
+  const estimatedReceive = useMemo(() => {
+    const n = Number(swapFrom) || 0;
+    return (n * 1.84 * 0.997).toFixed(2);
+  }, [swapFrom]);
+
+  const simulateAction = (label: string) => {
+    onPlayDrum();
+    const digest = simulatedSolanaSignature();
+    setReceipt(`${label} • chứng từ mô phỏng ${digest} trên ${player.chain}`);
+  };
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+        <div>
+          <button
+            onClick={() => { onPlayDrum(); onBack(); }}
+            className="inline-flex items-center space-x-1.5 text-xs text-slate-400 hover:text-imperial-lightgold mb-3"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span>Về tổng hành dinh</span>
+          </button>
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 text-[11px] font-semibold tracking-widest uppercase mb-3">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Minh bạch • An toàn • Dễ tiếp cận</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-cinzel font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-imperial-lightgold to-yellow-500">
+            Kinh Tế On-Chain
+          </h2>
+          <p className="text-sm text-slate-300 mt-2 max-w-2xl">
+            Thiết kế sản phẩm tài chính phi tập trung: thanh toán, tiết kiệm, lending, DEX, treasury dashboard và DAO tooling.
+            Game chiến thuật là lớp nhận diện; lớp tài chính phải đọc được, ký được, và kiểm chứng được trên chain.
+          </p>
+        </div>
+        <div className="bg-imperial-lacquer/90 border border-imperial-gold/40 rounded-2xl px-4 py-3 text-xs min-w-[220px]">
+          <div className="text-slate-400 uppercase tracking-wider text-[10px] mb-1">Ví đang dùng</div>
+          <div className="font-mono text-imperial-lightgold">{shortWallet}</div>
+          <div className="text-slate-500 mt-1 uppercase">{player.chain} • không giữ khóa phía máy chủ</div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 mb-6">
+        {DEFI_MODULES.map((m) => {
+          const selected = module === m.id;
+          return (
+            <button
+              key={m.id}
+              onClick={() => { onPlayDrum(); setModule(m.id); setReceipt(null); }}
+              className={`text-left rounded-xl border p-3 transition-all ${
+                selected
+                  ? 'bg-imperial-darkred/50 border-imperial-gold text-imperial-lightgold shadow-lg'
+                  : 'bg-imperial-lacquer/70 border-imperial-border text-slate-300 hover:border-imperial-gold/50'
+              }`}
+            >
+              <div className="mb-2">{MODULE_ICONS[m.id]}</div>
+              <div className="text-xs font-bold font-cinzel">{m.title}</div>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className="lg:col-span-2 bg-imperial-lacquer/90 border border-imperial-gold/50 rounded-2xl p-6">
+          <h3 className="font-cinzel text-lg font-bold text-white mb-1">{active.title}</h3>
+          <p className="text-sm text-slate-300 mb-4">{active.tagline}</p>
+          <div className="flex items-start space-x-2 text-xs text-emerald-300 bg-emerald-950/30 border border-emerald-700/40 rounded-xl p-3">
+            <Eye className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>{active.principle}</span>
+          </div>
+          <ul className="mt-5 space-y-2 text-xs text-slate-400">
+            <li className="flex items-center space-x-2"><Lock className="w-3.5 h-3.5 text-imperial-gold" /><span>Bạn ký trên ví; backend không custody.</span></li>
+            <li className="flex items-center space-x-2"><ShieldCheck className="w-3.5 h-3.5 text-imperial-gold" /><span>Trạng thái đọc được trước khi xác nhận.</span></li>
+            <li className="flex items-center space-x-2"><Wallet className="w-3.5 h-3.5 text-imperial-gold" /><span>Ngôn ngữ tiếng Việt, số liệu đơn giản, phí hiển thị trước.</span></li>
+          </ul>
+        </div>
+
+        <div className="lg:col-span-3 bg-imperial-lacquer/90 border border-imperial-border rounded-2xl p-6">
+          {module === 'payments' && (
+            <div>
+              <h4 className="text-sm font-bold text-imperial-lightgold mb-4">Gửi thanh toán</h4>
+              <label className="block text-[11px] text-slate-400 mb-1">Địa chỉ nhận</label>
+              <input
+                value={payTo}
+                onChange={(e) => setPayTo(e.target.value)}
+                placeholder="Địa chỉ ví Solana"
+                className="w-full mb-3 bg-black/40 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-imperial-gold"
+              />
+              <label className="block text-[11px] text-slate-400 mb-1">Số tiền</label>
+              <input
+                value={payAmount}
+                onChange={(e) => setPayAmount(e.target.value)}
+                className="w-full mb-2 bg-black/40 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-imperial-gold"
+              />
+              <p className="text-[11px] text-slate-400 mb-4">Phí mạng ước tính: 0.002 • Thời gian xác nhận: ~2s • Không phí ẩn</p>
+              <button
+                onClick={() => simulateAction(`Gửi ${payAmount} tới ${payTo || 'địa chỉ chờ nhập'}`)}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-imperial-crimson to-imperial-darkred border border-imperial-gold text-imperial-lightgold font-bold text-sm flex items-center justify-center space-x-2"
+              >
+                <Send className="w-4 h-4" /><span>Xem chứng từ rồi ký</span>
+              </button>
+              <div className="mt-5 space-y-2">
+                {PAYMENT_HISTORY.map((tx) => (
+                  <div key={tx.id} className="flex justify-between text-xs bg-black/30 border border-slate-800 rounded-lg px-3 py-2">
+                    <span className="text-slate-300">{tx.type} {tx.amount}</span>
+                    <span className="text-emerald-400">{tx.status}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {module === 'savings' && (
+            <div className="space-y-3">
+              {SAVINGS_VAULTS.map((v) => (
+                <div key={v.id} className="border border-slate-800 rounded-xl p-4 bg-black/30">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <div className="font-semibold text-white text-sm">{v.name}</div>
+                      <div className="text-[11px] text-slate-400">TVL {v.tvl} • {v.lock} • Rủi ro {v.risk}</div>
+                    </div>
+                    <div className="text-imperial-lightgold font-mono font-bold">{v.apy} APY</div>
+                  </div>
+                  <button
+                    onClick={() => simulateAction(`Gửi vào ${v.name}`)}
+                    className="text-xs px-3 py-1.5 rounded-lg border border-imperial-gold/50 text-imperial-lightgold hover:bg-imperial-darkred/40"
+                  >
+                    Gửi vào két
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {module === 'lending' && (
+            <div>
+              <div className="grid grid-cols-3 gap-2 mb-4 text-center">
+                <div className="bg-black/30 rounded-xl p-3 border border-slate-800">
+                  <div className="text-[10px] text-slate-400 uppercase">Đã cung cấp</div>
+                  <div className="text-lg font-mono text-white">24.0</div>
+                </div>
+                <div className="bg-black/30 rounded-xl p-3 border border-slate-800">
+                  <div className="text-[10px] text-slate-400 uppercase">Đã vay</div>
+                  <div className="text-lg font-mono text-white">6.5</div>
+                </div>
+                <div className="bg-black/30 rounded-xl p-3 border border-emerald-800">
+                  <div className="text-[10px] text-emerald-400 uppercase">Health factor</div>
+                  <div className="text-lg font-mono text-emerald-300">2.14</div>
+                </div>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead className="text-slate-400">
+                    <tr>
+                      <th className="text-left py-2">Tài sản</th>
+                      <th className="text-right">Cung</th>
+                      <th className="text-right">Vay</th>
+                      <th className="text-right">LTV max</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-slate-200">
+                    {LENDING_MARKETS.map((m) => (
+                      <tr key={m.asset} className="border-t border-slate-800">
+                        <td className="py-2 font-semibold">{m.asset}</td>
+                        <td className="text-right text-emerald-300">{m.supplyApy}</td>
+                        <td className="text-right text-amber-300">{m.borrowApy}</td>
+                        <td className="text-right">{m.ltv}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-3 mb-3">Thanh lý kích hoạt khi health factor &lt; 1.0. Không có lãi phạt ẩn ngoài tỷ lệ công bố.</p>
+              <button
+                onClick={() => simulateAction('Cung cấp tài sản thế chấp')}
+                className="w-full py-2.5 rounded-xl border border-imperial-gold/60 text-imperial-lightgold text-sm font-semibold"
+              >
+                Mô phỏng cung cấp / vay
+              </button>
+            </div>
+          )}
+
+          {module === 'dex' && (
+            <div>
+              <label className="block text-[11px] text-slate-400 mb-1">Bán (SOL)</label>
+              <input
+                value={swapFrom}
+                onChange={(e) => setSwapFrom(e.target.value)}
+                className="w-full mb-3 bg-black/40 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-imperial-gold"
+              />
+              <div className="flex justify-center my-1 text-slate-500"><ArrowRight className="w-4 h-4 rotate-90" /></div>
+              <label className="block text-[11px] text-slate-400 mb-1">Nhận (USDC, sau phí 0.30%)</label>
+              <div className="w-full mb-3 bg-black/40 border border-slate-700 rounded-xl px-3 py-2 text-sm text-imperial-lightgold font-mono">
+                {estimatedReceive}
+              </div>
+              <p className="text-[11px] text-slate-400 mb-4">Giá pool 1 SOL = 1.84 USDC • Slippage tối đa 0.50% • Impact ước tính thấp</p>
+              <button
+                onClick={() => simulateAction(`Swap ${swapFrom} SOL → ${estimatedReceive} USDC`)}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-800 to-blue-900 border border-cyan-400/40 text-white font-bold text-sm"
+              >
+                Xem tuyến đường rồi đổi
+              </button>
+              <div className="mt-4 space-y-1 text-[11px] text-slate-400">
+                {DEX_PAIRS.map((p) => (
+                  <div key={p.pair} className="flex justify-between">
+                    <span>{p.pair}</span>
+                    <span>phí {p.fee} • TVL {p.tvl}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {module === 'treasury' && (
+            <div>
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="bg-black/30 border border-imperial-gold/30 rounded-xl p-4">
+                  <div className="text-[10px] uppercase text-slate-400">Ngân khố công khai</div>
+                  <div className="text-2xl font-mono text-imperial-lightgold">48,760 SOL</div>
+                </div>
+                <div className="bg-black/30 border border-slate-800 rounded-xl p-4">
+                  <div className="text-[10px] uppercase text-slate-400">Chi 30 ngày</div>
+                  <div className="text-2xl font-mono text-amber-200">−1,080 SOL</div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                {TREASURY_FLOWS.map((f) => (
+                  <div key={f.proof} className="flex justify-between items-center text-xs bg-black/30 border border-slate-800 rounded-lg px-3 py-2">
+                    <span className="text-slate-300">{f.label}</span>
+                    <div className="text-right">
+                      <div className={f.amount.startsWith('+') ? 'text-emerald-400' : 'text-amber-300'}>{f.amount}</div>
+                      <div className="font-mono text-[10px] text-slate-500">{f.proof}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {module === 'dao' && (
+            <div className="space-y-3">
+              {DAO_PROPOSALS.map((p) => (
+                <div key={p.id} className="border border-slate-800 rounded-xl p-4 bg-black/30">
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-imperial-gold font-mono">#{p.id}</span>
+                    <span className="text-slate-400">{p.status}</span>
+                  </div>
+                  <div className="text-sm text-white font-semibold mb-2">{p.title}</div>
+                  <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden mb-2">
+                    <div className="h-full bg-emerald-500" style={{ width: `${p.forPct}%` }} />
+                  </div>
+                  <div className="flex justify-between text-[11px] text-slate-400">
+                    <span>Ủng hộ {p.forPct}%</span>
+                    <span>Quorum {p.quorum}%</span>
+                  </div>
+                  {p.status === 'Đang bỏ phiếu' && (
+                    <button
+                      onClick={() => simulateAction(`Bỏ phiếu ủng hộ đề xuất #${p.id}`)}
+                      className="mt-3 text-xs px-3 py-1.5 rounded-lg border border-emerald-500/50 text-emerald-300"
+                    >
+                      Bỏ phiếu (ký trên ví)
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {receipt && (
+            <div className="mt-4 text-[11px] text-emerald-300 bg-emerald-950/40 border border-emerald-700/40 rounded-xl px-3 py-2">
+              {receipt}. Bản UI này mô phỏng luồng minh bạch; giao dịch on-chain thật sẽ nối adapter hiện có khi module được triển khai.
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};

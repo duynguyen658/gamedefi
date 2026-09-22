@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #0B0C10;
+    color: #F1F5F9;
+    background-image: 
+      radial-gradient(circle at 50% 20%, rgba(139, 30, 15, 0.25) 0%, transparent 55%),
+      radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.12) 0%, transparent 40%),
+      radial-gradient(circle at 20% 85%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+      linear-gradient(to bottom, #07080b 0%, #0d0f17 50%, #07080b 100%);
+    background-attachment: fixed;
+  }
+}
+
+/* Custom Gold & Ancient Bronze Borders */
+.border-gold-gradient {
+  border-image: linear-gradient(to bottom right, #D4AF37, #CD7F32, #520B05, #D4AF37) 1;
+}
+
+.gold-glow {
+  box-shadow: 0 0 20px -5px rgba(212, 175, 55, 0.4), inset 0 0 15px -5px rgba(212, 175, 55, 0.2);
+}
+
+.crimson-glow {
+  box-shadow: 0 0 25px -5px rgba(185, 28, 28, 0.5), inset 0 0 15px -5px rgba(185, 28, 28, 0.25);
+}
+
+.jade-glow {
+  box-shadow: 0 0 20px -5px rgba(16, 185, 129, 0.45);
+}
+
+/* Ancient Vietnamese Decorative Corner Motif */
+.corner-ornament {
+  position: relative;
+}
+.corner-ornament::before,
+.corner-ornament::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: #D4AF37;
+  pointer-events: none;
+}
+.corner-ornament::before {
+  top: 0;
+  left: 0;
+  border-top: 2px solid #D4AF37;
+  border-left: 2px solid #D4AF37;
+}
+.corner-ornament::after {
+  bottom: 0;
+  right: 0;
+  border-bottom: 2px solid #D4AF37;
+  border-right: 2px solid #D4AF37;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0B0C10;
+}
+::-webkit-scrollbar-thumb {
+  background: #3D362A;
+  border-radius: 4px;
+  border: 1px solid #D4AF37;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #D4AF37;
+}
