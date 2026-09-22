@@ -18,3 +18,13 @@ Chain duy nhất là `solana`; địa chỉ base58 phân biệt hoa/thường.
 - `POST /rewards/claim`: `{wallet, battle_id}`; hiện trả 409 cho ví đủ điều kiện vì chưa có payout SOL.
 - `GET /players/{wallet}/rewards`: cần session đúng ví.
 - `GET /marketplace`: danh sách rỗng cho đến khi có escrow; API ghi marketplace/trades trả 503.
+
+
+## DEX
+
+- `POST /dex/order`: tạo quote/order với `idempotency_key`; retry cùng payload trả lại đúng order đã lưu.
+- `POST /dex/execute`: khóa order theo ví và chữ ký trước khi gửi Jupiter, ngăn gửi trùng.
+- `GET /dex/history`: lịch sử của ví trong session; đồng thời đối soát giao dịch đang chờ qua Solana RPC.
+- `POST /dex/reconcile`: chạy đối soát chủ động cho ví trong session.
+
+Production dùng `DATABASE_URL=postgresql+psycopg://...` và chạy `database/migrations/001_dex_swaps.sql`. Backend không lưu signed transaction hoặc private key; chỉ lưu unsigned quote transaction và signature công khai.

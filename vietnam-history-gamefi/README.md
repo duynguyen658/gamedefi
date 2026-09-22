@@ -12,6 +12,7 @@ Backend (Python 3.10+):
 cd backend
 python -m pip install -r requirements.txt
 # Copy .env.example thành .env
+# Với PostgreSQL: psql "$DATABASE_URL" -f ../database/migrations/001_dex_swaps.sql
 python -m pytest -q
 uvicorn app.main:app --reload
 ```
@@ -59,12 +60,12 @@ Không commit keypair trong `target/`. Không có deployment được tự thự
 ## Giới hạn hiện tại
 
 - Program `8qUBTgX99v5EhxbAaxuqS94rgfRhnLrTgW66Gh9BvLKN` đã deploy trên Devnet; ví development hiện là upgrade authority.
-- Backend còn dùng RAM; restart mất player, session, battle và reward references.
-- Database SQL là schema cho database mới; chưa nối vào backend, không tự chạy trên dữ liệu hiện hữu.
+- Player, session, battle và reward references vẫn dùng RAM nên mất khi backend restart.
+- Vòng đời DEX đã nối SQLAlchemy/PostgreSQL; production cần chạy migration `database/migrations/001_dex_swaps.sql`. Nếu không cấu hình `DATABASE_URL`, môi trường local dùng SQLite `gamefi-dev.db`.
 - Battle engine/API đã có, nhưng bàn cờ frontend còn mô phỏng cục bộ, chưa gọi API battle để lưu kết quả.
 - Reward SOL chưa có treasury/claim program: API trả 409 rõ ràng, không giả lập đã chuyển tiền.
 - Marketplace/P2P chặn thao tác ghi bằng 503; danh sách ban đầu trống, không seed ownership giả.
-- DEX dùng mock provider được gắn nhãn trên Devnet và Jupiter trên Mainnet; cần `JUPITER_API_KEY` ở backend để bật giao dịch Mainnet.
+- DEX dùng mock provider được gắn nhãn trên Devnet và Jupiter trên Mainnet; swap intent, trạng thái và signature được lưu trong PostgreSQL, có idempotency và đối soát Solana RPC. Cần `JUPITER_API_KEY` ở backend để bật giao dịch Mainnet.
 - Unity là client thử nghiệm, cần bridge tới ví Solana; không phải client chính.
 
 Chi tiết: [Blockchain](docs/blockchain.md), [API](docs/api.md), [Kiến trúc](docs/architecture.md).

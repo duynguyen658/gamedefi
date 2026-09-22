@@ -13,7 +13,7 @@ import {
   TradeProposal,
   WalletVerifyRequest,
 } from '../types';
-import type { DexExecution, DexOrder, DexOrderRequest } from '../types/dex';
+import type { DexExecution, DexOrder, DexOrderRequest, DexSwapHistory } from '../types/dex';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
@@ -432,6 +432,14 @@ class GameApiService {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...this.authHeaders() },
       body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw await apiError(res);
+    return await res.json();
+  }
+
+  async getDexHistory(limit = 5): Promise<DexSwapHistory[]> {
+    const res = await fetch(`${API_BASE_URL}/dex/history?limit=${limit}`, {
+      headers: this.authHeaders(),
     });
     if (!res.ok) throw await apiError(res);
     return await res.json();

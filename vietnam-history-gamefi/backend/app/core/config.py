@@ -8,6 +8,10 @@ class Settings(BaseSettings):
 
     app_name: str = "vn-history-gamefi-backend"
 
+    # SQLAlchemy URL. Production should use postgresql+psycopg.
+    database_url: str = "sqlite+pysqlite:///./gamefi-dev.db"
+    database_auto_create: bool = True
+
     # --- Solana ---
     solana_network: str = "devnet"
     solana_rpc_url: str = "https://api.devnet.solana.com"
@@ -21,7 +25,6 @@ class Settings(BaseSettings):
     jupiter_api_key: str = ""
     jupiter_base_url: str = "https://api.jup.ag/swap/v2"
     dex_mock_sol_usdc_rate: float = 100.0
-    dex_order_ttl_seconds: int = 120
 
     nonce_ttl_seconds: int = 300
     session_ttl_seconds: int = 3_600

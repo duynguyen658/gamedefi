@@ -53,6 +53,9 @@ Thumbs.db
 # =========================
 *.tmp
 *.temp
+*.db
+*.sqlite
+*.sqlite3
 
 # Solana build output (includes local program keypairs)
 blockchain/solana/target/

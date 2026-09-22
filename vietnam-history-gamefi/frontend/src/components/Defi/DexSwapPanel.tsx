@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowDownUp,
   CheckCircle2,
+  Clock3,
   ExternalLink,
   LoaderCircle,
   RefreshCw,
@@ -20,7 +21,7 @@ import {
   validateSwapAmount,
 } from '../../services/dexBalances';
 import { formatBaseUnits, uiAmountToBaseUnits } from '../../services/dexMath';
-import type { DexExecution, DexOrder } from '../../types/dex';
+import type { DexExecution, DexOrder, DexSwapHistory } from '../../types/dex';
 
 interface DexSwapPanelProps {
   player: Player;
@@ -31,6 +32,21 @@ type BalanceStatus = 'loading' | 'ready' | 'error' | 'wallet-required';
 type RequestStatus = 'idle' | 'quoting' | 'signing' | 'executing';
 
 const EMPTY_BALANCES: DexBalances = { SOL: '0', USDC: '0' };
+
+function newIdempotencyKey(): string {
+  return typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : `dex-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+const STATUS_LABELS: Record<DexSwapHistory['status'], string> = {
+  quoted: 'Đã báo giá',
+  simulated: 'Mô phỏng',
+  pending_confirmation: 'Chờ xác nhận',
+  confirmed: 'Đã xác nhận',
+  failed: 'Thất bại',
+  expired: 'Hết hạn',
+};
 
 function apiError(error: unknown): string {
   return error instanceof Error ? error.message : 'DEX không thể xử lý yêu cầu lúc này.';
@@ -46,6 +62,8 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum }
   const [requestStatus, setRequestStatus] = useState<RequestStatus>('idle');
   const [order, setOrder] = useState<DexOrder | null>(null);
   const [execution, setExecution] = useState<DexExecution | null>(null);
+  const [history, setHistory] = useState<DexSwapHistory[]>([]);
+  const [intentKey, setIntentKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const tokens = useMemo(() => dexTokens(), []);
@@ -70,13 +88,27 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum }
     }
   };
 
+  const refreshHistory = async () => {
+    if (player.is_guest) {
+      setHistory([]);
+      return;
+    }
+    try {
+      setHistory(await apiService.getDexHistory());
+    } catch {
+      // Balance and quoting remain available when history reconciliation is temporarily unavailable.
+    }
+  };
+
   useEffect(() => {
     void refreshBalances();
+    void refreshHistory();
   }, [player.wallet, player.is_guest]);
 
   const clearQuote = () => {
     setOrder(null);
     setExecution(null);
+    setIntentKey(null);
     setError(null);
   };
 
@@ -88,21 +120,25 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum }
     clearQuote();
   };
 
-  const requestOrder = async () => {
+  const requestOrder = async (forceNew = false) => {
     if (amountError || !amount) return;
     onPlayDrum();
     setRequestStatus('quoting');
     setError(null);
     setExecution(null);
     try {
+      const key = forceNew || !intentKey ? newIdempotencyKey() : intentKey;
+      setIntentKey(key);
       const nextOrder = await apiService.createDexOrder({
         wallet: player.wallet,
         input_symbol: fromToken,
         output_symbol: toToken,
         amount: uiAmountToBaseUnits(amount, from.decimals),
         slippage_bps: slippageBps,
+        idempotency_key: key,
       });
       setOrder(nextOrder);
+      await refreshHistory();
     } catch (requestError) {
       setOrder(null);
       setError(apiError(requestError));
@@ -128,6 +164,7 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum }
       setExecution(result);
       if (result.status !== 'Success') setError(result.error || `Giao dịch thất bại với mã ${result.code}.`);
       if (result.status === 'Success') await refreshBalances();
+      await refreshHistory();
     } catch (executeError) {
       setError(apiError(executeError));
     } finally {
@@ -308,10 +345,42 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum }
         </div>
       )}
 
+
+      {history.length > 0 && (
+        <div className="rounded-xl border border-slate-800 bg-black/20 p-3">
+          <div className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            <Clock3 className="h-3.5 w-3.5" /> Giao dịch gần đây
+          </div>
+          <div className="space-y-2">
+            {history.map((item) => {
+              const href = item.signature
+                ? `https://explorer.solana.com/tx/${item.signature}${SOLANA_NETWORK === 'mainnet-beta' ? '' : `?cluster=${SOLANA_NETWORK}`}`
+                : null;
+              return (
+                <div key={item.request_id} className="flex items-center justify-between gap-3 text-[11px]">
+                  <span className="text-slate-300">
+                    {formatBaseUnits(BigInt(item.in_amount), item.input_decimals, 4)} {item.input_symbol}
+                    {' → '}
+                    {formatBaseUnits(BigInt(item.out_amount), item.output_decimals, 4)} {item.output_symbol}
+                  </span>
+                  {href ? (
+                    <a href={href} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-imperial-lightgold underline">
+                      {STATUS_LABELS[item.status]} <ExternalLink className="h-3 w-3" />
+                    </a>
+                  ) : (
+                    <span className={item.status === 'failed' ? 'text-red-300' : 'text-slate-500'}>{STATUS_LABELS[item.status]}</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {!order || order.simulation ? (
         <button
           type="button"
-          onClick={() => void requestOrder()}
+          onClick={() => void requestOrder(Boolean(order?.simulation))}
           disabled={!canRequestQuote}
           className="flex w-full items-center justify-center gap-2 rounded-xl border border-imperial-gold/50 bg-imperial-darkred/70 py-3 text-sm font-bold text-imperial-lightgold transition-colors hover:bg-imperial-crimson/70 disabled:cursor-not-allowed disabled:border-slate-700 disabled:bg-slate-900/70 disabled:text-slate-500"
         >
@@ -331,7 +400,7 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum }
           </button>
           <button
             type="button"
-            onClick={() => void requestOrder()}
+            onClick={() => void requestOrder(true)}
             disabled={busy}
             className="rounded-xl border border-slate-700 px-3 text-slate-400 hover:text-white disabled:opacity-40"
             aria-label="Lấy lại báo giá"

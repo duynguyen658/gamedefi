@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -14,6 +15,7 @@ class DexOrderRequest(BaseModel):
     output_symbol: Literal["SOL", "USDC"]
     amount: str = Field(pattern=r"^[1-9][0-9]{0,29}$")
     slippage_bps: int = Field(default=50, ge=1, le=500)
+    idempotency_key: str = Field(min_length=8, max_length=64, pattern=r"^[A-Za-z0-9._:-]+$")
 
     @field_validator("wallet")
     @classmethod
@@ -83,3 +85,27 @@ class DexExecutionOut(BaseModel):
     total_input_amount: str | None
     total_output_amount: str | None
     error: str | None = None
+
+
+class DexSwapHistoryOut(BaseModel):
+    request_id: str
+    input_symbol: str
+    output_symbol: str
+    in_amount: str
+    out_amount: str
+    input_decimals: int
+    output_decimals: int
+    provider: str
+    status: str
+    simulation: bool
+    signature: str | None
+    error: str | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class DexReconciliationOut(BaseModel):
+    checked: int
+    confirmed: int
+    failed: int
+    pending: int

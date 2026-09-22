@@ -82,7 +82,7 @@ def test_verify_rejects_reused_nonce(client):
 
 def test_nonce_rejects_unsupported_chain(client):
     assert client.post("/auth/nonce", json={"chain": "bitcoin", "wallet": "abc"}).status_code == 422
-    assert client.post("/auth/nonce", json={"chain": "sui", "wallet": "0xabc"}).status_code == 422
+    assert client.post("/auth/nonce", json={"chain": "ethereum", "wallet": "0xabc"}).status_code == 422
 
 
 def test_nonce_rejects_invalid_solana_wallet(client):
@@ -112,7 +112,7 @@ def test_public_blockchain_config_is_solana_only(client):
     assert response.status_code == 200
     assert response.json()["chain"] == "solana"
     assert set(response.json()) == {"chain", "network", "program_id"}
-    assert client.get("/blockchain/sui/transaction/anything").status_code == 404
+    assert client.get("/blockchain/ethereum/transaction/anything").status_code == 404
 
 
 def test_state_changing_routes_require_matching_session(client, adapter):

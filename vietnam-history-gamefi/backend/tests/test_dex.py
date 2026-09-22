@@ -33,6 +33,7 @@ def test_dex_order_requires_wallet_session_and_returns_labeled_simulation(client
         "output_symbol": "USDC",
         "amount": "1000000000",
         "slippage_bps": 50,
+        "idempotency_key": "dex-test-order-1",
     }
     assert client.post("/dex/order", json=body).status_code == 401
     response = client.post("/dex/order", json=body, headers=auth_headers(player))
@@ -54,6 +55,7 @@ def test_dex_rejects_another_wallet_and_invalid_pair(client):
         "input_symbol": "SOL",
         "output_symbol": "USDC",
         "amount": "1",
+        "idempotency_key": "dex-test-order-2",
     }
     assert client.post("/dex/order", json=body, headers=auth_headers(player)).status_code == 403
     body.update(wallet=wallet, output_symbol="SOL")

@@ -6,6 +6,7 @@ export interface DexOrderRequest {
   output_symbol: DexTokenSymbol;
   amount: string;
   slippage_bps: number;
+  idempotency_key: string;
 }
 
 export interface DexOrder {
@@ -36,4 +37,22 @@ export interface DexExecution {
   total_input_amount: string | null;
   total_output_amount: string | null;
   error: string | null;
+}
+
+
+export interface DexSwapHistory {
+  request_id: string;
+  input_symbol: DexTokenSymbol;
+  output_symbol: DexTokenSymbol;
+  in_amount: string;
+  out_amount: string;
+  input_decimals: number;
+  output_decimals: number;
+  provider: string;
+  status: 'quoted' | 'simulated' | 'pending_confirmation' | 'confirmed' | 'failed' | 'expired';
+  simulation: boolean;
+  signature: string | null;
+  error: string | null;
+  created_at: string;
+  updated_at: string;
 }
