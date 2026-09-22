@@ -49,8 +49,8 @@ bash scripts/deploy-solana.sh devnet
 ```
 
 Anchor/Solana CLI phải cài sẵn. Script không tự faucet, không thay ví người chơi.
-Sau deploy cập nhật `SOLANA_PROGRAM_ID` và restart backend. Contract PDA này cần deployment
-mới hoặc upgrade; proof account ngẫu nhiên của bản prototype cũ không tự trở thành PDA.
+Deployment Devnet hiện tại dùng program `8qUBTgX99v5EhxbAaxuqS94rgfRhnLrTgW66Gh9BvLKN`.
+Khi upgrade hoặc đổi program, cập nhật `SOLANA_PROGRAM_ID` và restart backend. Proof account ngẫu nhiên của bản prototype cũ không tự trở thành PDA.
 
 ## Kiểm thử
 

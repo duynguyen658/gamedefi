@@ -1,3 +1,6 @@
 [workspace]
 members = ["programs/history_game"]
 resolver = "2"
+
+[profile.release]
+overflow-checks = true

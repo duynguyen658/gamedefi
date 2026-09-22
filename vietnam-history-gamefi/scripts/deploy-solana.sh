@@ -7,6 +7,7 @@ case "$CLUSTER" in
   *) echo "Usage: bash scripts/deploy-solana.sh [devnet|localnet]" >&2; exit 1 ;;
 esac
 cd "$ROOT/blockchain/solana"
+export RUSTUP_TOOLCHAIN="${RUSTUP_TOOLCHAIN:-solana}"
 command -v anchor >/dev/null
 command -v solana-keygen >/dev/null
 mkdir -p target/deploy

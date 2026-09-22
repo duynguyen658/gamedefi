@@ -58,7 +58,7 @@ Không commit keypair trong `target/`. Không có deployment được tự thự
 
 ## Giới hạn hiện tại
 
-- Program ID trong source là placeholder cho đến khi chạy `anchor keys sync` trong quy trình deploy.
+- Program `8qUBTgX99v5EhxbAaxuqS94rgfRhnLrTgW66Gh9BvLKN` đã deploy trên Devnet; ví development hiện là upgrade authority.
 - Backend còn dùng RAM; restart mất player, session, battle và reward references.
 - Database SQL là schema cho database mới; chưa nối vào backend, không tự chạy trên dữ liệu hiện hữu.
 - Battle engine/API đã có, nhưng bàn cờ frontend còn mô phỏng cục bộ, chưa gọi API battle để lưu kết quả.

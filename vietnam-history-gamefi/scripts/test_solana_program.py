@@ -35,18 +35,18 @@ def main():
             raise RuntimeError(body["error"])
         return body["result"]
 
-    def confirmed(signature):
+    def finalized(signature):
         deadline = time.monotonic() + 30
         while time.monotonic() < deadline:
             status = rpc("getSignatureStatuses", [[signature]])["value"][0]
-            if status and status.get("confirmationStatus") in ("confirmed", "finalized"):
+            if status and status.get("confirmationStatus") == "finalized":
                 assert status["err"] is None, status
                 return
             time.sleep(0.2)
-        raise TimeoutError("Local validator did not confirm transaction")
+        raise TimeoutError("Local validator did not finalize transaction")
 
     owner = Keypair()
-    confirmed(rpc("requestAirdrop", [str(owner.pubkey()), 2_000_000_000]))
+    finalized(rpc("requestAirdrop", [str(owner.pubkey()), 2_000_000_000]))
     proof = Pubkey.find_program_address([b"faction", bytes(owner.pubkey())], program)[0]
 
     def mint(reference):
@@ -56,7 +56,7 @@ def main():
                                         AccountMeta(SYSTEM_PROGRAM_ID, False, False)])
         tx = Transaction.new_signed_with_payer([ix], owner.pubkey(), [owner], blockhash)
         sig = rpc("sendTransaction", [base64.b64encode(bytes(tx)).decode(), {"encoding": "base64", "preflightCommitment": "confirmed"}])
-        confirmed(sig)
+        finalized(sig)
 
     try:
         mint("9")
