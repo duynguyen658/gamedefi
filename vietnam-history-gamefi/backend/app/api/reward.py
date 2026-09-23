@@ -51,9 +51,11 @@ def submit_event_reward(
     event: RewardEventRecord,
     amount: int,
 ) -> RewardClaimRecord:
+    settings = request.app.state.settings
+    if settings.solana_network == "mainnet-beta" and not settings.reward_mainnet_enabled:
+        raise HTTPException(status_code=503, detail="Reward Mainnet đang tạm đóng để kiểm tra vận hành")
     repository = request.app.state.reward_claims
     adapter = request.app.state.resolver.get("solana")
-    settings = request.app.state.settings
     try:
         claim, _created = repository.reserve_claim(event=event, amount=amount)
         if claim.status in {"submitted", "submission_unknown"}:

@@ -135,6 +135,13 @@ def check_mainnet_readiness(
         checks["reward_distributor"] = False
         checks["reward_vault_funded"] = False
 
+    try:
+        checks["reward_signer"] = (
+            str(adapter._load_reward_distributor_keypair().pubkey()) == settings.reward_distributor_authority
+        )
+    except Exception:
+        checks["reward_signer"] = False
+
     cutoff = datetime.now(timezone.utc) - timedelta(minutes=15)
     try:
         with dex_swaps.engine.connect() as connection:

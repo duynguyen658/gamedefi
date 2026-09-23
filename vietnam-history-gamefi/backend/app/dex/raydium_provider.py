@@ -144,7 +144,10 @@ class RaydiumDexProvider(DexProvider):
             output -= self._ceil_fee(output_before_creator_fee, state["creator_fee_rate"])
         if output <= 0:
             raise DexProviderError("Số lượng nhận quá nhỏ")
-        ideal_output = amount * output_reserve // input_reserve
+        # Price impact describes the curve only; pool fees are shown separately.
+        ideal_output = net_input * output_reserve // input_reserve
+        if not creator_on_input:
+            ideal_output -= self._ceil_fee(ideal_output, state["creator_fee_rate"])
         price_impact_bps = max(0, (ideal_output - output) * 10_000 // ideal_output)
 
         return DexOrder(

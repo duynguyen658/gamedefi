@@ -40,27 +40,18 @@ const MODULE_ICONS: Record<DefiModule, React.ReactNode> = {
   dao: <Vote className="w-5 h-5" />,
 };
 
-const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-
-function simulatedSolanaSignature(): string {
-  const bytes = crypto.getRandomValues(new Uint8Array(12));
-  const value = Array.from(bytes, (byte) => BASE58_ALPHABET[byte % BASE58_ALPHABET.length]).join('');
-  return `${value.slice(0, 8)}…${value.slice(-4)}`;
-}
-
 export const DefiHub: React.FC<DefiHubProps> = ({ player, onBack, onPlayDrum }) => {
   const [module, setModule] = useState<DefiModule>('dex');
   const [payAmount, setPayAmount] = useState('5.00');
   const [payTo, setPayTo] = useState('');
-  const [receipt, setReceipt] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const active = DEFI_MODULES.find((m) => m.id === module)!;
   const shortWallet = `${player.wallet.substring(0, 6)}…${player.wallet.substring(player.wallet.length - 4)}`;
 
-  const simulateAction = (label: string) => {
+  const showPreviewNotice = (label: string) => {
     onPlayDrum();
-    const digest = simulatedSolanaSignature();
-    setReceipt(`${label} • chứng từ mô phỏng ${digest} trên ${player.chain}`);
+    setNotice(`${label}: tính năng này chưa triển khai. Không có giao dịch hoặc chữ ký ví nào được tạo.`);
   };
 
   return (
@@ -99,7 +90,7 @@ export const DefiHub: React.FC<DefiHubProps> = ({ player, onBack, onPlayDrum }) 
           return (
             <button
               key={m.id}
-              onClick={() => { onPlayDrum(); setModule(m.id); setReceipt(null); }}
+              onClick={() => { onPlayDrum(); setModule(m.id); setNotice(null); }}
               className={`text-left rounded-xl border p-3 transition-all ${
                 selected
                   ? 'bg-imperial-darkred/50 border-imperial-gold text-imperial-lightgold shadow-lg'
@@ -130,6 +121,11 @@ export const DefiHub: React.FC<DefiHubProps> = ({ player, onBack, onPlayDrum }) 
         </div>
 
         <div className="lg:col-span-3 bg-imperial-lacquer/90 border border-imperial-border rounded-2xl p-6">
+          {module !== 'dex' && (
+            <p className="mb-4 rounded-lg border border-amber-700/50 bg-amber-950/20 px-3 py-2 text-xs text-amber-200">
+              Bản minh họa: số liệu bên dưới là dữ liệu mẫu, chưa phản ánh tài sản hay giao dịch on-chain.
+            </p>
+          )}
           {module === 'payments' && (
             <div>
               <h4 className="text-sm font-bold text-imperial-lightgold mb-4">Gửi thanh toán</h4>
@@ -146,12 +142,12 @@ export const DefiHub: React.FC<DefiHubProps> = ({ player, onBack, onPlayDrum }) 
                 onChange={(e) => setPayAmount(e.target.value)}
                 className="w-full mb-2 bg-black/40 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-imperial-gold"
               />
-              <p className="text-[11px] text-slate-400 mb-4">Phí mạng ước tính: 0.002 • Thời gian xác nhận: ~2s • Không phí ẩn</p>
+              <p className="text-[11px] text-slate-400 mb-4">Chưa tính phí mạng; màn hình này chưa gửi giao dịch.</p>
               <button
-                onClick={() => simulateAction(`Gửi ${payAmount} tới ${payTo || 'địa chỉ chờ nhập'}`)}
+                onClick={() => showPreviewNotice('Thanh toán')}
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-imperial-crimson to-imperial-darkred border border-imperial-gold text-imperial-lightgold font-bold text-sm flex items-center justify-center space-x-2"
               >
-                <Send className="w-4 h-4" /><span>Xem chứng từ rồi ký</span>
+                <Send className="w-4 h-4" /><span>Xem trạng thái tính năng</span>
               </button>
               <div className="mt-5 space-y-2">
                 {PAYMENT_HISTORY.map((tx) => (
@@ -176,10 +172,10 @@ export const DefiHub: React.FC<DefiHubProps> = ({ player, onBack, onPlayDrum }) 
                     <div className="text-imperial-lightgold font-mono font-bold">{v.apy} APY</div>
                   </div>
                   <button
-                    onClick={() => simulateAction(`Gửi vào ${v.name}`)}
+                    onClick={() => showPreviewNotice('Tiết kiệm')}
                     className="text-xs px-3 py-1.5 rounded-lg border border-imperial-gold/50 text-imperial-lightgold hover:bg-imperial-darkred/40"
                   >
-                    Gửi vào két
+                    Xem trạng thái
                   </button>
                 </div>
               ))}
@@ -226,7 +222,7 @@ export const DefiHub: React.FC<DefiHubProps> = ({ player, onBack, onPlayDrum }) 
               </div>
               <p className="text-[11px] text-slate-400 mt-3 mb-3">Thanh lý kích hoạt khi health factor &lt; 1.0. Không có lãi phạt ẩn ngoài tỷ lệ công bố.</p>
               <button
-                onClick={() => simulateAction('Cung cấp tài sản thế chấp')}
+                onClick={() => showPreviewNotice('Lending')}
                 className="w-full py-2.5 rounded-xl border border-imperial-gold/60 text-imperial-lightgold text-sm font-semibold"
               >
                 Mô phỏng cung cấp / vay
@@ -282,10 +278,10 @@ export const DefiHub: React.FC<DefiHubProps> = ({ player, onBack, onPlayDrum }) 
                   </div>
                   {p.status === 'Đang bỏ phiếu' && (
                     <button
-                      onClick={() => simulateAction(`Bỏ phiếu ủng hộ đề xuất #${p.id}`)}
+                      onClick={() => showPreviewNotice('DAO')}
                       className="mt-3 text-xs px-3 py-1.5 rounded-lg border border-emerald-500/50 text-emerald-300"
                     >
-                      Bỏ phiếu (ký trên ví)
+                      Xem trạng thái bỏ phiếu
                     </button>
                   )}
                 </div>
@@ -293,9 +289,9 @@ export const DefiHub: React.FC<DefiHubProps> = ({ player, onBack, onPlayDrum }) 
             </div>
           )}
 
-          {receipt && (
-            <div className="mt-4 text-[11px] text-emerald-300 bg-emerald-950/40 border border-emerald-700/40 rounded-xl px-3 py-2">
-              {receipt}. Bản UI này mô phỏng luồng minh bạch; giao dịch on-chain thật sẽ nối adapter hiện có khi module được triển khai.
+          {notice && (
+            <div className="mt-4 rounded-xl border border-amber-700/40 bg-amber-950/30 px-3 py-2 text-[11px] text-amber-200" role="status">
+              {notice}
             </div>
           )}
         </div>

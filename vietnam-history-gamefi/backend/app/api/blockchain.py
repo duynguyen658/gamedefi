@@ -90,7 +90,9 @@ def solana_reward_distributor(request: Request):
         "distributor": settings.reward_distributor_authority,
         "allocation_base_units": str(settings.reward_vault_allocation_base_units),
         "verified": verified,
-        "active": verified and not on_chain["paused"],
+        "active": verified and not on_chain["paused"] and (
+            settings.solana_network != "mainnet-beta" or settings.reward_mainnet_enabled
+        ),
         "on_chain": on_chain,
         "vault_on_chain": vault_on_chain,
         "config_explorer_url": (

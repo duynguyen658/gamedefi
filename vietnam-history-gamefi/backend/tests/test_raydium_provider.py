@@ -80,6 +80,7 @@ def test_raydium_provider_quotes_exact_cpmm_amount_and_submits():
     ))
     assert order.out_amount == "99401095"
     assert order.fee_bps == 50
+    assert order.price_impact_bps == 9  # Curve impact excludes the separately displayed 50 bps fee.
     assert order.executable and not order.simulation
     assert order.transaction is None
     assert provider.required_transaction_accounts() == {

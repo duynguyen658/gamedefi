@@ -3,6 +3,7 @@ from fastapi import HTTPException
 from solders.keypair import Keypair
 
 from app.api.dex import require_trading_enabled
+from app.api.reward import submit_event_reward
 from app.core.config import Settings
 from app.core.mainnet import mainnet_configuration_errors, validate_mainnet_configuration
 from app.dex.interface import DexProviderError, token_registry
@@ -60,3 +61,14 @@ def test_mainnet_dex_stays_closed_until_explicitly_enabled():
     assert exc.value.status_code == 503
     Request.app.state.settings.dex_mainnet_enabled = True
     require_trading_enabled(Request())
+
+
+def test_mainnet_reward_cannot_submit_before_release_switch():
+    class Request:
+        class app:
+            class state:
+                settings = Settings(_env_file=None, solana_network="mainnet-beta")
+
+    with pytest.raises(HTTPException) as exc:
+        submit_event_reward(request=Request(), event=None, amount=1)
+    assert exc.value.status_code == 503

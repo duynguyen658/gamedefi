@@ -40,6 +40,7 @@ class Settings(BaseSettings):
     reward_max_amount_base_units: int = 1_000_000_000
     reward_vault_allocation_base_units: int = 1_000_000_000_000
     reward_vault_alert_threshold_base_units: int = 10_000_000_000
+    reward_mainnet_enabled: bool = False
     reward_distributor_keypair_path: str = "~/.config/solana/gamefi-hkdv/devnet-reward-distributor-keypair.json"
 
     # --- DEX ---
