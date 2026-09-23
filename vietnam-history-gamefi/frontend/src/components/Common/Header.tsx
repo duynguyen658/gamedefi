@@ -1,33 +1,26 @@
 import React from 'react';
-import { Volume2, VolumeX, Radio, Wallet, LogOut, Crown, ShoppingBag, ArrowLeftRight } from 'lucide-react';
-import { ChainType, Player } from '../../types';
-import { SOLANA_NETWORK } from '../../services/solana';
+import { Volume2, VolumeX, Wallet, LogOut, Crown, ShoppingBag, ArrowLeftRight } from 'lucide-react';
+import { Player } from '../../types';
 
 interface HeaderProps {
-  chain: ChainType;
-  onSelectChain: (chain: ChainType) => void;
   player: Player | null;
   onOpenWalletModal: () => void;
   onDisconnect: () => void;
   isMuted: boolean;
   onToggleMute: () => void;
   onPlayGong: () => void;
-  serverOnline?: boolean;
   onOpenAdvisorCouncil?: () => void;
   onOpenMarketplace?: () => void;
   onOpenDefiHub?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  chain,
-  onSelectChain,
   player,
   onOpenWalletModal,
   onDisconnect,
   isMuted,
   onToggleMute,
   onPlayGong,
-  serverOnline = true,
   onOpenAdvisorCouncil,
   onOpenMarketplace,
   onOpenDefiHub,
@@ -42,47 +35,12 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="font-display text-imperial-gold font-black text-lg">越</span>
           </div>
           <div>
-            <div className="flex items-center space-x-2">
-              <h1 className="font-display text-base lg:text-lg font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-imperial-lightgold via-imperial-gold to-amber-500 uppercase">
-                Hào Khí Đại Việt
-              </h1>
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-imperial-darkred/60 text-imperial-lightgold border border-imperial-crimson/50 font-semibold tracking-wide">
-                Gameplay First
-              </span>
-            </div>
+            <h1 className="font-display text-base lg:text-lg font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-imperial-lightgold via-imperial-gold to-amber-500 uppercase">
+              Hào Khí Đại Việt
+            </h1>
             <p className="text-[11px] text-slate-400 hidden sm:block">
               Lịch sử là Trò chơi &bull; Blockchain là Thị trường
             </p>
-          </div>
-        </div>
-
-        {/* Center: Chain & Server Status */}
-        <div className="hidden md:flex items-center space-x-4 bg-imperial-lacquer/80 px-3 py-1.5 rounded-full border border-imperial-border text-xs">
-          <div className="flex items-center space-x-1.5">
-            <span className={`w-2 h-2 rounded-full ${serverOnline ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`}></span>
-            <span className="text-slate-300 font-medium">
-              API: {serverOnline ? 'Trực Tuyến' : 'Cục Bộ'}
-            </span>
-          </div>
-
-          <div className="h-3 w-px bg-imperial-border" />
-
-          <div className="flex items-center space-x-1.5">
-            <Radio className="w-3.5 h-3.5 text-imperial-gold" />
-            <span className="text-slate-400">Mạng:</span>
-            <div className="inline-flex rounded-lg bg-black/40 p-0.5 border border-slate-700/60">
-
-              <button
-                onClick={() => onSelectChain('solana')}
-                className={`px-2 py-0.5 rounded text-[11px] font-semibold transition-all ${
-                  chain === 'solana'
-                    ? 'bg-gradient-to-r from-purple-700 to-indigo-700 text-white shadow'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                Solana {SOLANA_NETWORK === 'mainnet-beta' ? 'Mainnet' : SOLANA_NETWORK}
-              </button>
-            </div>
           </div>
         </div>
 

@@ -1,13 +1,10 @@
 import React from 'react';
 import { DrumOrnament } from '../Common/DrumOrnament';
-import { Shield, ArrowRight, Play, Flame, Swords, Crown, ShoppingBag, Sparkles, Wallet } from 'lucide-react';
-import { ChainType } from '../../types';
+import { ArrowRight, Play, Swords, Crown, ShoppingBag, Wallet } from 'lucide-react';
 
 interface SplashScreenProps {
   onEnterF2P: () => void;
   onEnterWithWallet: () => void;
-  onSelectChain: (chain: ChainType) => void;
-  chain: ChainType;
   onPlayDrum: () => void;
   onPlayGong: () => void;
 }
@@ -15,8 +12,6 @@ interface SplashScreenProps {
 export const SplashScreen: React.FC<SplashScreenProps> = ({
   onEnterF2P,
   onEnterWithWallet,
-  onSelectChain,
-  chain,
   onPlayDrum,
   onPlayGong,
 }) => {
@@ -35,12 +30,6 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
       {/* Hero Content Box */}
       <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center">
         
-        {/* Imperial Badge */}
-        <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-imperial-lacquer/90 border border-imperial-gold/60 text-imperial-lightgold text-xs font-semibold tracking-wide uppercase mb-6 shadow-lg shadow-amber-950/30">
-          <Crown className="w-3.5 h-3.5 text-imperial-gold" />
-          <span>Game Chiến Thuật Lịch Sử Việt Nam &bull; Gameplay First</span>
-        </div>
-
         {/* Main Title */}
         <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-amber-100 via-imperial-lightgold to-amber-500 tracking-tight leading-tight mb-4 drop-shadow-md">
           HÀO KHÍ ĐẠI VIỆT
@@ -59,22 +48,6 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
           Chọn một trong 8 triều đại hào hùng, chiêu mộ binh mã, rèn luyện Tướng Cố Vấn và tái hiện những đại chiến vang dội: Bạch Đằng, Rạch Gầm, Đống Đa, Như Nguyệt. 
           Hoàn toàn miễn phí trải nghiệm không cần ví điện tử!
         </p>
-
-        {/* Chain Selector pills (Optional Trading Layer) */}
-        <div className="flex items-center space-x-3 bg-black/60 backdrop-blur-md p-1.5 rounded-2xl border border-imperial-border mb-8 shadow-inner">
-          <span className="text-xs text-slate-400 pl-3 font-medium">Thị trường tùy chọn:</span>
-
-          <button
-            onClick={() => { onPlayDrum(); onSelectChain('solana'); }}
-            className={`px-3 sm:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-bold flex items-center space-x-1.5 transition-all ${
-              chain === 'solana'
-                ? 'bg-gradient-to-r from-purple-700 to-indigo-600 text-white shadow-lg shadow-purple-900/50 scale-105'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <span>⚡ Solana Network</span>
-          </button>
-        </div>
 
         {/* CTA Launch Buttons (F2P Primary & Wallet Secondary) */}
         <div className="flex flex-col sm:flex-row items-center gap-4 mb-12">

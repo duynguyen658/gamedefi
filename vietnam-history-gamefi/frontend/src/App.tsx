@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ChainType, PreGameStep, MapLocation, PlayerResources, Player } from './types';
 import { useWallet } from './hooks/useWallet';
 import { useFaction } from './hooks/useFaction';
@@ -19,7 +19,6 @@ import { DefiHub } from './components/Defi/DefiHub';
 export const App: React.FC = () => {
   const [step, setStep] = useState<PreGameStep>('splash');
   const [isWalletModalOpen, setIsWalletModalOpen] = useState<boolean>(false);
-  const [serverOnline, setServerOnline] = useState<boolean>(true);
   const [selectedLocation, setSelectedLocation] = useState<MapLocation | null>(null);
   const [resources] = useState<PlayerResources>({ rice: 4500, gold: 12800, morale: 85 });
 
@@ -31,8 +30,6 @@ export const App: React.FC = () => {
 
   // Wallet system
   const {
-    chain,
-    setChain,
     player,
     isConnected,
     isConnecting,
@@ -56,15 +53,6 @@ export const App: React.FC = () => {
 
   // The effective player is either the wallet-connected player or the guest player
   const effectivePlayer = player || guestPlayer;
-
-  // Check Backend health on mount
-  useEffect(() => {
-    async function check() {
-      const ok = await apiService.checkHealth();
-      setServerOnline(ok);
-    }
-    check();
-  }, []);
 
   // F2P: Guest login — no wallet needed
   const handleEnterF2P = async () => {
@@ -117,15 +105,12 @@ export const App: React.FC = () => {
       
       {/* Ancient Header Navigation */}
       <Header
-        chain={chain}
-        onSelectChain={(c) => setChain(c)}
         player={effectivePlayer ?? null}
         onOpenWalletModal={() => setIsWalletModalOpen(true)}
         onDisconnect={handleDisconnect}
         isMuted={isMuted}
         onToggleMute={toggleMute}
         onPlayGong={playGong}
-        serverOnline={serverOnline}
         onOpenAdvisorCouncil={() => setStep('advisor_council')}
         onOpenMarketplace={() => setStep('marketplace')}
         onOpenDefiHub={() => {
@@ -140,8 +125,6 @@ export const App: React.FC = () => {
           <SplashScreen
             onEnterF2P={handleEnterF2P}
             onEnterWithWallet={handleEnterWithWallet}
-            onSelectChain={(c) => setChain(c)}
-            chain={chain}
             onPlayDrum={playDrum}
             onPlayGong={playGong}
           />
