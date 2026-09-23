@@ -66,7 +66,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({
             <ShieldCheck className="w-4 h-4" />
             <span>Xác thực danh tính Tướng quân</span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold font-cinzel text-white">
+          <h2 className="text-xl sm:text-2xl font-bold font-display text-white">
             Kết Nối Ví Khởi Trận
           </h2>
           <p className="text-xs text-slate-400 mt-1">

@@ -382,7 +382,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
                   {selectedUnit.icon === 'spear' ? '⚔' : selectedUnit.icon === 'archer' ? '🏹' : selectedUnit.icon === 'elephant' ? '🐘' : '🐎'}
                 </div>
                 <div className="flex-1">
-                  <div className="text-sm font-bold font-cinzel text-white leading-tight">{selectedUnit.name}</div>
+                  <div className="text-sm font-bold font-display text-white leading-tight">{selectedUnit.name}</div>
                   <div className="grid grid-cols-3 gap-x-2 gap-y-1 mt-1.5 text-[10px]">
                     <Stat label="AT" value={selectedUnit.stats.at} color="text-emerald-400" />
                     <Stat label="ATK" value={selectedUnit.stats.atk} color="text-red-400" />
@@ -473,7 +473,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           {battleResult && (
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <div className={`font-cinzel font-bold ${battleResult.victory ? 'text-emerald-300' : 'text-red-300'}`}>
+                <div className={`font-display font-bold ${battleResult.victory ? 'text-emerald-300' : 'text-red-300'}`}>
                   {battleResult.victory ? 'Chiến thắng đã được backend xác nhận' : 'Trận đánh chưa đủ điều kiện nhận HKDV'}
                 </div>
                 <div className="mt-1 font-mono text-[10px] text-slate-500">Battle ID: {battleResult.battle_id}</div>

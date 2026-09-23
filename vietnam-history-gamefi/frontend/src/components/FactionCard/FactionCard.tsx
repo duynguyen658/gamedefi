@@ -86,7 +86,7 @@ export const FactionCard: React.FC<FactionCardProps> = ({
 
         {/* Faction Name & Motto */}
         <div className="mt-2 mb-3">
-          <h3 className="text-xl sm:text-2xl font-cinzel font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-imperial-lightgold to-yellow-500">
+          <h3 className="text-xl sm:text-2xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-imperial-lightgold to-yellow-500">
             {faction.name}
           </h3>
           <p className="text-xs italic text-amber-200/70 line-clamp-1 mt-0.5">

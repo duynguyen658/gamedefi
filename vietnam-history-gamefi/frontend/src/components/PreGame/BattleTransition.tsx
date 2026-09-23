@@ -49,11 +49,11 @@ export const BattleTransition: React.FC<BattleTransitionProps> = ({
               <Swords className="w-10 h-10" />
             </div>
 
-            <div className="text-6xl font-black font-cinzel text-imperial-gold">
+            <div className="text-6xl font-black font-display text-imperial-gold">
               {countdown}
             </div>
 
-            <h2 className="text-2xl sm:text-3xl font-cinzel font-black text-white">
+            <h2 className="text-2xl sm:text-3xl font-display font-black text-white">
               CHIÊNG TRỐNG VANG RỜN &bull; ĐẠI QUÂN TIẾN VÀO TRẬN ĐỊA
             </h2>
 
@@ -65,11 +65,11 @@ export const BattleTransition: React.FC<BattleTransitionProps> = ({
           <div className="bg-imperial-lacquer/95 border-2 border-imperial-gold rounded-3xl p-8 gold-glow space-y-6 animate-in fade-in duration-700 text-left">
             <div className="flex items-center justify-between pb-4 border-b border-imperial-border">
               <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 rounded-xl bg-imperial-darkred border border-imperial-gold flex items-center justify-center text-imperial-gold font-cinzel text-xl font-black">
+                <div className="w-12 h-12 rounded-xl bg-imperial-darkred border border-imperial-gold flex items-center justify-center text-imperial-gold font-display text-xl font-black">
                   {(faction.coat_of_arms ?? faction.name).charAt(0)}
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold font-cinzel text-white">
+                  <h3 className="text-xl font-bold font-display text-white">
                     Chiến Trường Sẵn Sàng (Combat Ready)
                   </h3>
                   <p className="text-xs text-slate-400">
@@ -127,7 +127,7 @@ export const BattleTransition: React.FC<BattleTransitionProps> = ({
 
               <button
                 onClick={() => { onPlayDrum(); onEnterCampaign(); }}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-imperial-crimson via-red-600 to-imperial-darkred hover:from-red-600 hover:to-imperial-crimson border-2 border-imperial-gold text-imperial-lightgold font-cinzel font-bold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-lg shadow-red-950/60"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-imperial-crimson via-red-600 to-imperial-darkred hover:from-red-600 hover:to-imperial-crimson border-2 border-imperial-gold text-imperial-lightgold font-display font-bold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-lg shadow-red-950/60"
               >
                 <Map className="w-4 h-4" />
                 <span>Vào Bản Đồ Chiến Dịch</span>

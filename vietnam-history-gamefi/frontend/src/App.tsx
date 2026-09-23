@@ -267,7 +267,7 @@ export const App: React.FC = () => {
       <footer className="w-full border-t border-imperial-border/60 bg-imperial-lacquer/80 backdrop-blur-sm py-4 px-4 text-center text-xs text-slate-500">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
           <div>
-            <span className="font-cinzel text-imperial-lightgold font-bold">Hào Khí Đại Việt</span>
+            <span className="font-display text-imperial-lightgold font-bold">Hào Khí Đại Việt</span>
             {' '}— Lịch sử là Trò chơi. Blockchain là Thị trường.
           </div>
           <div className="flex items-center space-x-4 text-[11px] text-slate-400">

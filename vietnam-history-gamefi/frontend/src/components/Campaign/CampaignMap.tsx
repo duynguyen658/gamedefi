@@ -79,13 +79,13 @@ export const CampaignMap: React.FC<CampaignMapProps> = ({
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 bg-imperial-lacquer/90 border border-imperial-gold/50 rounded-2xl px-4 py-3 gold-glow">
         <div className="flex items-center space-x-3">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-imperial-darkred to-imperial-crimson p-0.5 border-2 border-imperial-gold flex items-center justify-center">
-            <span className="font-cinzel text-imperial-gold font-black text-xl">
+            <span className="font-display text-imperial-gold font-black text-xl">
               {(faction.coat_of_arms ?? faction.name).charAt(0)}
             </span>
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h3 className="font-cinzel font-bold text-white text-base leading-none">{player.username}</h3>
+              <h3 className="font-display font-bold text-white text-base leading-snug">{player.username}</h3>
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-900/50 border border-cyan-500/40 text-cyan-300 uppercase font-semibold">
                 Solana &bull; Active
               </span>
@@ -125,7 +125,7 @@ export const CampaignMap: React.FC<CampaignMapProps> = ({
         {/* ------------------------------------------------------------------ */}
         <aside className="bg-imperial-lacquer/90 border border-imperial-border rounded-2xl p-4 h-fit">
           <div className="mb-3">
-            <h4 className="font-cinzel font-bold text-imperial-lightgold text-sm uppercase tracking-wide">
+            <h4 className="font-display font-bold text-imperial-lightgold text-sm uppercase tracking-wide">
               Chiến Dịch Lịch Sử
             </h4>
             <p className="text-[10px] text-slate-400 uppercase tracking-widest">Historic Campaign Chapters</p>
@@ -149,7 +149,7 @@ export const CampaignMap: React.FC<CampaignMapProps> = ({
                     }`}
                 >
                   <span>
-                    <span className="font-bold font-cinzel block">Ch. {chapter.chapter_id}: {chapter.title_vi}</span>
+                    <span className="font-bold font-display block">Ch. {chapter.chapter_id}: {chapter.title_vi}</span>
                     <span className="text-[10px] text-slate-400">({chapter.era})</span>
                   </span>
                   {isLocked ? (
@@ -221,7 +221,7 @@ export const CampaignMap: React.FC<CampaignMapProps> = ({
               >
                 {loc.is_capital ? (
                   <div className={`w-9 h-9 rounded-md bg-gradient-to-b from-amber-300 to-imperial-gold border-2 ${isSelected ? 'border-white' : 'border-imperial-darkred'} flex items-center justify-center shadow-lg`}>
-                    <span className="text-imperial-darkred font-cinzel font-black text-sm">{loc.flag_glyph}</span>
+                    <span className="text-imperial-darkred font-display font-black text-sm">{loc.flag_glyph}</span>
                   </div>
                 ) : (
                   <Flag
@@ -229,7 +229,7 @@ export const CampaignMap: React.FC<CampaignMapProps> = ({
                     strokeWidth={1}
                   />
                 )}
-                <span className="mt-1 text-[10px] font-cinzel font-bold text-white bg-black/60 px-1.5 py-0.5 rounded whitespace-nowrap">
+                <span className="mt-1 text-[10px] font-display font-bold text-white bg-black/60 px-1.5 py-0.5 rounded whitespace-nowrap">
                   {loc.name}
                 </span>
 
@@ -275,7 +275,7 @@ export const CampaignMap: React.FC<CampaignMapProps> = ({
         <button
           onClick={handleDeploy}
           disabled={!selectedLocation}
-          className="px-8 py-3 rounded-2xl bg-gradient-to-r from-imperial-crimson via-red-600 to-imperial-darkred hover:from-red-600 hover:to-imperial-crimson text-imperial-lightgold font-cinzel font-black text-sm uppercase tracking-widest border-2 border-imperial-gold shadow-2xl shadow-red-950/70 hover:scale-[1.03] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+          className="px-8 py-3 rounded-2xl bg-gradient-to-r from-imperial-crimson via-red-600 to-imperial-darkred hover:from-red-600 hover:to-imperial-crimson text-imperial-lightgold font-display font-black text-sm uppercase tracking-widest border-2 border-imperial-gold shadow-2xl shadow-red-950/70 hover:scale-[1.03] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
         >
           Xuất Quân / Deploy{selectedLocation ? ` — ${selectedLocation.name}` : ''}
         </button>

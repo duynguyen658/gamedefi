@@ -73,7 +73,7 @@ export const DefiHub: React.FC<DefiHubProps> = ({ player, onBack, onPlayDrum }) 
             <ShieldCheck className="w-3.5 h-3.5" />
             <span>Hào Khí Đại Việt · Khu Giao Thương</span>
           </div>
-          <h2 className="font-cinzel text-3xl font-black text-imperial-lightgold sm:text-4xl">
+          <h2 className="font-display text-3xl font-black text-imperial-lightgold sm:text-4xl">
             {module === 'dex' ? 'Khu Giao Thương' : 'Kinh Tế On-Chain'}
           </h2>
           <p className="mt-3 max-w-[65ch] text-sm leading-relaxed text-slate-300">
@@ -114,7 +114,7 @@ export const DefiHub: React.FC<DefiHubProps> = ({ player, onBack, onPlayDrum }) 
       <div className={module === 'dex' ? 'min-w-0' : 'grid grid-cols-1 gap-6 lg:grid-cols-5'}>
         {module !== 'dex' && (
           <div className="lg:col-span-2 bg-imperial-lacquer/90 border border-imperial-gold/50 rounded-2xl p-6">
-            <h3 className="font-cinzel text-lg font-bold text-white mb-1">{active.title}</h3>
+            <h3 className="font-display text-lg font-bold text-white mb-1">{active.title}</h3>
             <p className="text-sm text-slate-300 mb-4">{active.tagline}</p>
             <div className="flex items-start space-x-2 text-xs text-emerald-300 bg-emerald-950/30 border border-emerald-700/40 rounded-xl p-3">
               <Eye className="w-4 h-4 shrink-0 mt-0.5" />

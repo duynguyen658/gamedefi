@@ -149,7 +149,7 @@ export const AdvisorMarketplace: React.FC<AdvisorMarketplaceProps> = ({
               <Coins className="w-4 h-4" />
               <span>Lớp Giao Dịch Sở Hữu On-Chain (Solana)</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-cinzel font-black text-white">
+            <h1 className="text-2xl sm:text-3xl font-display font-black text-white">
               Chợ Tướng Cố Vấn Đại Việt
             </h1>
             <p className="text-xs text-slate-300 mt-1 max-w-2xl">
@@ -159,7 +159,7 @@ export const AdvisorMarketplace: React.FC<AdvisorMarketplaceProps> = ({
 
           <div className="text-right hidden sm:block">
             <div className="text-[11px] text-slate-400">Triết lý thiết kế</div>
-            <div className="text-xs font-bold text-imperial-lightgold font-cinzel">
+            <div className="text-xs font-bold text-imperial-lightgold font-display">
               History is the Game. Blockchain is the Marketplace.
             </div>
           </div>
@@ -277,7 +277,7 @@ export const AdvisorMarketplace: React.FC<AdvisorMarketplaceProps> = ({
                         </span>
                       </div>
 
-                      <h3 className="text-lg font-black text-white font-cinzel">{item.advisor_name}</h3>
+                      <h3 className="text-lg font-black text-white font-display">{item.advisor_name}</h3>
                       <div className="text-xs text-amber-400 font-medium mb-3">
                         {adv?.title || 'Quân Sư'} &bull; Faction #{item.faction_id}
                       </div>
@@ -298,7 +298,7 @@ export const AdvisorMarketplace: React.FC<AdvisorMarketplaceProps> = ({
                     <div className="pt-4 border-t border-slate-800">
                       <div className="flex items-center justify-between mb-3">
                         <span className="text-xs text-slate-400">Giá niêm yết:</span>
-                        <div className="text-base font-black text-imperial-lightgold font-cinzel">
+                        <div className="text-base font-black text-imperial-lightgold font-display">
                           {item.price} {item.currency}
                         </div>
                       </div>
@@ -330,7 +330,7 @@ export const AdvisorMarketplace: React.FC<AdvisorMarketplaceProps> = ({
             <Tag className="w-4 h-4" />
             <span>Niêm yết tài sản</span>
           </div>
-          <h2 className="text-xl font-black text-white font-cinzel mb-2">Bán Tướng Cố Vấn Lên Chợ</h2>
+          <h2 className="text-xl font-black text-white font-display mb-2">Bán Tướng Cố Vấn Lên Chợ</h2>
           <p className="text-xs text-slate-300 mb-6">
             Chọn Tướng Cố Vấn bạn sở hữu trên ví để niêm yết bán cho người chơi khác. Người mua sẽ trả token và quyền sở hữu on-chain sẽ được cập nhật.
           </p>
@@ -377,7 +377,7 @@ export const AdvisorMarketplace: React.FC<AdvisorMarketplaceProps> = ({
 
             <button
               type="submit"
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-imperial-crimson to-red-700 hover:from-red-600 hover:to-imperial-crimson text-white text-xs font-bold uppercase tracking-wider font-cinzel shadow-xl cursor-pointer mt-4"
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-imperial-crimson to-red-700 hover:from-red-600 hover:to-imperial-crimson text-white text-xs font-bold uppercase tracking-wider font-display shadow-xl cursor-pointer mt-4"
             >
               Ký Chữ Ký Ví & Đăng Bán
             </button>
@@ -393,7 +393,7 @@ export const AdvisorMarketplace: React.FC<AdvisorMarketplaceProps> = ({
               <ArrowLeftRight className="w-4 h-4" />
               <span>Trao đổi ngang hàng P2P</span>
             </div>
-            <h2 className="text-xl font-black text-white font-cinzel mb-2">Đề Nghị Đổi Tướng Trực Tiếp</h2>
+            <h2 className="text-xl font-black text-white font-display mb-2">Đề Nghị Đổi Tướng Trực Tiếp</h2>
             <p className="text-xs text-slate-300 mb-6">
               Trao đổi Tướng Cố Vấn trực tiếp giữa 2 người chơi mà không mất phí trung gian. Cả hai bên đều phải ký xác nhận chữ ký ví để hoàn tất.
             </p>
@@ -441,7 +441,7 @@ export const AdvisorMarketplace: React.FC<AdvisorMarketplaceProps> = ({
 
               <button
                 type="submit"
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-700 to-blue-700 hover:from-cyan-600 hover:to-blue-600 text-white text-xs font-bold uppercase tracking-wider font-cinzel shadow-xl cursor-pointer mt-4"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-700 to-blue-700 hover:from-cyan-600 hover:to-blue-600 text-white text-xs font-bold uppercase tracking-wider font-display shadow-xl cursor-pointer mt-4"
               >
                 Gửi Đề Nghị Trao Đổi
               </button>
@@ -451,7 +451,7 @@ export const AdvisorMarketplace: React.FC<AdvisorMarketplaceProps> = ({
           {/* Trade Proposals List */}
           {trades.length > 0 && (
             <div className="bg-imperial-lacquer/80 border border-imperial-border rounded-2xl p-6">
-              <h3 className="text-sm font-bold text-white font-cinzel mb-4">Các Đề Nghị Đang Chờ</h3>
+              <h3 className="text-sm font-bold text-white font-display mb-4">Các Đề Nghị Đang Chờ</h3>
               <div className="space-y-3">
                 {trades.map(t => (
                   <div key={t.trade_id} className="bg-black/30 border border-slate-800 rounded-xl p-3 flex items-center justify-between">

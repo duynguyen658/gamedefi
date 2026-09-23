@@ -255,7 +255,7 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum }
         </div>
         <div className="border-t border-imperial-border pt-5">
           <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-imperial-gold">Thị trường</p>
-          <h3 className="mt-2 font-cinzel text-lg font-bold text-imperial-lightgold">{QUOTE_TOKEN} / SOL</h3>
+          <h3 className="mt-2 font-display text-lg font-bold text-imperial-lightgold">{QUOTE_TOKEN} / SOL</h3>
           <p className="mt-1 text-xs text-slate-400">{SOLANA_NETWORK === 'devnet' ? 'Raydium CPMM · Devnet' : SOLANA_NETWORK === 'mainnet-beta' ? 'Jupiter · Mainnet' : 'Mạng thử nghiệm'}</p>
           {dexConfig?.pool_id && (
             <a
@@ -269,7 +269,7 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum }
           )}
         </div>
         <div className="border-t border-imperial-border pt-5">
-          <div className="flex items-center gap-2 text-imperial-lightgold"><Coins className="h-4 w-4" /><h3 className="font-cinzel text-base font-bold">Chiến lợi phẩm HKDV</h3></div>
+          <div className="flex items-center gap-2 text-imperial-lightgold"><Coins className="h-4 w-4" /><h3 className="font-display text-base font-bold">Chiến lợi phẩm HKDV</h3></div>
           <p className="mt-2 text-xs leading-relaxed text-slate-400">Phần thưởng từ trận đánh và nhiệm vụ có thể dùng tại Khu Giao Thương sau khi được xác nhận.</p>
           <GameTokenCard player={player} />
         </div>
@@ -279,7 +279,7 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum }
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-imperial-border pb-5">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-imperial-gold">Giao dịch · 01</p>
-            <h3 id="dex-swap-title" className="mt-1 font-cinzel text-xl font-bold text-imperial-lightgold">Đổi SOL ↔ {QUOTE_TOKEN}</h3>
+            <h3 id="dex-swap-title" className="mt-1 font-display text-xl font-bold text-imperial-lightgold">Đổi SOL ↔ {QUOTE_TOKEN}</h3>
           </div>
           <span className="rounded-full border border-amber-600/40 bg-amber-950/30 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-200">{networkLabel}</span>
         </div>
@@ -463,7 +463,7 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum }
 
       <aside className="order-3 min-w-0 space-y-8 border-t border-imperial-border pt-5 lg:border-t-0 lg:pt-0" aria-label="Trạng thái và lịch sử giao dịch">
         <section className="border-t border-imperial-gold/50 pt-4">
-          <div className="flex items-center gap-2 text-imperial-lightgold"><ScrollText className="h-4 w-4" /><h3 className="font-cinzel text-base font-bold">Sổ giao dịch</h3></div>
+          <div className="flex items-center gap-2 text-imperial-lightgold"><ScrollText className="h-4 w-4" /><h3 className="font-display text-base font-bold">Sổ giao dịch</h3></div>
           <p className="mt-2 text-xs leading-relaxed text-slate-400">Báo giá từ pool, ví của bạn ký giao dịch và Solana xác nhận kết quả.</p>
           <ol className="mt-5 space-y-4 text-xs">
             <li className="flex gap-3"><span className="font-bold text-imperial-gold">01</span><span className={order ? 'text-imperial-lightgold' : 'text-slate-400'}>Xem báo giá và mức nhận tối thiểu</span></li>
@@ -473,7 +473,7 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum }
         </section>
 
         <section className="border-t border-imperial-border pt-5" aria-live="polite">
-          <div className="flex items-center gap-2 text-imperial-lightgold"><Clock3 className="h-4 w-4" /><h3 className="font-cinzel text-base font-bold">Lệnh gần đây</h3></div>
+          <div className="flex items-center gap-2 text-imperial-lightgold"><Clock3 className="h-4 w-4" /><h3 className="font-display text-base font-bold">Lệnh gần đây</h3></div>
           {historyStatus === 'loading' ? (
             <p className="mt-4 text-xs text-slate-400">Đang tải lịch sử giao dịch…</p>
           ) : historyStatus === 'error' ? (

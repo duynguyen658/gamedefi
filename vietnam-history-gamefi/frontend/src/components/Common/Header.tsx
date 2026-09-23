@@ -39,11 +39,11 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Brand & Logo */}
         <div className="flex items-center space-x-3 cursor-pointer" onClick={onPlayGong}>
           <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-imperial-darkred to-imperial-crimson p-0.5 border border-imperial-gold shadow-lg shadow-red-950/50 flex items-center justify-center">
-            <span className="font-cinzel text-imperial-gold font-black text-lg">越</span>
+            <span className="font-display text-imperial-gold font-black text-lg">越</span>
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h1 className="font-cinzel text-base lg:text-lg font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-imperial-lightgold via-imperial-gold to-amber-500 uppercase">
+              <h1 className="font-display text-base lg:text-lg font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-imperial-lightgold via-imperial-gold to-amber-500 uppercase">
                 Hào Khí Đại Việt
               </h1>
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-imperial-darkred/60 text-imperial-lightgold border border-imperial-crimson/50 font-semibold tracking-wide">

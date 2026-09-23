@@ -84,7 +84,7 @@ export const FactionSelection: React.FC<FactionSelectionProps> = ({
             <ArrowLeft className="w-4 h-4" />
             <span>Quay lại Màn hình Khởi đầu</span>
           </button>
-          <h2 className="text-2xl sm:text-3xl font-cinzel font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-imperial-lightgold to-yellow-500">
+          <h2 className="text-2xl sm:text-3xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-imperial-lightgold to-yellow-500">
             Chiêu Mộ Tộc Hệ &bull; Lựa Chọn Triều Đại
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 mt-1">
@@ -100,7 +100,7 @@ export const FactionSelection: React.FC<FactionSelectionProps> = ({
               {player?.username || 'Khách viếng thăm'}
             </div>
           </div>
-          <div className="w-9 h-9 rounded-lg bg-imperial-darkred flex items-center justify-center text-imperial-gold border border-imperial-gold/50 font-cinzel font-bold text-sm">
+          <div className="w-9 h-9 rounded-lg bg-imperial-darkred flex items-center justify-center text-imperial-gold border border-imperial-gold/50 font-display font-bold text-sm">
             {player?.is_guest ? 'F2P' : (player?.chain?.toUpperCase() || 'F2P')}
           </div>
         </div>
@@ -138,7 +138,7 @@ export const FactionSelection: React.FC<FactionSelectionProps> = ({
               </span>
             </div>
 
-            <h3 className="text-3xl sm:text-4xl font-cinzel font-black text-white">
+            <h3 className="text-3xl sm:text-4xl font-display font-black text-white">
               {selectedFaction.name}
             </h3>
 
@@ -182,7 +182,7 @@ export const FactionSelection: React.FC<FactionSelectionProps> = ({
             </div>
 
             <div>
-              <h4 className="text-sm font-bold text-white font-cinzel">
+              <h4 className="text-sm font-bold text-white font-display">
                 Gia Nhập {selectedFaction.name}
               </h4>
               <p className="text-[11px] text-slate-400 mt-0.5">

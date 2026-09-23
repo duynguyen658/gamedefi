@@ -128,7 +128,7 @@ export const AdvisorCouncil: React.FC<AdvisorCouncilProps> = ({
               <Crown className="w-4 h-4 text-imperial-gold" />
               <span>Hào Khí Đại Việt &bull; Cố Vấn Tướng Soái</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-cinzel font-black text-white tracking-wide">
+            <h1 className="text-2xl sm:text-3xl font-display font-black text-white tracking-wide">
               Hội Đồng Quân Sư Lịch Sử
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
@@ -144,7 +144,7 @@ export const AdvisorCouncil: React.FC<AdvisorCouncilProps> = ({
               </div>
               <div className="text-left">
                 <div className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">Đang Chỉ Huy Quân Đội</div>
-                <div className="text-sm font-bold text-white font-cinzel">{army.equipped_advisor_name || army.equipped_advisor_id}</div>
+                <div className="text-sm font-bold text-white font-display">{army.equipped_advisor_name || army.equipped_advisor_id}</div>
               </div>
             </div>
           )}
@@ -225,7 +225,7 @@ export const AdvisorCouncil: React.FC<AdvisorCouncilProps> = ({
                       <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${style.badge}`}>
                         {adv.rarity}
                       </span>
-                      <h3 className="text-base font-bold text-white font-cinzel mt-2">{adv.name}</h3>
+                      <h3 className="text-base font-bold text-white font-display mt-2">{adv.name}</h3>
                       <div className="text-xs text-amber-400/90 font-medium">{adv.title} &bull; {adv.faction_name}</div>
                     </div>
 
@@ -289,10 +289,10 @@ export const AdvisorCouncil: React.FC<AdvisorCouncilProps> = ({
               <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${RARITY_STYLES[selectedAdvisor.rarity].badge}`}>
                 {selectedAdvisor.rarity}
               </span>
-              <span className="text-xs text-slate-400 font-cinzel">{selectedAdvisor.faction_name}</span>
+              <span className="text-xs text-slate-400 font-display">{selectedAdvisor.faction_name}</span>
             </div>
 
-            <h2 className="text-xl font-black text-white font-cinzel">{selectedAdvisor.name}</h2>
+            <h2 className="text-xl font-black text-white font-display">{selectedAdvisor.name}</h2>
             <div className="text-xs text-amber-400 font-semibold mb-4">{selectedAdvisor.title}</div>
 
             {/* Historical Lore */}
@@ -370,7 +370,7 @@ export const AdvisorCouncil: React.FC<AdvisorCouncilProps> = ({
               <button
                 onClick={() => handleEquip(selectedAdvisor)}
                 disabled={army?.equipped_advisor_id === selectedAdvisor.id}
-                className={`w-full py-3 rounded-xl font-cinzel font-bold text-xs uppercase tracking-wider transition-all cursor-pointer ${
+                className={`w-full py-3 rounded-xl font-display font-bold text-xs uppercase tracking-wider transition-all cursor-pointer ${
                   army?.equipped_advisor_id === selectedAdvisor.id
                     ? 'bg-emerald-950 border border-emerald-600/50 text-emerald-300 cursor-not-allowed'
                     : 'bg-gradient-to-r from-imperial-crimson to-red-700 hover:from-red-600 hover:to-imperial-crimson text-white shadow-xl shadow-red-950/60'

@@ -23,8 +23,9 @@ export default {
         },
       },
       fontFamily: {
-        cinzel: ['Cinzel', 'serif'],
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['Noto Serif', 'Be Vietnam Pro', 'serif'],
+        serif: ['Noto Serif', 'Be Vietnam Pro', 'serif'],
+        sans: ['Be Vietnam Pro', 'Segoe UI', 'system-ui', 'sans-serif'],
       },
       backgroundImage: {
         'drum-pattern': "radial-gradient(circle, rgba(212,175,55,0.08) 1px, transparent 1px)",

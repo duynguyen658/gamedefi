@@ -49,11 +49,11 @@ export const PreGameLobby: React.FC<PreGameLobbyProps> = ({
       
       {/* Top Welcome Title */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-imperial-lacquer border border-imperial-gold/60 text-imperial-lightgold text-xs font-semibold tracking-widest uppercase mb-3">
+        <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-imperial-lacquer border border-imperial-gold/60 text-imperial-lightgold text-xs font-semibold tracking-wide uppercase mb-3">
           <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           <span>Sảnh Tiền Trạm &bull; Sẵn Sàng Xuất Kích</span>
         </div>
-        <h2 className="text-3xl sm:text-4xl font-cinzel font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-imperial-lightgold to-yellow-500">
+        <h2 className="text-3xl sm:text-4xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-imperial-lightgold to-yellow-500">
           Tổng Hành Dinh Tướng Quân
         </h2>
         <p className="text-sm text-slate-300 mt-2 max-w-xl mx-auto">
@@ -74,7 +74,7 @@ export const PreGameLobby: React.FC<PreGameLobbyProps> = ({
                 <span className="text-[10px] uppercase font-bold text-imperial-gold tracking-widest">
                   Thống Lĩnh Quân Đoàn
                 </span>
-                <h3 className="text-lg font-bold text-white font-cinzel">
+                <h3 className="text-lg font-bold text-white font-display">
                   {player.username}
                 </h3>
                 <div className="text-xs text-slate-400 font-mono">
@@ -86,7 +86,7 @@ export const PreGameLobby: React.FC<PreGameLobbyProps> = ({
             <div className="space-y-3 pt-3 border-t border-imperial-border/80 text-xs">
               <div className="flex justify-between items-center py-1">
                 <span className="text-slate-400">Triều đại phụng sự:</span>
-                <span className="font-bold text-amber-300 font-cinzel">{faction.name}</span>
+                <span className="font-bold text-amber-300 font-display">{faction.name}</span>
               </div>
               <div className="flex justify-between items-center py-1">
                 <span className="text-slate-400">Chế độ trải nghiệm:</span>
@@ -132,7 +132,7 @@ export const PreGameLobby: React.FC<PreGameLobbyProps> = ({
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-2">
                 <Users className="w-5 h-5 text-imperial-gold" />
-                <h3 className="font-cinzel text-base font-bold text-white">
+                <h3 className="font-display text-base font-bold text-white">
                   Binh Lực & Tướng Cố Vấn
                 </h3>
               </div>
@@ -167,7 +167,7 @@ export const PreGameLobby: React.FC<PreGameLobbyProps> = ({
                   Kích Hoạt
                 </span>
               </div>
-              <div className="text-sm font-bold text-white font-cinzel">
+              <div className="text-sm font-bold text-white font-display">
                 {army?.equipped_advisor_name || 'Đã phân bổ tướng bản triều'}
               </div>
             </div>
@@ -203,7 +203,7 @@ export const PreGameLobby: React.FC<PreGameLobbyProps> = ({
           <div>
             <div className="flex items-center space-x-2 mb-4">
               <Compass className="w-5 h-5 text-amber-400" />
-              <h3 className="font-cinzel text-base font-bold text-white">
+              <h3 className="font-display text-base font-bold text-white">
                 Mục Tiêu Chiến Dịch
               </h3>
             </div>
@@ -235,7 +235,7 @@ export const PreGameLobby: React.FC<PreGameLobbyProps> = ({
           <div className="space-y-3">
             <button
               onClick={handleLaunch}
-              className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-imperial-crimson via-red-600 to-imperial-darkred hover:from-red-600 hover:to-imperial-crimson text-imperial-lightgold font-cinzel font-black text-base uppercase tracking-wider border-2 border-imperial-gold shadow-2xl shadow-red-950/80 hover:scale-[1.02] transition-all flex items-center justify-center space-x-3 cursor-pointer"
+              className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-imperial-crimson via-red-600 to-imperial-darkred hover:from-red-600 hover:to-imperial-crimson text-imperial-lightgold font-display font-black text-base uppercase tracking-wider border-2 border-imperial-gold shadow-2xl shadow-red-950/80 hover:scale-[1.02] transition-all flex items-center justify-center space-x-3 cursor-pointer"
             >
               <Play className="w-5 h-5 fill-current" />
               <span>Xuất Quân Vào Chiến Trường</span>

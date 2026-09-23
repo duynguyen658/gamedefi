@@ -36,21 +36,21 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
       <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center">
         
         {/* Imperial Badge */}
-        <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-imperial-lacquer/90 border border-imperial-gold/60 text-imperial-lightgold text-xs font-semibold tracking-widest uppercase mb-6 shadow-lg shadow-amber-950/30">
+        <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-imperial-lacquer/90 border border-imperial-gold/60 text-imperial-lightgold text-xs font-semibold tracking-wide uppercase mb-6 shadow-lg shadow-amber-950/30">
           <Crown className="w-3.5 h-3.5 text-imperial-gold" />
           <span>Game Chiến Thuật Lịch Sử Việt Nam &bull; Gameplay First</span>
         </div>
 
         {/* Main Title */}
-        <h1 className="font-cinzel text-4xl sm:text-6xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-amber-100 via-imperial-lightgold to-amber-500 tracking-tight leading-none mb-4 drop-shadow-md">
+        <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-amber-100 via-imperial-lightgold to-amber-500 tracking-tight leading-tight mb-4 drop-shadow-md">
           HÀO KHÍ ĐẠI VIỆT
         </h1>
-        <p className="font-serif italic text-lg sm:text-2xl text-amber-200/90 font-medium tracking-wide mb-4 max-w-2xl">
+        <p className="font-serif italic text-lg sm:text-2xl text-amber-200/90 font-medium leading-relaxed mb-4 max-w-2xl">
           "Nam quốc sơn hà Nam đế cư &bull; Tiệt nhiên định phận tại thiên thư"
         </p>
 
         {/* Tagline */}
-        <div className="inline-block px-4 py-1 rounded-xl bg-black/50 border border-imperial-gold/40 text-xs sm:text-sm font-bold text-imperial-lightgold font-cinzel mb-6">
+        <div className="inline-block px-4 py-1 rounded-xl bg-black/50 border border-imperial-gold/40 text-xs sm:text-sm font-bold text-imperial-lightgold font-display mb-6">
           Lịch sử là Trò chơi &bull; Blockchain là Thị trường
         </div>
 
@@ -84,10 +84,10 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
               onPlayGong();
               onEnterF2P();
             }}
-            className="group relative px-8 sm:px-10 py-4 rounded-2xl bg-gradient-to-r from-imperial-crimson via-red-600 to-imperial-darkred text-imperial-lightgold font-cinzel font-black text-base sm:text-lg tracking-wider uppercase border-2 border-imperial-gold shadow-2xl shadow-red-950/80 hover:scale-105 transition-all duration-300 flex items-center space-x-3 cursor-pointer"
+            className="group relative px-8 sm:px-10 py-4 rounded-2xl bg-gradient-to-r from-imperial-crimson via-red-600 to-imperial-darkred text-imperial-lightgold font-display font-black text-base sm:text-lg tracking-wider uppercase border-2 border-imperial-gold shadow-2xl shadow-red-950/80 hover:scale-105 transition-all duration-300 flex items-center space-x-3 cursor-pointer"
           >
             <Play className="w-5 h-5 fill-current text-imperial-lightgold" />
-            <span>Chơi Ngay (Không Cần Ví)</span>
+            <span className="text-center leading-snug"><span className="sm:hidden">Chơi Ngay Miễn Phí</span><span className="hidden sm:inline">Chơi Ngay (Không Cần Ví)</span></span>
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </button>
 
@@ -97,7 +97,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
               onPlayDrum();
               onEnterWithWallet();
             }}
-            className="px-6 py-4 rounded-2xl bg-imperial-lacquer/90 hover:bg-slate-800 text-slate-200 hover:text-white font-cinzel font-bold text-sm tracking-wider uppercase border border-slate-700 flex items-center space-x-2 transition-all cursor-pointer"
+            className="px-6 py-4 rounded-2xl bg-imperial-lacquer/90 hover:bg-slate-800 text-slate-200 hover:text-white font-display font-bold text-sm tracking-wider uppercase border border-slate-700 flex items-center space-x-2 transition-all cursor-pointer"
           >
             <Wallet className="w-4 h-4 text-imperial-gold" />
             <span>Nối Ví (Chợ Tướng On-Chain)</span>
