@@ -33,7 +33,11 @@ def persistence_error(exc: DexPersistenceError) -> HTTPException:
     return HTTPException(status_code=status, detail=str(exc))
 
 
-def signed_transaction_signature(value: str, expected_wallet: str) -> str:
+def signed_transaction_signature(
+    value: str,
+    expected_wallet: str,
+    required_instruction: tuple[str, str] | None = None,
+) -> str:
     try:
         transaction = VersionedTransaction.from_bytes(base64.b64decode(value, validate=True))
         if not transaction.signatures or transaction.signatures[0] == Signature.default():
@@ -42,6 +46,19 @@ def signed_transaction_signature(value: str, expected_wallet: str) -> str:
         account_keys = transaction.message.account_keys
         if not account_keys or str(account_keys[0]) != expected_wallet:
             raise ValueError("Ví ký không phải fee payer của giao dịch DEX")
+        if required_instruction:
+            program_id, pool_id = required_instruction
+            static_accounts = [str(key) for key in account_keys]
+            if program_id not in static_accounts or pool_id not in static_accounts:
+                raise ValueError("Giao dịch không chứa program hoặc pool Raydium đã báo giá")
+            program_index = static_accounts.index(program_id)
+            pool_index = static_accounts.index(pool_id)
+            valid_swap = any(
+                instruction.program_id_index == program_index and pool_index in instruction.accounts
+                for instruction in transaction.message.instructions
+            )
+            if not valid_swap:
+                raise ValueError("Giao dịch không gọi đúng pool Raydium đã báo giá")
         return str(transaction.signatures[0])
     except ValueError:
         raise
@@ -59,6 +76,8 @@ def dex_config(request: Request):
         "supports_execution": provider.supports_execution,
         "persistence": "sql",
         "tokens": [token.__dict__ for token in token_registry(settings.solana_network).values()],
+        "pool_id": getattr(provider, "pool_id", None),
+        "program_id": getattr(provider, "program_id", None),
     }
 
 
@@ -80,6 +99,8 @@ def create_order(body: DexOrderRequest, request: Request, principal: SessionPrin
                 raise DexIdempotencyConflict("Khóa idempotency đã được dùng cho một lệnh khác")
             return DexOrderOut(**existing.to_order().__dict__)
         tokens = token_registry(network)
+        if body.input_symbol not in tokens or body.output_symbol not in tokens:
+            raise HTTPException(status_code=422, detail="Cặp token không được hỗ trợ trên mạng này")
         order = request.app.state.dex_provider.get_order(DexOrderRequestData(
             wallet=body.wallet,
             input_token=tokens[body.input_symbol],
@@ -103,7 +124,13 @@ def execute_order(body: DexExecuteRequest, request: Request, principal: SessionP
     if principal.is_guest:
         raise HTTPException(status_code=403, detail="Tài khoản guest không thể thực thi DEX")
     try:
-        signature = signed_transaction_signature(body.signed_transaction, body.wallet)
+        provider = request.app.state.dex_provider
+        required_instruction = (
+            (provider.program_id, provider.pool_id)
+            if hasattr(provider, "program_id") and hasattr(provider, "pool_id")
+            else None
+        )
+        signature = signed_transaction_signature(body.signed_transaction, body.wallet, required_instruction)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     repository = request.app.state.dex_swaps

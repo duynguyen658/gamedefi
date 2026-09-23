@@ -6,7 +6,7 @@ import uuid
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 
-from sqlalchemy import BigInteger, Boolean, DateTime, Integer, String, Text, UniqueConstraint, Uuid, create_engine, select
+from sqlalchemy import BigInteger, Boolean, DateTime, Integer, String, Text, UniqueConstraint, Uuid, create_engine, inspect, select, text
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -63,6 +63,7 @@ class DexSwapModel(Base):
     expires_at: Mapped[int | None] = mapped_column(BigInteger)
     last_valid_block_height: Mapped[int | None] = mapped_column(BigInteger)
     warning: Mapped[str | None] = mapped_column(Text)
+    price_impact_bps: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     status: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
     signature: Mapped[str | None] = mapped_column(String(128), unique=True)
     code: Mapped[int | None] = mapped_column(Integer)
@@ -100,6 +101,7 @@ class DexSwapRecord:
     expires_at: int | None
     last_valid_block_height: int | None
     warning: str | None
+    price_impact_bps: int
     status: str
     signature: str | None
     code: int | None
@@ -138,6 +140,12 @@ class DexSwapRepository:
         self.sessions = sessionmaker(self.engine, expire_on_commit=False)
         if create_schema:
             Base.metadata.create_all(self.engine)
+            columns = {column["name"] for column in inspect(self.engine).get_columns("dex_swaps")}
+            if "price_impact_bps" not in columns:
+                with self.engine.begin() as connection:
+                    connection.execute(text(
+                        "ALTER TABLE dex_swaps ADD COLUMN price_impact_bps INTEGER NOT NULL DEFAULT 0"
+                    ))
 
     @staticmethod
     def _record(row: DexSwapModel) -> DexSwapRecord:

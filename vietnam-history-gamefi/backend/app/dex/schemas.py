@@ -11,8 +11,8 @@ from app.core.security import is_valid_solana_wallet
 
 class DexOrderRequest(BaseModel):
     wallet: str
-    input_symbol: Literal["SOL", "USDC"]
-    output_symbol: Literal["SOL", "USDC"]
+    input_symbol: Literal["SOL", "HKDV", "USDC"]
+    output_symbol: Literal["SOL", "HKDV", "USDC"]
     amount: str = Field(pattern=r"^[1-9][0-9]{0,29}$")
     slippage_bps: int = Field(default=50, ge=1, le=500)
     idempotency_key: str = Field(min_length=8, max_length=64, pattern=r"^[A-Za-z0-9._:-]+$")
@@ -51,6 +51,7 @@ class DexOrderOut(BaseModel):
     expires_at: int | None = None
     last_valid_block_height: int | None = None
     warning: str | None = None
+    price_impact_bps: int = Field(default=0, ge=0)
 
 
 class DexExecuteRequest(BaseModel):

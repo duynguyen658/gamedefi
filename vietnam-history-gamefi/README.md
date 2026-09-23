@@ -74,7 +74,7 @@ Không commit keypair trong `target/`. Không có deployment được tự thự
 - Battle engine/API đã có, nhưng bàn cờ frontend còn mô phỏng cục bộ, chưa gọi API battle để lưu kết quả.
 - Battle/quest hợp lệ tạo claim HKDV bền vững; backend dùng distributor key riêng để ký, receipt PDA chống phát trùng và API tự đối soát trạng thái Solana.
 - Marketplace/P2P chặn thao tác ghi bằng 503; danh sách ban đầu trống, không seed ownership giả.
-- DEX dùng mock provider được gắn nhãn trên Devnet và Jupiter trên Mainnet; swap intent, trạng thái và signature được lưu trong PostgreSQL, có idempotency và đối soát Solana RPC. Cần `JUPITER_API_KEY` ở backend để bật giao dịch Mainnet.
+- DEX HKDV/SOL đã hoạt động trên Raydium CPMM Devnet; ví người chơi tự ký, backend xác minh đúng program/pool rồi gửi RPC. Swap intent, trạng thái và signature được lưu trong PostgreSQL, có idempotency và đối soát. Mainnet tiếp tục dùng Jupiter và cần `JUPITER_API_KEY`.
 - Unity là client thử nghiệm, cần bridge tới ví Solana; không phải client chính.
 
 Chi tiết: [Blockchain](docs/blockchain.md), [HKDV token](docs/game-token.md), [Reward distributor](docs/reward-distributor.md), [API](docs/api.md), [Kiến trúc](docs/architecture.md).

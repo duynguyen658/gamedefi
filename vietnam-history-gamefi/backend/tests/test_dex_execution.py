@@ -1,11 +1,14 @@
 import base64
 
 from solders.hash import Hash
+from solders.instruction import Instruction
 from solders.keypair import Keypair
+from solders.system_program import ID as SYSTEM_PROGRAM_ID
 from solders.message import Message
 from solders.system_program import TransferParams, transfer
 from solders.transaction import VersionedTransaction
 
+from app.api.dex import signed_transaction_signature
 from app.blockchain.interface import TransactionInfo
 from app.dex.interface import DexExecution, DexOrder
 from conftest import login
@@ -61,11 +64,38 @@ def order_body(wallet: str, key: str = "phase3-order-key") -> dict:
     return {
         "wallet": wallet,
         "input_symbol": "SOL",
-        "output_symbol": "USDC",
+        "output_symbol": "HKDV",
         "amount": "1",
         "slippage_bps": 50,
         "idempotency_key": key,
     }
+
+
+
+
+def test_signed_transaction_requires_pool_in_raydium_instruction():
+    owner = Keypair()
+    recipient = Keypair().pubkey()
+    unrelated_pool = Keypair().pubkey()
+    transfer_instruction = transfer(TransferParams(
+        from_pubkey=owner.pubkey(), to_pubkey=recipient, lamports=1,
+    ))
+    unrelated_instruction = Instruction(unrelated_pool, b"", [])
+    message = Message.new_with_blockhash(
+        [transfer_instruction, unrelated_instruction], owner.pubkey(), Hash.default(),
+    )
+    encoded = base64.b64encode(bytes(VersionedTransaction(message, [owner]))).decode()
+
+    try:
+        signed_transaction_signature(
+            encoded,
+            str(owner.pubkey()),
+            (str(SYSTEM_PROGRAM_ID), str(unrelated_pool)),
+        )
+    except ValueError as exc:
+        assert "không gọi đúng pool Raydium" in str(exc)
+    else:
+        raise AssertionError("transaction with an unrelated pool account must be rejected")
 
 
 def test_order_is_idempotent_and_conflicting_reuse_is_rejected(client):

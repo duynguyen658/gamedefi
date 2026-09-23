@@ -24,9 +24,10 @@ Chain duy nhất là `solana`; địa chỉ base58 phân biệt hoa/thường.
 
 ## DEX
 
-- `POST /dex/order`: tạo quote/order với `idempotency_key`; retry cùng payload trả lại đúng order đã lưu.
-- `POST /dex/execute`: khóa order theo ví và chữ ký trước khi gửi Jupiter, ngăn gửi trùng.
-- `GET /dex/history`: lịch sử của ví trong session; đồng thời đối soát giao dịch đang chờ qua Solana RPC.
-- `POST /dex/reconcile`: chạy đối soát chủ động cho ví trong session.
+- `GET /dex/config`: trả network, token registry, provider và public Raydium pool/program ID.
+- `POST /dex/order`: Devnet đọc reserve on-chain và tính quote CPMM HKDV/SOL; `idempotency_key` bảo đảm retry cùng payload trả lại order đã lưu.
+- `POST /dex/execute`: khóa order theo ví/chữ ký, xác minh transaction chứa đúng Raydium program và pool, rồi gửi Solana RPC. Mainnet chuyển signed transaction tới Jupiter.
+- `GET /dex/history`: lịch sử của ví trong session và tự đối soát giao dịch đang chờ.
+- `POST /dex/reconcile`: chạy đối soát chủ động.
 
-Production dùng `DATABASE_URL=postgresql+psycopg://...` và chạy `database/migrations/001_dex_swaps.sql`. Backend không lưu signed transaction hoặc private key; chỉ lưu unsigned quote transaction và signature công khai.
+Production dùng `DATABASE_URL=postgresql+psycopg://...` và chạy `database/migrations/001_dex_swaps.sql`. Backend không lưu signed transaction hoặc private key; chỉ lưu quote, trạng thái và public signature.

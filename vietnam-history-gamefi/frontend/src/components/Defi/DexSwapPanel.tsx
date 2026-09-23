@@ -21,6 +21,7 @@ import {
   validateSwapAmount,
 } from '../../services/dexBalances';
 import { formatBaseUnits, uiAmountToBaseUnits } from '../../services/dexMath';
+import { buildRaydiumSwapTransaction } from '../../services/raydiumSwap';
 import type { DexExecution, DexOrder, DexSwapHistory } from '../../types/dex';
 
 interface DexSwapPanelProps {
@@ -31,7 +32,8 @@ interface DexSwapPanelProps {
 type BalanceStatus = 'loading' | 'ready' | 'error' | 'wallet-required';
 type RequestStatus = 'idle' | 'quoting' | 'signing' | 'executing';
 
-const EMPTY_BALANCES: DexBalances = { SOL: '0', USDC: '0' };
+const EMPTY_BALANCES: DexBalances = { SOL: '0', HKDV: '0', USDC: '0' };
+const QUOTE_TOKEN: DexTokenSymbol = SOLANA_NETWORK === 'mainnet-beta' ? 'USDC' : 'HKDV';
 
 function newIdempotencyKey(): string {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -54,7 +56,7 @@ function apiError(error: unknown): string {
 
 export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum }) => {
   const [fromToken, setFromToken] = useState<DexTokenSymbol>('SOL');
-  const [toToken, setToToken] = useState<DexTokenSymbol>('USDC');
+  const [toToken, setToToken] = useState<DexTokenSymbol>(QUOTE_TOKEN);
   const [amount, setAmount] = useState('');
   const [slippageBps, setSlippageBps] = useState(50);
   const [balances, setBalances] = useState<DexBalances>(EMPTY_BALANCES);
@@ -148,13 +150,17 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum }
   };
 
   const signAndExecute = async () => {
-    if (!order?.transaction || !order.executable) return;
+    if (!order?.executable) return;
     onPlayDrum();
     setError(null);
     setExecution(null);
     try {
       setRequestStatus('signing');
-      const signedTransaction = await solanaAdapter.signVersionedTransaction(order.transaction, player.wallet);
+      const unsignedTransaction = order.provider === 'raydium'
+        ? await buildRaydiumSwapTransaction(order, player.wallet)
+        : order.transaction;
+      if (!unsignedTransaction) throw new Error('DEX không trả giao dịch để ký.');
+      const signedTransaction = await solanaAdapter.signVersionedTransaction(unsignedTransaction, player.wallet);
       setRequestStatus('executing');
       const result = await apiService.executeDexOrder({
         wallet: player.wallet,
@@ -253,7 +259,7 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum }
             onChange={(event) => {
               const symbol = event.target.value as DexTokenSymbol;
               setFromToken(symbol);
-              setToToken(symbol === 'SOL' ? 'USDC' : 'SOL');
+              setToToken(symbol === 'SOL' ? QUOTE_TOKEN : 'SOL');
               setAmount('');
               clearQuote();
             }}
@@ -310,14 +316,20 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum }
         <div className={`rounded-xl border p-3 text-[11px] ${order.simulation ? 'border-amber-700/50 bg-amber-950/20' : 'border-emerald-800/50 bg-emerald-950/20'}`}>
           <div className="mb-2 flex items-center justify-between">
             <span className={order.simulation ? 'font-bold text-amber-300' : 'font-bold text-emerald-300'}>
-              {order.simulation ? 'Báo giá mô phỏng Devnet' : 'Báo giá Jupiter Mainnet'}
+              {order.simulation ? 'Báo giá mô phỏng' : order.provider === 'raydium' ? 'Raydium HKDV/SOL Devnet' : 'Báo giá Jupiter Mainnet'}
             </span>
             <span className="text-slate-400">{order.router} · {order.mode}</span>
           </div>
           <div className="grid grid-cols-2 gap-2 text-slate-400">
             <span>Nhận tối thiểu</span><span className="text-right text-slate-200">{minimumReceived} {toToken}</span>
-            <span>Phí tuyến</span><span className="text-right text-slate-200">{(order.fee_bps / 100).toFixed(2)}%</span>
-            <span>Price impact</span><span className="text-right text-slate-200">Theo bộ định tuyến</span>
+            <span>Phí pool</span><span className="text-right text-slate-200">{(order.fee_bps / 100).toFixed(2)}%</span>
+            <span>Price impact</span><span className="text-right text-slate-200">{(order.price_impact_bps / 100).toFixed(2)}%</span>
+            <span>Pool</span>
+            <span className="truncate text-right text-slate-200">
+              {order.provider === 'raydium'
+                ? order.router.slice(0, 6) + '...' + order.router.slice(-6)
+                : 'Theo bộ định tuyến'}
+            </span>
           </div>
           {order.warning && <p className="mt-2 text-amber-300">{order.warning}</p>}
         </div>

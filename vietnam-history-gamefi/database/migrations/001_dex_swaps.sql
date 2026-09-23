@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS dex_swaps (
   expires_at BIGINT,
   last_valid_block_height BIGINT,
   warning TEXT,
+  price_impact_bps INTEGER NOT NULL DEFAULT 0,
   status TEXT NOT NULL CHECK (status IN ('quoted', 'simulated', 'pending_confirmation', 'confirmed', 'failed', 'expired')),
   signature TEXT UNIQUE,
   code INTEGER,
@@ -38,3 +39,5 @@ CREATE TABLE IF NOT EXISTS dex_swaps (
 
 CREATE INDEX IF NOT EXISTS ix_dex_swaps_wallet_created ON dex_swaps (wallet, created_at DESC);
 CREATE INDEX IF NOT EXISTS ix_dex_swaps_reconcile ON dex_swaps (status, updated_at) WHERE status = 'pending_confirmation';
+
+ALTER TABLE dex_swaps ADD COLUMN IF NOT EXISTS price_impact_bps INTEGER NOT NULL DEFAULT 0;

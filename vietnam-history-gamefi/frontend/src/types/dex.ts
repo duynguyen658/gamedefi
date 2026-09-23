@@ -17,7 +17,7 @@ export interface DexOrder {
   out_amount: string;
   input_decimals: number;
   output_decimals: number;
-  provider: 'mock' | 'jupiter';
+  provider: 'mock' | 'raydium' | 'jupiter';
   router: string;
   mode: string;
   fee_bps: number;
@@ -28,6 +28,7 @@ export interface DexOrder {
   expires_at: number | null;
   last_valid_block_height: number | null;
   warning: string | null;
+  price_impact_bps: number;
 }
 
 export interface DexExecution {

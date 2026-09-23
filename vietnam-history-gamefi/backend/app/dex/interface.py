@@ -7,6 +7,7 @@ from dataclasses import dataclass
 SOL_MINT = "So11111111111111111111111111111111111111112"
 MAINNET_USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
 DEVNET_USDC_MINT = "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"
+HKDV_MINT = "45kZL6u62pbEmLiiZuUeuPWcotqZb8DLMmaPD5tNs1qm"
 
 
 class DexProviderError(RuntimeError):
@@ -50,6 +51,7 @@ class DexOrder:
     expires_at: int | None = None
     last_valid_block_height: int | None = None
     warning: str | None = None
+    price_impact_bps: int = 0
 
 
 @dataclass(frozen=True)
@@ -63,6 +65,11 @@ class DexExecution:
 
 
 def token_registry(network: str) -> dict[str, DexToken]:
+    if network == "devnet":
+        return {
+            "SOL": DexToken("SOL", "Solana", SOL_MINT, 9),
+            "HKDV": DexToken("HKDV", "H\u00e0o Kh\u00ed \u0110\u1ea1i Vi\u1ec7t", HKDV_MINT, 6),
+        }
     usdc_mint = MAINNET_USDC_MINT if network == "mainnet-beta" else DEVNET_USDC_MINT
     return {
         "SOL": DexToken("SOL", "Solana", SOL_MINT, 9),

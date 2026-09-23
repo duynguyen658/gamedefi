@@ -6,7 +6,7 @@ import httpx
 import pytest
 from solders.keypair import Keypair
 
-from app.dex.interface import MAINNET_USDC_MINT, SOL_MINT, DexOrderRequestData, token_registry
+from app.dex.interface import MAINNET_USDC_MINT, SOL_MINT, DexOrder, DexOrderRequestData, token_registry
 from app.dex.jupiter_provider import JupiterDexProvider
 from app.dex.mock_provider import MockDexProvider
 from conftest import login
@@ -16,21 +16,52 @@ def auth_headers(player: dict) -> dict[str, str]:
     return {"Authorization": f"Bearer {player['access_token']}"}
 
 
-def test_devnet_config_uses_non_executable_mock_provider(client):
+class QuoteProvider:
+    name = "raydium"
+    supports_execution = True
+    pool_id = "test-pool"
+    program_id = "test-program"
+
+    def get_order(self, request):
+        return DexOrder(
+            request_id="raydium_test_quote",
+            input_symbol=request.input_token.symbol,
+            output_symbol=request.output_token.symbol,
+            in_amount=request.amount,
+            out_amount="99401095",
+            input_decimals=request.input_token.decimals,
+            output_decimals=request.output_token.decimals,
+            provider=self.name,
+            router=self.pool_id,
+            mode="exact-in",
+            fee_bps=25,
+            slippage_bps=request.slippage_bps,
+            transaction=None,
+            executable=True,
+            simulation=False,
+        )
+
+    def execute(self, signed_transaction, request_id):
+        raise AssertionError("not used")
+
+
+def test_devnet_config_uses_executable_raydium_provider(client):
     response = client.get("/dex/config")
     assert response.status_code == 200
     assert response.json()["network"] == "devnet"
-    assert response.json()["provider"] == "mock"
-    assert response.json()["supports_execution"] is False
-    assert {token["symbol"] for token in response.json()["tokens"]} == {"SOL", "USDC"}
+    assert response.json()["provider"] == "raydium"
+    assert response.json()["supports_execution"] is True
+    assert response.json()["pool_id"] == "6dg1ELPzBmmqs7UDTr8pAZmGNQY9XymEDo6KQx8h4J2r"
+    assert {token["symbol"] for token in response.json()["tokens"]} == {"SOL", "HKDV"}
 
 
-def test_dex_order_requires_wallet_session_and_returns_labeled_simulation(client):
+def test_dex_order_requires_wallet_session_and_returns_executable_quote(client):
     wallet, player = login(client)
+    client.app.state.dex_provider = QuoteProvider()
     body = {
         "wallet": wallet,
         "input_symbol": "SOL",
-        "output_symbol": "USDC",
+        "output_symbol": "HKDV",
         "amount": "1000000000",
         "slippage_bps": 50,
         "idempotency_key": "dex-test-order-1",
@@ -39,12 +70,11 @@ def test_dex_order_requires_wallet_session_and_returns_labeled_simulation(client
     response = client.post("/dex/order", json=body, headers=auth_headers(player))
     assert response.status_code == 200, response.text
     order = response.json()
-    assert order["provider"] == "mock"
-    assert order["simulation"] is True
-    assert order["executable"] is False
+    assert order["provider"] == "raydium"
+    assert order["simulation"] is False
+    assert order["executable"] is True
     assert order["transaction"] is None
-    assert order["out_amount"] == "100000000"
-    assert "không thể ký" in order["warning"]
+    assert order["out_amount"] == "99401095"
 
 
 def test_dex_rejects_another_wallet_and_invalid_pair(client):
@@ -53,7 +83,7 @@ def test_dex_rejects_another_wallet_and_invalid_pair(client):
     body = {
         "wallet": another_wallet,
         "input_symbol": "SOL",
-        "output_symbol": "USDC",
+        "output_symbol": "HKDV",
         "amount": "1",
         "idempotency_key": "dex-test-order-2",
     }
@@ -64,7 +94,7 @@ def test_dex_rejects_another_wallet_and_invalid_pair(client):
 
 def test_mock_provider_quotes_both_directions_without_transaction():
     provider = MockDexProvider(Decimal("100"))
-    tokens = token_registry("devnet")
+    tokens = token_registry("testnet")
     request = DexOrderRequestData(
         wallet=str(Keypair().pubkey()),
         input_token=tokens["USDC"],

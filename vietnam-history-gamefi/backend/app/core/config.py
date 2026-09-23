@@ -42,8 +42,12 @@ class Settings(BaseSettings):
     reward_distributor_keypair_path: str = "~/.config/solana/gamefi-hkdv/devnet-reward-distributor-keypair.json"
 
     # --- DEX ---
-    # The Jupiter key remains backend-only. Non-mainnet environments use the
-    # explicitly labelled, non-executable mock provider.
+    # Devnet uses the deployed HKDV/SOL Raydium CPMM pool. Mainnet uses Jupiter.
+    raydium_cpmm_program_id: str = "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
+    raydium_pool_id: str = "6dg1ELPzBmmqs7UDTr8pAZmGNQY9XymEDo6KQx8h4J2r"
+    raydium_config_id: str = "5MxLgy9oPdTC3YgkiePHqr3EoCRD9uLVYRQS2ANAs7wy"
+    raydium_wsol_vault: str = "5RyuHkhmFLa2AziU4X6Y6i49d4WN6uGn6Cty3L4mHuWc"
+    raydium_hkdv_vault: str = "DYv7LuMu5Qnt9PTSft7R83Aan5ANo88GRXmEMbmcDZdD"
     jupiter_api_key: str = ""
     jupiter_base_url: str = "https://api.jup.ag/swap/v2"
     dex_mock_sol_usdc_rate: float = 100.0

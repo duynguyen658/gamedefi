@@ -2,11 +2,21 @@
 
 ## Trạng thái triển khai
 
-- Giai đoạn 1 hoàn thành: DEX có đường điều hướng trong game, đọc số dư SOL/USDC từ RPC và không còn hiển thị tỷ giá, TVL hoặc chữ ký mô phỏng.
-- Giai đoạn 2 hoàn thành: backend chọn mock provider không thực thi trên Devnet và Jupiter `/order` + `/execute` trên Mainnet; frontend hỗ trợ báo giá, ký versioned transaction và hiển thị kết quả.
-- Giai đoạn 3 hoàn thành: swap intent, idempotency, trạng thái thực thi và reconciliation được lưu qua SQLAlchemy/PostgreSQL.
-- Giai đoạn 4 hoàn thành: SPL token HKDV cung cố định đã được phát hành trên Devnet; backend xác minh mint và treasury qua RPC, frontend hiển thị số dư ví.
-- Giai đoạn 5 hoàn thành: reward distributor và vault PDA đã deploy; có authority tách biệt, pause/rotation, giới hạn payout và receipt chống replay.
+- Giai đoạn 1-6 hoàn thành: giao diện, provider boundary, SQL persistence/reconciliation, HKDV fixed supply, reward distributor và các kiểm soát vận hành.
+- Giai đoạn 7 hoàn thành trên Devnet: pool Raydium CPMM `HKDV/SOL` có thanh khoản khởi tạo 100.000 HKDV + 1 SOL.
+- Frontend đọc số dư, lấy quote, tạo versioned transaction và yêu cầu Phantom/Solflare ký. Backend không giữ private key, chỉ xác minh/gửi transaction đã ký và đối soát signature.
+- Hai chiều SOL → HKDV và HKDV → SOL đã smoke test thành công. Public signature nằm trong deployment record `blockchain/solana/deployments/devnet-raydium-hkdv-sol-pool.json`.
+
+### Chạy DEX local
+
+1. Copy `backend/.env.example` thành `backend/.env`, cấu hình PostgreSQL và chạy `database/migrations/001_dex_swaps.sql`.
+2. Copy `frontend/.env.example` thành `frontend/.env`.
+3. Chạy `uvicorn app.main:app --reload` trong thư mục `backend`.
+4. Chạy `npm install` và `npm run dev` trong `frontend`.
+5. Chuyển Phantom/Solflare sang Devnet, có Devnet SOL, kết nối ví và mở module DEX. Swap SOL sang HKDV trước nếu ví chưa có HKDV.
+
+Pool Devnet: `6dg1ELPzBmmqs7UDTr8pAZmGNQY9XymEDo6KQx8h4J2r`. Phí trade hiện tại 0,25%; creator fee theo config pool 0,25%. Devnet là môi trường thử nghiệm.
+
 
 Hướng thiết kế: **tài chính phi tập trung minh bạch, an toàn, dễ tiếp cận**.
 

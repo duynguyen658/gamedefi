@@ -1,4 +1,4 @@
-type DexTokenSymbol = 'SOL' | 'USDC';
+type DexTokenSymbol = 'SOL' | 'HKDV' | 'USDC';
 
 export function uiAmountToBaseUnits(value: string, decimals: number): string {
   const amount = value.trim();
@@ -35,5 +35,5 @@ export function maximumSpendable(balance: string, symbol: DexTokenSymbol): strin
   const available = Number(balance);
   if (!Number.isFinite(available) || available <= 0) return '';
   const reserve = symbol === 'SOL' ? 0.01 : 0;
-  return Math.max(0, available - reserve).toFixed(symbol === 'SOL' ? 6 : 2).replace(/\.?0+$/, '');
+  return Math.max(0, available - reserve).toFixed(symbol === 'USDC' ? 2 : 6).replace(/\.?0+$/, '');
 }
