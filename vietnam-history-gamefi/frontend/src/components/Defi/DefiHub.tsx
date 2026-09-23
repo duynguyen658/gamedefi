@@ -39,6 +39,10 @@ const MODULE_ICONS: Record<DefiModule, React.ReactNode> = {
   treasury: <Landmark className="w-5 h-5" />,
   dao: <Vote className="w-5 h-5" />,
 };
+const NAV_MODULES = [
+  ...DEFI_MODULES.filter((item) => item.id === 'dex'),
+  ...DEFI_MODULES.filter((item) => item.id !== 'dex'),
+];
 
 export const DefiHub: React.FC<DefiHubProps> = ({ player, onBack, onPlayDrum }) => {
   const [module, setModule] = useState<DefiModule>('dex');
@@ -55,8 +59,8 @@ export const DefiHub: React.FC<DefiHubProps> = ({ player, onBack, onPlayDrum }) 
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+    <div className="mx-auto w-full max-w-[1480px] px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+      <div className="flex flex-col gap-5 border-b border-imperial-border pb-7 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <button
             onClick={() => { onPlayDrum(); onBack(); }}
@@ -65,62 +69,67 @@ export const DefiHub: React.FC<DefiHubProps> = ({ player, onBack, onPlayDrum }) 
             <ChevronLeft className="w-4 h-4" />
             <span>Về tổng hành dinh</span>
           </button>
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 text-[11px] font-semibold tracking-widest uppercase mb-3">
+          <div className="mb-3 inline-flex items-center space-x-2 border border-imperial-gold/40 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-imperial-gold">
             <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Minh bạch • An toàn • Dễ tiếp cận</span>
+            <span>Hào Khí Đại Việt · Khu Giao Thương</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-cinzel font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-imperial-lightgold to-yellow-500">
-            Kinh Tế On-Chain
+          <h2 className="font-cinzel text-3xl font-black text-imperial-lightgold sm:text-4xl">
+            {module === 'dex' ? 'Khu Giao Thương' : 'Kinh Tế On-Chain'}
           </h2>
-          <p className="text-sm text-slate-300 mt-2 max-w-2xl">
-            Thiết kế sản phẩm tài chính phi tập trung: thanh toán, tiết kiệm, lending, DEX, treasury dashboard và DAO tooling.
-            Game chiến thuật là lớp nhận diện; lớp tài chính phải đọc được, ký được, và kiểm chứng được trên chain.
+          <p className="mt-3 max-w-[65ch] text-sm leading-relaxed text-slate-300">
+            {module === 'dex'
+              ? 'Đổi SOL và HKDV bằng ví Solana của bạn. Xem rõ tỷ giá, phí và số nhận tối thiểu trước khi ký.'
+              : 'Các tiện ích kinh tế trong game. Các module ngoài DEX hiện là bản minh họa và chưa gửi giao dịch.'}
           </p>
         </div>
-        <div className="bg-imperial-lacquer/90 border border-imperial-gold/40 rounded-2xl px-4 py-3 text-xs min-w-[220px]">
+        <div className="min-w-0 border-t border-imperial-gold/50 pt-3 text-xs sm:min-w-[220px] sm:border-t-0 sm:border-l sm:pl-5 sm:pt-0">
           <div className="text-slate-400 uppercase tracking-wider text-[10px] mb-1">Ví đang dùng</div>
-          <div className="font-mono text-imperial-lightgold">{shortWallet}</div>
-          <div className="text-slate-500 mt-1 uppercase">{player.chain} • khóa người chơi luôn ở trong ví</div>
+          <div className="font-mono text-imperial-lightgold">{player.is_guest ? 'Chưa kết nối ví' : shortWallet}</div>
+          <div className="text-slate-400 mt-1 uppercase">{player.chain} • khóa người chơi ở trong ví</div>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 mb-6">
-        {DEFI_MODULES.map((m) => {
+      <nav className="dex-module-nav mb-8 mt-5 flex gap-2 overflow-x-auto" aria-label="Các khu vực kinh tế">
+        {NAV_MODULES.map((m) => {
           const selected = module === m.id;
           return (
             <button
               key={m.id}
+              type="button"
               onClick={() => { onPlayDrum(); setModule(m.id); setNotice(null); }}
-              className={`text-left rounded-xl border p-3 transition-all ${
+              aria-current={selected ? 'page' : undefined}
+              className={`flex min-h-11 shrink-0 items-center gap-2 rounded-lg border px-4 py-2 text-xs font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-imperial-gold ${
                 selected
-                  ? 'bg-imperial-darkred/50 border-imperial-gold text-imperial-lightgold shadow-lg'
-                  : 'bg-imperial-lacquer/70 border-imperial-border text-slate-300 hover:border-imperial-gold/50'
+                  ? 'border-imperial-gold bg-imperial-darkred text-imperial-lightgold'
+                  : 'border-imperial-border bg-imperial-lacquer/70 text-slate-300 hover:border-imperial-gold/50'
               }`}
             >
-              <div className="mb-2">{MODULE_ICONS[m.id]}</div>
-              <div className="text-xs font-bold font-cinzel">{m.title}</div>
+              {MODULE_ICONS[m.id]}
+              <span>{m.title}</span>
             </button>
           );
         })}
-      </div>
+      </nav>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        <div className="lg:col-span-2 bg-imperial-lacquer/90 border border-imperial-gold/50 rounded-2xl p-6">
-          <h3 className="font-cinzel text-lg font-bold text-white mb-1">{active.title}</h3>
-          <p className="text-sm text-slate-300 mb-4">{active.tagline}</p>
-          <div className="flex items-start space-x-2 text-xs text-emerald-300 bg-emerald-950/30 border border-emerald-700/40 rounded-xl p-3">
-            <Eye className="w-4 h-4 shrink-0 mt-0.5" />
-            <span>{active.principle}</span>
+      <div className={module === 'dex' ? 'min-w-0' : 'grid grid-cols-1 gap-6 lg:grid-cols-5'}>
+        {module !== 'dex' && (
+          <div className="lg:col-span-2 bg-imperial-lacquer/90 border border-imperial-gold/50 rounded-2xl p-6">
+            <h3 className="font-cinzel text-lg font-bold text-white mb-1">{active.title}</h3>
+            <p className="text-sm text-slate-300 mb-4">{active.tagline}</p>
+            <div className="flex items-start space-x-2 text-xs text-emerald-300 bg-emerald-950/30 border border-emerald-700/40 rounded-xl p-3">
+              <Eye className="w-4 h-4 shrink-0 mt-0.5" />
+              <span>{active.principle}</span>
+            </div>
+            <ul className="mt-5 space-y-2 text-xs text-slate-400">
+              <li className="flex items-center space-x-2"><Lock className="w-3.5 h-3.5 text-imperial-gold" /><span>Ví ký DEX; service signer riêng chỉ được phát reward từ vault.</span></li>
+              <li className="flex items-center space-x-2"><ShieldCheck className="w-3.5 h-3.5 text-imperial-gold" /><span>Trạng thái đọc được trước khi xác nhận.</span></li>
+              <li className="flex items-center space-x-2"><Wallet className="w-3.5 h-3.5 text-imperial-gold" /><span>Ngôn ngữ tiếng Việt, số liệu đơn giản, phí hiển thị trước.</span></li>
+            </ul>
+            <GameTokenCard player={player} />
           </div>
-          <ul className="mt-5 space-y-2 text-xs text-slate-400">
-            <li className="flex items-center space-x-2"><Lock className="w-3.5 h-3.5 text-imperial-gold" /><span>Ví ký DEX; service signer riêng chỉ được phát reward từ vault.</span></li>
-            <li className="flex items-center space-x-2"><ShieldCheck className="w-3.5 h-3.5 text-imperial-gold" /><span>Trạng thái đọc được trước khi xác nhận.</span></li>
-            <li className="flex items-center space-x-2"><Wallet className="w-3.5 h-3.5 text-imperial-gold" /><span>Ngôn ngữ tiếng Việt, số liệu đơn giản, phí hiển thị trước.</span></li>
-          </ul>
-          <GameTokenCard player={player} />
-        </div>
+        )}
 
-        <div className="lg:col-span-3 bg-imperial-lacquer/90 border border-imperial-border rounded-2xl p-6">
+        <div className={module === 'dex' ? 'min-w-0' : 'lg:col-span-3 rounded-2xl border border-imperial-border bg-imperial-lacquer/90 p-6'}>
           {module !== 'dex' && (
             <p className="mb-4 rounded-lg border border-amber-700/50 bg-amber-950/20 px-3 py-2 text-xs text-amber-200">
               Bản minh họa: số liệu bên dưới là dữ liệu mẫu, chưa phản ánh tài sản hay giao dịch on-chain.
