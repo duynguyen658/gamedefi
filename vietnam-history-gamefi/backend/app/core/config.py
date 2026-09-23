@@ -17,7 +17,8 @@ class Settings(BaseSettings):
     solana_rpc_url: str = "https://api.devnet.solana.com"
     solana_program_id: str = ""
     solana_gas_budget_lamports: int = 5_000_000
-    reward_amount_lamports: int = 5_000_000
+    battle_reward_amount_base_units: int = 5_000_000
+    quest_reward_amount_base_units: int = 10_000_000
 
     # --- Fixed-supply HKDV game token (Solana Devnet, phase 4) ---
     game_token_name: str = "Hao Khi Dai Viet"
@@ -38,6 +39,7 @@ class Settings(BaseSettings):
     reward_distributor_authority: str = "6RigAPgKTdEwxmRqaoMiJj6GYnkipTSwRRc9Wkw79rTv"
     reward_max_amount_base_units: int = 1_000_000_000
     reward_vault_allocation_base_units: int = 1_000_000_000_000
+    reward_distributor_keypair_path: str = "~/.config/solana/gamefi-hkdv/devnet-reward-distributor-keypair.json"
 
     # --- DEX ---
     # The Jupiter key remains backend-only. Non-mainnet environments use the

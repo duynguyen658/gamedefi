@@ -9,6 +9,7 @@ from app.core.config import get_settings
 from app.core.security import NonceStore, SessionStore
 from app.dex.persistence import DexSwapRepository
 from app.dex.resolver import create_dex_provider
+from app.rewards.persistence import RewardPersistenceError, RewardRepository
 
 
 def create_app() -> FastAPI:
@@ -17,6 +18,10 @@ def create_app() -> FastAPI:
 
     @app.exception_handler(SolanaAdapterError)
     async def solana_unavailable(_request, exc):
+        return JSONResponse(status_code=503, content={"detail": str(exc)})
+
+    @app.exception_handler(RewardPersistenceError)
+    async def reward_persistence_unavailable(_request, exc):
         return JSONResponse(status_code=503, content={"detail": str(exc)})
 
     allowed_origins = [origin.strip() for origin in settings.cors_allow_origins.split(",") if origin.strip()]
@@ -32,6 +37,7 @@ def create_app() -> FastAPI:
     app.state.session_store = SessionStore(settings.session_ttl_seconds)
     app.state.dex_provider = create_dex_provider(settings)
     app.state.dex_swaps = DexSwapRepository(settings.database_url, create_schema=settings.database_auto_create)
+    app.state.reward_claims = RewardRepository(settings.database_url, create_schema=settings.database_auto_create)
 
     app.include_router(auth.router)
     app.include_router(faction.router)

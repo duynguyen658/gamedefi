@@ -11,6 +11,7 @@ import {
   NonceResponse,
   Player,
   Quest,
+  RewardClaim,
   TradeProposal,
   WalletVerifyRequest,
 } from '../types';
@@ -408,6 +409,43 @@ class GameApiService {
       console.warn('Error fetching quests:', e);
       return [];
     }
+  }
+
+
+  async getPlayerQuests(wallet: string): Promise<Quest[]> {
+    const res = await fetch(`${API_BASE_URL}/quests/players/${wallet}`, {
+      headers: this.authHeaders(),
+    });
+    if (!res.ok) throw await apiError(res);
+    return await res.json();
+  }
+
+  async claimBattleReward(wallet: string, battleId: string): Promise<RewardClaim> {
+    const res = await fetch(`${API_BASE_URL}/rewards/claim`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...this.authHeaders() },
+      body: JSON.stringify({ wallet, battle_id: battleId }),
+    });
+    if (!res.ok) throw await apiError(res);
+    return await res.json();
+  }
+
+  async claimQuestReward(wallet: string, questId: string): Promise<RewardClaim> {
+    const res = await fetch(`${API_BASE_URL}/rewards/quests/claim`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...this.authHeaders() },
+      body: JSON.stringify({ wallet, quest_id: questId }),
+    });
+    if (!res.ok) throw await apiError(res);
+    return await res.json();
+  }
+
+  async getRewards(wallet: string, limit = 20): Promise<RewardClaim[]> {
+    const res = await fetch(`${API_BASE_URL}/players/${wallet}/rewards?limit=${limit}`, {
+      headers: this.authHeaders(),
+    });
+    if (!res.ok) throw await apiError(res);
+    return await res.json();
   }
 
 

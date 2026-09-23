@@ -9,19 +9,36 @@ from typing import Any
 
 import httpx
 import base58
+from solders.hash import Hash
+from solders.instruction import AccountMeta, Instruction
+from solders.keypair import Keypair
+from solders.message import Message
 from solders.pubkey import Pubkey
 from solders.system_program import ID as SYSTEM_PROGRAM_ID
+from solders.transaction import Transaction
 
 from app.blockchain.borsh_utils import BorshReader, anchor_discriminator
-from app.blockchain.interface import BlockchainAdapter, NftInfo, TransactionInfo
+from app.blockchain.interface import (
+    BlockchainAdapter,
+    NftInfo,
+    PreparedRewardSubmission,
+    TransactionInfo,
+)
 from app.core.config import Settings
 
 
 SPL_TOKEN_PROGRAM_ID = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+ASSOCIATED_TOKEN_PROGRAM_ID = "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
 
 
 class SolanaAdapterError(RuntimeError):
     pass
+
+
+class SolanaSubmissionError(SolanaAdapterError):
+    def __init__(self, message: str, *, signature: str):
+        super().__init__(message)
+        self.signature = signature
 
 
 class SolanaAdapter(BlockchainAdapter):
@@ -57,7 +74,7 @@ class SolanaAdapter(BlockchainAdapter):
         return TransactionInfo(
             digest=digest,
             status="pending" if meta is None else ("success" if meta.get("err") is None else "failure"),
-            sender=keys[0] if keys else None,
+            sender=(str(keys[0].get("pubkey")) if keys and isinstance(keys[0], dict) else (str(keys[0]) if keys else None)),
             timestamp_ms=(result.get("blockTime") or 0) * 1000 or None,
             events=[], raw=result,
         )
@@ -257,8 +274,125 @@ class SolanaAdapter(BlockchainAdapter):
     def mint_faction(self, recipient: str, faction_id: int) -> tuple[str, str]:
         raise SolanaAdapterError("Ví người chơi phải ký mint_faction; backend không giữ private key")
 
-    def send_reward(self, recipient: str, amount: int, battle_id: int) -> str:
-        raise SolanaAdapterError("Chưa có chương trình treasury và claim reward Solana được triển khai")
+    def _reward_receipt_pda(self, claim_id: bytes) -> Pubkey:
+        if len(claim_id) != 32:
+            raise SolanaAdapterError("claim_id reward phải dài đúng 32 byte")
+        return Pubkey.find_program_address([b"reward", claim_id], self._program_id())[0]
+
+    def get_reward_receipt(self, claim_id: bytes) -> dict[str, Any] | None:
+        receipt = self._reward_receipt_pda(claim_id)
+        result = self._rpc("getAccountInfo", [str(receipt), {
+            "encoding": "base64", "commitment": "confirmed",
+        }])
+        account = (result or {}).get("value")
+        if account is None:
+            return None
+        if account.get("owner") != str(self._program_id()) or account.get("executable"):
+            raise SolanaAdapterError("Reward receipt không thuộc program đã cấu hình")
+        try:
+            raw = base64.b64decode(account["data"][0], validate=True)
+            if raw[:8] != anchor_discriminator("account", "RewardReceipt") or len(raw) < 89:
+                raise ValueError("invalid reward receipt")
+            stored_claim = raw[8:40]
+            reader = BorshReader(raw, offset=40)
+            recipient = str(Pubkey.from_bytes(reader.read_pubkey()))
+            amount = reader.read_u64()
+            slot = reader.read_u64()
+            bump = reader.read_u8()
+        except (ValueError, IndexError, KeyError, TypeError, binascii.Error) as exc:
+            raise SolanaAdapterError("RPC trả reward receipt không hợp lệ") from exc
+        return {
+            "address": str(receipt),
+            "claim_id": stored_claim.hex(),
+            "recipient": recipient,
+            "amount": amount,
+            "slot": slot,
+            "bump": bump,
+        }
+
+    def _load_reward_distributor_keypair(self) -> Keypair:
+        path = Path(self.s.reward_distributor_keypair_path).expanduser()
+        try:
+            raw = json.loads(path.read_text(encoding="utf-8"))
+            if not isinstance(raw, list) or len(raw) != 64 or any(
+                not isinstance(value, int) or not 0 <= value <= 255 for value in raw
+            ):
+                raise ValueError("invalid keypair bytes")
+            keypair = Keypair.from_bytes(bytes(raw))
+        except (OSError, ValueError, TypeError, json.JSONDecodeError) as exc:
+            raise SolanaAdapterError(
+                "Không đọc được reward distributor keypair từ đường dẫn backend đã cấu hình"
+            ) from exc
+        if str(keypair.pubkey()) != self.s.reward_distributor_authority:
+            raise SolanaAdapterError("Reward distributor keypair không khớp authority on-chain")
+        return keypair
+
+    def prepare_reward(
+        self, recipient: str, amount: int, claim_id: bytes
+    ) -> PreparedRewardSubmission:
+        if amount <= 0 or amount > self.s.reward_max_amount_base_units:
+            raise SolanaAdapterError("Số lượng HKDV reward vượt giới hạn distributor")
+        try:
+            recipient_key = Pubkey.from_string(recipient)
+            config = Pubkey.from_string(self.s.reward_distributor_config)
+            vault = Pubkey.from_string(self.s.reward_distributor_vault)
+            mint = Pubkey.from_string(self.s.game_token_mint)
+        except ValueError as exc:
+            raise SolanaAdapterError("Cấu hình reward chứa địa chỉ Solana không hợp lệ") from exc
+        keypair = self._load_reward_distributor_keypair()
+        token_program = Pubkey.from_string(SPL_TOKEN_PROGRAM_ID)
+        associated_program = Pubkey.from_string(ASSOCIATED_TOKEN_PROGRAM_ID)
+        recipient_token = Pubkey.find_program_address(
+            [bytes(recipient_key), bytes(token_program), bytes(mint)], associated_program
+        )[0]
+        receipt = self._reward_receipt_pda(claim_id)
+        data = anchor_discriminator("global", "distribute_reward") + claim_id + amount.to_bytes(8, "little")
+        instruction = Instruction(self._program_id(), data, [
+            AccountMeta(config, False, True),
+            AccountMeta(receipt, False, True),
+            AccountMeta(vault, False, True),
+            AccountMeta(mint, False, False),
+            AccountMeta(recipient_key, False, False),
+            AccountMeta(recipient_token, False, True),
+            AccountMeta(keypair.pubkey(), True, True),
+            AccountMeta(token_program, False, False),
+            AccountMeta(associated_program, False, False),
+            AccountMeta(SYSTEM_PROGRAM_ID, False, False),
+        ])
+        latest = self._rpc("getLatestBlockhash", [{"commitment": "confirmed"}])
+        try:
+            value = latest["value"]
+            blockhash = Hash.from_string(value["blockhash"])
+            last_valid_block_height = int(value["lastValidBlockHeight"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise SolanaAdapterError("RPC không trả recent blockhash hợp lệ") from exc
+        transaction = Transaction([keypair], Message([instruction], keypair.pubkey()), blockhash)
+        return PreparedRewardSubmission(
+            signature=str(transaction.signatures[0]),
+            receipt_address=str(receipt),
+            signed_transaction=base64.b64encode(bytes(transaction)).decode("ascii"),
+            last_valid_block_height=last_valid_block_height,
+        )
+
+    def submit_reward(self, prepared: PreparedRewardSubmission) -> str:
+        try:
+            result = self._rpc("sendTransaction", [prepared.signed_transaction, {
+                "encoding": "base64",
+                "skipPreflight": False,
+                "preflightCommitment": "confirmed",
+                "maxRetries": 3,
+            }])
+        except SolanaAdapterError as exc:
+            raise SolanaSubmissionError(
+                "Không xác định được trạng thái gửi reward; cần đối soát chữ ký",
+                signature=prepared.signature,
+            ) from exc
+        if result != prepared.signature:
+            raise SolanaSubmissionError(
+                "RPC trả chữ ký reward không khớp giao dịch đã lưu",
+                signature=prepared.signature,
+            )
+        return prepared.signature
 
     def _rpc(self, method: str, params: list) -> Any:
         try:

@@ -1,9 +1,10 @@
 from fastapi import APIRouter, HTTPException, Request
 
 from app.blockchain.adapter_resolver import UnsupportedChainError
-from app.core.store import store
+from app.blockchain.solana_adapter import SolanaAdapterError
 from app.schemas import TransactionOut
 from app.core.config import get_settings
+from app.rewards.reconciliation import reconcile_claim
 
 router = APIRouter(prefix="/blockchain", tags=["blockchain"])
 
@@ -106,7 +107,17 @@ def get_transaction(chain: str, digest: str, request: Request):
     tx = adapter.get_transaction(digest)
     if tx is None:
         raise HTTPException(status_code=404, detail="Không tìm thấy transaction")
-    store.mark_reward_status(chain, digest, tx.status)
+    claim = request.app.state.reward_claims.get_by_signature(digest)
+    if claim:
+        try:
+            reconcile_claim(
+                request.app.state.reward_claims,
+                adapter,
+                claim,
+                request.app.state.settings.reward_distributor_authority,
+            )
+        except SolanaAdapterError:
+            pass
     return TransactionOut(
         digest=tx.digest,
         status=tx.status,

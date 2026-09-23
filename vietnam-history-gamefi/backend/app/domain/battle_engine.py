@@ -70,6 +70,7 @@ class BattleEngine:
         scenario_id: str = "bach_dang_1288",
         tactical_formation: str = "standard",
         advisor_id: str | None = None,
+        battle_id: str | None = None,
     ) -> BattleRecord:
         scenario = SCENARIOS.get(scenario_id, SCENARIOS["bach_dang_1288"])
         army = store.get_army(player_wallet)
@@ -194,7 +195,7 @@ class BattleEngine:
                     action="tactical_retreat",
                     actor="Toàn Quân Ta",
                     damage_dealt=final_dmg,
-                    log_message=f"Lực lượng địch quá mạnh, quân ta tạm lui về bảo toàn binh lực.",
+                    log_message="Lực lượng địch quá mạnh, quân ta tạm lui về bảo toàn binh lực.",
                 )
             )
 
@@ -202,7 +203,7 @@ class BattleEngine:
         enemy_casualties = min(scenario["enemy_power"], int(total_player_dmg * 0.35))
 
         record = BattleRecord(
-            battle_id=f"battle-{uuid.uuid4().hex[:10]}",
+            battle_id=(battle_id if victory and battle_id else f"battle-{uuid.uuid4().hex[:10]}"),
             player_wallet=player_wallet,
             scenario_id=scenario_id,
             advisor_id=active_advisor_id,
@@ -216,6 +217,5 @@ class BattleEngine:
             combat_logs=[log.model_dump() for log in logs],
         )
 
-        store.add_battle_record(record)
-        return record
+        return store.add_battle_record(record)
 

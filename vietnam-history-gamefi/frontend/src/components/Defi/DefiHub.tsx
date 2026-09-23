@@ -89,7 +89,7 @@ export const DefiHub: React.FC<DefiHubProps> = ({ player, onBack, onPlayDrum }) 
         <div className="bg-imperial-lacquer/90 border border-imperial-gold/40 rounded-2xl px-4 py-3 text-xs min-w-[220px]">
           <div className="text-slate-400 uppercase tracking-wider text-[10px] mb-1">Ví đang dùng</div>
           <div className="font-mono text-imperial-lightgold">{shortWallet}</div>
-          <div className="text-slate-500 mt-1 uppercase">{player.chain} • không giữ khóa phía máy chủ</div>
+          <div className="text-slate-500 mt-1 uppercase">{player.chain} • khóa người chơi luôn ở trong ví</div>
         </div>
       </div>
 
@@ -122,7 +122,7 @@ export const DefiHub: React.FC<DefiHubProps> = ({ player, onBack, onPlayDrum }) 
             <span>{active.principle}</span>
           </div>
           <ul className="mt-5 space-y-2 text-xs text-slate-400">
-            <li className="flex items-center space-x-2"><Lock className="w-3.5 h-3.5 text-imperial-gold" /><span>Bạn ký trên ví; backend không custody.</span></li>
+            <li className="flex items-center space-x-2"><Lock className="w-3.5 h-3.5 text-imperial-gold" /><span>Ví ký DEX; service signer riêng chỉ được phát reward từ vault.</span></li>
             <li className="flex items-center space-x-2"><ShieldCheck className="w-3.5 h-3.5 text-imperial-gold" /><span>Trạng thái đọc được trước khi xác nhận.</span></li>
             <li className="flex items-center space-x-2"><Wallet className="w-3.5 h-3.5 text-imperial-gold" /><span>Ngôn ngữ tiếng Việt, số liệu đơn giản, phí hiển thị trước.</span></li>
           </ul>

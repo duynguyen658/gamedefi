@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import BigInteger, Boolean, DateTime, Integer, String, Text, UniqueConstraint, Uuid, create_engine, select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.dex.interface import DexExecution, DexOrder

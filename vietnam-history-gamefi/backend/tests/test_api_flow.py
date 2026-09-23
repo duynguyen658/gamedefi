@@ -1,3 +1,4 @@
+from app.core.store import store
 from conftest import login, login_solana, make_wallet, sign_message
 
 
@@ -161,6 +162,43 @@ def test_faction_registration_rejects_unrelated_successful_transaction(client, a
     assert response.status_code == 400
 
 
+def test_battle_reward_id_is_stable_within_daily_period(client, adapter):
+    wallet, player = login(client)
+    register_faction(client, adapter, wallet, player)
+    first = win_battle(client, wallet, player)
+    second = win_battle(client, wallet, player)
+    assert second == first
+
+
+def test_losing_battle_does_not_consume_daily_winning_reward(client, adapter):
+    wallet, player = login(client)
+    register_faction(client, adapter, wallet, player)
+    store.get_army(wallet).total_power = 500
+    loss = client.post(
+        "/battles",
+        headers=auth_headers(player),
+        json={
+            "player_wallet": wallet,
+            "scenario_id": "ngoc_hoi_1789",
+            "tactical_formation": "standard",
+        },
+    )
+    assert loss.status_code == 200, loss.text
+    assert loss.json()["victory"] is False
+    assert client.post(
+        "/rewards/claim",
+        headers=auth_headers(player),
+        json={"wallet": wallet, "battle_id": loss.json()["battle_id"]},
+    ).status_code == 404
+
+    winning_battle_id = win_battle(client, wallet, player)
+    assert winning_battle_id != loss.json()["battle_id"]
+    assert client.post(
+        "/rewards/claim",
+        headers=auth_headers(player),
+        json={"wallet": wallet, "battle_id": winning_battle_id},
+    ).status_code == 200
+
 def test_reward_requires_owned_winning_battle_and_is_single_use(client, adapter):
     wallet, player = login(client)
     register_faction(client, adapter, wallet, player)
@@ -172,10 +210,20 @@ def test_reward_requires_owned_winning_battle_and_is_single_use(client, adapter)
 
     response = client.post("/rewards/claim", headers=headers, json={"wallet": wallet, "battle_id": battle_id})
     assert response.status_code == 200, response.text
-    digest = response.json()["tx_digest"]
-    assert response.json()["battle_id"] == battle_id
-    assert client.post("/rewards/claim", headers=headers, json={"wallet": wallet, "battle_id": battle_id}).status_code == 409
+    payload = response.json()
+    digest = payload["tx_digest"]
+    assert payload["battle_id"] == battle_id
+    assert payload["source_type"] == "battle"
+    assert payload["status"] == "confirmed"
+
+    repeated = client.post("/rewards/claim", headers=headers, json={"wallet": wallet, "battle_id": battle_id})
+    assert repeated.status_code == 200
+    assert repeated.json()["claim_id"] == payload["claim_id"]
+    assert repeated.json()["tx_digest"] == digest
     assert client.get(f"/blockchain/solana/transaction/{digest}").status_code == 200
+    history = client.get(f"/players/{wallet}/rewards", headers=headers)
+    assert history.status_code == 200
+    assert len(history.json()) == 1
 
 
 def test_solana_login_uses_base58_signature(client):
@@ -205,3 +253,32 @@ def test_reward_distributor_config_is_verified(client):
     assert payload["on_chain"]["paused"] is False
     assert payload["on_chain"]["claims_count"] == 0
     assert payload["vault_on_chain"]["amount"] == "1000000000000"
+
+
+def test_completed_quest_claim_is_idempotent(client, adapter):
+    wallet, player = login(client)
+    register_faction(client, adapter, wallet, player, faction_id=5)
+    win_battle(client, wallet, player)
+    headers = auth_headers(player)
+
+    quests = client.get(f"/quests/players/{wallet}", headers=headers)
+    assert quests.status_code == 200
+    quest = next(item for item in quests.json() if item["id"] == "quest_bach_dang_1288")
+    assert quest["completed"] is True
+    assert quest["completed_battles"] == 1
+
+    first = client.post(
+        "/rewards/quests/claim",
+        headers=headers,
+        json={"wallet": wallet, "quest_id": quest["id"]},
+    )
+    assert first.status_code == 200, first.text
+    assert first.json()["source_type"] == "quest"
+    assert first.json()["status"] == "confirmed"
+    repeated = client.post(
+        "/rewards/quests/claim",
+        headers=headers,
+        json={"wallet": wallet, "quest_id": quest["id"]},
+    )
+    assert repeated.status_code == 200
+    assert repeated.json()["claim_id"] == first.json()["claim_id"]

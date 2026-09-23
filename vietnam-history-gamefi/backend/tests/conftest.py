@@ -12,6 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from app.main import create_app
 from app.core.store import Store, store
 from app.dex.persistence import DexSwapRepository
+from app.rewards.persistence import RewardRepository
 from fake_adapter import FakeAdapter
 
 
@@ -41,6 +42,7 @@ def client(adapter):
     app = create_app()
     app.state.resolver = StubResolver(adapter)
     app.state.dex_swaps = DexSwapRepository("sqlite+pysqlite://", create_schema=True)
+    app.state.reward_claims = RewardRepository("sqlite+pysqlite://", create_schema=True)
     with TestClient(app) as test_client:
         yield test_client
 

@@ -47,3 +47,21 @@ python3 scripts/initialize-reward-distributor.py devnet
 ```
 
 Script khởi tạo có tính idempotent: không tạo lại config và chỉ hoàn tất lần cấp vốn ban đầu nếu chưa có funding record. Script không tự bù số dư sau payout hoặc admin withdrawal; việc tái cấp vốn phải là thao tác treasury riêng có chủ đích. Script không ghi private key vào repository.
+
+## Giai đoạn 6: payout từ gameplay
+
+- Mỗi chiến thắng đủ điều kiện được backend ghi vào `reward_events`; client không được tự khai báo chiến thắng hay số HKDV.
+- `claim_id = sha256(network:wallet:source_type:source_id)` được dùng giống nhau trong PostgreSQL và receipt PDA on-chain.
+- Backend ký bằng distributor key riêng ở `REWARD_DISTRIBUTOR_KEYPAIR_PATH`; keypair nằm ngoài Git và không được gửi xuống frontend.
+- Giao dịch đã ký được lưu trước khi broadcast. Trạng thái `submitted`/`submission_unknown` được đối soát bằng transaction và nội dung receipt.
+- Battle thưởng 5 HKDV, quest hoàn thành thưởng 10 HKDV trên Devnet. Cả hai đều nằm dưới giới hạn 1.000 HKDV mỗi claim của contract.
+- ID của chiến thắng nhận thưởng được cố định theo ví, kịch bản và ngày UTC; gọi lại API trong cùng ngày không thể tạo thêm payout, còn trận thua không làm mất lượt thắng.
+- Chạy migration `database/migrations/002_reward_claims.sql` trước khi bật payout trên PostgreSQL.
+
+### Xác minh Devnet giai đoạn 6
+
+- Cấp phí distributor: `3GBMwsnq3MKhw81ABuNaKBAeuWp3vJqQgbvWdLWE5KqXQMHBKieGAcXgt9iVNZUfuGEpAj3jyzy1hAyonh4a6qvD` (0,2 Devnet SOL).
+- Payout theo công thức claim cuối: `22ozFj2cRxRjZyfn3wCYgisgEwmGXEMw6q14HMErwVnghar4rJMyUcLaMxkL1UHfGjwwiRJkxAtfCi78jDnHqmdK`.
+- Receipt: `DSrMMpw8yF7CaLae7CgetczwqAWihJ7d2LWNWNqD4Kpu`.
+- Sau kiểm tra: 2 claims, tổng 10 HKDV; vault còn 999.990 HKDV và distributor không bị pause.
+- Bản ghi máy đọc: `blockchain/solana/deployments/devnet-phase6-reward-payout.json`.

@@ -13,6 +13,7 @@ cd backend
 python -m pip install -r requirements.txt
 # Copy .env.example thành .env
 # Với PostgreSQL: psql "$DATABASE_URL" -f ../database/migrations/001_dex_swaps.sql
+psql "$DATABASE_URL" -f ../database/migrations/002_reward_claims.sql
 python -m pytest -q
 uvicorn app.main:app --reload
 ```
@@ -68,10 +69,10 @@ Không commit keypair trong `target/`. Không có deployment được tự thự
 
 - Program `8qUBTgX99v5EhxbAaxuqS94rgfRhnLrTgW66Gh9BvLKN` đã deploy trên Devnet; ví development hiện là upgrade authority.
 - SPL game token `HKDV` (`45kZL6u62pbEmLiiZuUeuPWcotqZb8DLMmaPD5tNs1qm`) đã deploy trên Devnet với tổng cung cố định 1 tỷ; mint/freeze authority đều không còn.
-- Player, session, battle và reward references vẫn dùng RAM nên mất khi backend restart.
+- Player, session và battle detail vẫn dùng RAM; reward eligibility và claim HKDV đã lưu bền vững trong PostgreSQL.
 - Vòng đời DEX đã nối SQLAlchemy/PostgreSQL; production cần chạy migration `database/migrations/001_dex_swaps.sql`. Nếu không cấu hình `DATABASE_URL`, môi trường local dùng SQLite `gamefi-dev.db`.
 - Battle engine/API đã có, nhưng bàn cờ frontend còn mô phỏng cục bộ, chưa gọi API battle để lưu kết quả.
-- Reward distributor HKDV và vault đã hoạt động trên Devnet; API battle/quest chưa gửi payout cho đến giai đoạn 6 và vẫn trả 409 rõ ràng.
+- Battle/quest hợp lệ tạo claim HKDV bền vững; backend dùng distributor key riêng để ký, receipt PDA chống phát trùng và API tự đối soát trạng thái Solana.
 - Marketplace/P2P chặn thao tác ghi bằng 503; danh sách ban đầu trống, không seed ownership giả.
 - DEX dùng mock provider được gắn nhãn trên Devnet và Jupiter trên Mainnet; swap intent, trạng thái và signature được lưu trong PostgreSQL, có idempotency và đối soát Solana RPC. Cần `JUPITER_API_KEY` ở backend để bật giao dịch Mainnet.
 - Unity là client thử nghiệm, cần bridge tới ví Solana; không phải client chính.

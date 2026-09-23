@@ -10,7 +10,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import time
-import threading
 import uuid
 from dataclasses import dataclass, field
 
@@ -101,17 +100,6 @@ class AdvisorOwnership:
     verified_at: float = field(default_factory=time.time)
 
 
-@dataclass
-class RewardRecord:
-    id: int
-    wallet: str
-    chain: str
-    battle_id: str
-    amount: int
-    tx_digest: str
-    status: str = "pending"
-
-
 class Store:
     def __init__(self) -> None:
         self.players: dict[str, Player] = {}
@@ -120,10 +108,6 @@ class Store:
         self.listings: dict[str, MarketplaceListing] = {}
         self.trades: dict[str, TradeRecord] = {}
         self.advisor_ownerships: dict[str, AdvisorOwnership] = {}
-        self.rewards: list[RewardRecord] = []
-        self._reserved_reward_claims: set[str] = set()
-        self._reward_lock = threading.Lock()
-        self._reward_seq = 0
         self._advisors_cache: list[dict] | None = None
 
     @staticmethod
@@ -230,7 +214,10 @@ class Store:
         return mapping.get(faction_id)
 
     # ---------------------------------------------------------------- Battle
-    def add_battle_record(self, record: BattleRecord) -> None:
+    def add_battle_record(self, record: BattleRecord) -> BattleRecord:
+        existing = self.battles.get(record.battle_id)
+        if existing is not None:
+            return existing
         self.battles[record.battle_id] = record
         # Update player progression & stats
         player = self.find_player_any_chain(record.player_wallet)
@@ -245,6 +232,7 @@ class Store:
                 # Level up check
                 if player.experience >= player.level * 200:
                     player.level += 1
+        return record
 
     def get_battle(self, battle_id: str) -> BattleRecord | None:
         return self.battles.get(battle_id)
@@ -288,16 +276,16 @@ class Store:
     # ---------------------------------------------------------------- Marketplace
     def get_active_listings(self, chain: str | None = None, faction_id: int | None = None) -> list[MarketplaceListing]:
         result = []
-        for l in self.listings.values():
-            if l.status != "active":
+        for listing in self.listings.values():
+            if listing.status != "active":
                 continue
-            if chain and l.chain.lower() != chain.lower():
+            if chain and listing.chain.lower() != chain.lower():
                 continue
             if faction_id:
-                adv = self.get_advisor(l.advisor_id)
+                adv = self.get_advisor(listing.advisor_id)
                 if not adv or adv.get("faction_id") != faction_id:
                     continue
-            result.append(l)
+            result.append(listing)
         return result
 
     def get_listing(self, listing_id: str) -> MarketplaceListing | None:
@@ -414,53 +402,6 @@ class Store:
             and normalize_wallet(chain, ownership.owner_wallet) == normalize_wallet(chain, wallet)
         )
 
-    # ---------------------------------------------------------------- Legacy Rewards
-    def _reward_claim_key(self, chain: str, wallet: str, battle_id: str) -> str:
-        return f"{chain}:{normalize_wallet(chain, wallet)}:{battle_id}"
-
-    def reserve_reward_claim(self, chain: str, wallet: str, battle_id: str) -> bool:
-        """Atomically reserve one battle reward before an external chain call."""
-        key = self._reward_claim_key(chain, wallet, battle_id)
-        with self._reward_lock:
-            if key in self._reserved_reward_claims:
-                return False
-            if any(
-                self._reward_claim_key(record.chain, record.wallet, record.battle_id) == key
-                for record in self.rewards
-            ):
-                return False
-            self._reserved_reward_claims.add(key)
-            return True
-
-    def release_reward_claim(self, chain: str, wallet: str, battle_id: str) -> None:
-        with self._reward_lock:
-            self._reserved_reward_claims.discard(self._reward_claim_key(chain, wallet, battle_id))
-
-    def add_reward(
-        self, chain: str, wallet: str, battle_id: str, amount: int, tx_digest: str
-    ) -> RewardRecord:
-        self._reward_seq += 1
-        record = RewardRecord(
-            id=self._reward_seq,
-            wallet=normalize_wallet(chain, wallet),
-            chain=chain,
-            battle_id=battle_id,
-            amount=amount,
-            tx_digest=tx_digest,
-        )
-        with self._reward_lock:
-            self.rewards.append(record)
-            self._reserved_reward_claims.discard(self._reward_claim_key(chain, wallet, battle_id))
-        return record
-
-    def rewards_of(self, chain: str, wallet: str) -> list[RewardRecord]:
-        norm = normalize_wallet(chain, wallet)
-        return [r for r in self.rewards if r.chain == chain and r.wallet == norm]
-
-    def mark_reward_status(self, chain: str, tx_digest: str, status: str) -> None:
-        for record in self.rewards:
-            if record.chain == chain and record.tx_digest == tx_digest and record.status != status:
-                record.status = status
 
 
 store = Store()

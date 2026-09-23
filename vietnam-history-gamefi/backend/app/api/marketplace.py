@@ -35,23 +35,23 @@ def _marketplace_unavailable() -> None:
 def list_marketplace_listings(chain: str | None = None, faction_id: int | None = None):
     listings = store.get_active_listings(chain=chain, faction_id=faction_id)
     out = []
-    for l in listings:
-        adv = store.get_advisor(l.advisor_id)
+    for listing in listings:
+        adv = store.get_advisor(listing.advisor_id)
         if not adv:
             continue
         out.append(
             MarketplaceListingOut(
-                listing_id=l.listing_id,
-                advisor_id=l.advisor_id,
+                listing_id=listing.listing_id,
+                advisor_id=listing.advisor_id,
                 advisor_name=adv["name"],
                 faction_id=adv["faction_id"],
                 rarity=adv["rarity"],
-                seller_wallet=l.seller_wallet,
-                price=l.price,
-                currency=l.currency,
-                chain=l.chain,
-                status=l.status,
-                created_at=l.created_at,
+                seller_wallet=listing.seller_wallet,
+                price=listing.price,
+                currency=listing.currency,
+                chain=listing.chain,
+                status=listing.status,
+                created_at=listing.created_at,
             )
         )
     return out

@@ -1,7 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+import hashlib
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from app.api.dependencies import require_session, require_wallet
-from app.core.security import SessionPrincipal
+from app.core.security import SessionPrincipal, normalize_wallet
 from app.core.store import store
 from app.domain.battle_engine import BattleEngine, SCENARIOS
 from app.schemas import BattleRequest, BattleResultOut, CombatTurnLog
@@ -10,7 +13,11 @@ router = APIRouter(prefix="/battles", tags=["battle"])
 
 
 @router.post("", response_model=BattleResultOut)
-def start_battle(body: BattleRequest, principal: SessionPrincipal = Depends(require_session)):
+def start_battle(
+    body: BattleRequest,
+    request: Request,
+    principal: SessionPrincipal = Depends(require_session),
+):
     require_wallet(principal, body.player_wallet)
     player = store.get_player(principal.chain, principal.wallet)
     if player is None:
@@ -24,12 +31,36 @@ def start_battle(body: BattleRequest, principal: SessionPrincipal = Depends(requ
     if body.advisor_id and not store.player_can_use_advisor(principal.chain, principal.wallet, body.advisor_id):
         raise HTTPException(status_code=403, detail="Ví chưa sở hữu Tướng Cố Vấn này")
 
+    reward_period = datetime.now(timezone.utc).date().isoformat()
+    battle_digest = hashlib.sha256(
+        (
+            f"{request.app.state.settings.solana_network}:"
+            f"{normalize_wallet(principal.chain, principal.wallet)}:"
+            f"{body.scenario_id}:{reward_period}"
+        ).encode("utf-8")
+    ).hexdigest()[:24]
     record = BattleEngine.resolve_battle(
         player_wallet=body.player_wallet,
         scenario_id=body.scenario_id,
         tactical_formation=body.tactical_formation,
         advisor_id=body.advisor_id,
+        battle_id=f"battle-{battle_digest}",
     )
+
+    if record.victory:
+        request.app.state.reward_claims.record_event(
+            network=request.app.state.settings.solana_network,
+            wallet=normalize_wallet(principal.chain, principal.wallet),
+            source_type="battle",
+            source_id=record.battle_id,
+            qualifier=record.scenario_id,
+            eligible=True,
+            metadata={
+                "scenario_id": record.scenario_id,
+                "victory": True,
+                "turns_taken": record.turns_taken,
+            },
+        )
 
     combat_logs = [CombatTurnLog(**log) for log in record.combat_logs]
 

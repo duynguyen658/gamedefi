@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Faction, Player, BattleUnit, HexTile, TerrainType, TacticalAction, MapLocation } from '../../types';
+import { Faction, Player, BattleResultResponse, BattleUnit, HexTile, TerrainType, TacticalAction, MapLocation, RewardClaim } from '../../types';
+import { apiService } from '../../services/api';
 import { BACH_DANG_HEXES, BACH_DANG_UNITS, BATTLEFIELD_DIMS } from '../../data/campaign';
 import { hexToPixel, hexPolygonPoints, boardPixelSize, hexDistance, HEX_SIZE } from '../../utils/hexGrid';
 import {
@@ -13,6 +14,9 @@ import {
   Radar,
   MousePointer2,
   Sparkles,
+  ExternalLink,
+  LoaderCircle,
+  Trophy,
 } from 'lucide-react';
 
 interface BattleScreenProps {
@@ -68,6 +72,10 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   const [turnSide, setTurnSide] = useState<'player' | 'enemy'>('player');
   const [tideTurnsLeft, setTideTurnsLeft] = useState<number>(2);
   const [log, setLog] = useState<string[]>(['Trận Bạch Đằng bắt đầu. Đến lượt quân ta hành động.']);
+  const [battleResult, setBattleResult] = useState<BattleResultResponse | null>(null);
+  const [rewardClaim, setRewardClaim] = useState<RewardClaim | null>(null);
+  const [settling, setSettling] = useState(false);
+  const [settlementError, setSettlementError] = useState<string | null>(null);
 
   const { cols, rows } = BATTLEFIELD_DIMS;
   const boardSize = useMemo(() => boardPixelSize(cols, rows), [cols, rows]);
@@ -172,6 +180,25 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
       return;
     }
     setActiveAction(prev => (prev === action ? null : action));
+  };
+
+  const handleSettleBattle = async () => {
+    setSettling(true);
+    setSettlementError(null);
+    try {
+      const scenarioId = 'bach_dang_1288';
+      const result = await apiService.executeBattle(player.wallet, scenarioId, 'aggressive');
+      setBattleResult(result);
+      if (result.victory && !player.is_guest) {
+        const claim = await apiService.claimBattleReward(player.wallet, result.battle_id);
+        setRewardClaim(claim);
+      }
+      if (result.victory) onPlayGong();
+    } catch (reason) {
+      setSettlementError(reason instanceof Error ? reason.message : 'Không thể ghi nhận kết quả trận đánh.');
+    } finally {
+      setSettling(false);
+    }
   };
 
   const playerInitiative = turnSide === 'player';
@@ -429,8 +456,48 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
               <span>{action.label}</span>
             </button>
           ))}
+          <button
+            type="button"
+            onClick={() => void handleSettleBattle()}
+            disabled={settling || Boolean(battleResult)}
+            className="flex items-center gap-1.5 rounded-xl border border-amber-400 bg-imperial-darkred px-3 py-2 text-xs font-bold text-imperial-lightgold disabled:opacity-50"
+          >
+            {settling ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Trophy className="h-4 w-4" />}
+            <span>{settling ? 'Đang ghi nhận…' : battleResult ? 'Đã chốt kết quả' : 'Chốt trận & nhận HKDV'}</span>
+          </button>
         </div>
       </div>
+
+      {(battleResult || settlementError) && (
+        <div className="mt-3 rounded-2xl border border-imperial-gold/40 bg-imperial-lacquer/90 p-4 text-xs">
+          {battleResult && (
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div className={`font-cinzel font-bold ${battleResult.victory ? 'text-emerald-300' : 'text-red-300'}`}>
+                  {battleResult.victory ? 'Chiến thắng đã được backend xác nhận' : 'Trận đánh chưa đủ điều kiện nhận HKDV'}
+                </div>
+                <div className="mt-1 font-mono text-[10px] text-slate-500">Battle ID: {battleResult.battle_id}</div>
+                {player.is_guest && battleResult.victory && (
+                  <div className="mt-1 text-amber-300">Đăng nhập bằng ví Solana để nhận reward on-chain.</div>
+                )}
+              </div>
+              {rewardClaim && (
+                <div className="text-right">
+                  <div className={rewardClaim.status === 'confirmed' ? 'text-emerald-300' : 'text-amber-300'}>
+                    5 HKDV · {rewardClaim.status === 'confirmed' ? 'đã xác nhận' : 'đang đối soát'}
+                  </div>
+                  {rewardClaim.explorer_url && (
+                    <a href={rewardClaim.explorer_url} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-[10px] text-amber-300 underline">
+                      Solana Explorer <ExternalLink className="h-3 w-3" />
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+          {settlementError && <div className="mt-2 text-red-300">{settlementError}</div>}
+        </div>
+      )}
 
     </div>
   );

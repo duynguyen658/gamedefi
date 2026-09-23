@@ -1,0 +1,38 @@
+{
+  "phase": 6,
+  "network": "devnet",
+  "program_id": "8qUBTgX99v5EhxbAaxuqS94rgfRhnLrTgW66Gh9BvLKN",
+  "mint": "45kZL6u62pbEmLiiZuUeuPWcotqZb8DLMmaPD5tNs1qm",
+  "reward_config": "3MHpXEzsFkeJeYdPMmnL8LMCY3r3Ew3wm753fZacTCuw",
+  "reward_vault": "9ngszc2V6RBRxgtagHCsn6s369aZoKWHb8uXShZAhoS7",
+  "distributor": "6RigAPgKTdEwxmRqaoMiJj6GYnkipTSwRRc9Wkw79rTv",
+  "recipient": "oV3Y4Z6DvPvBWGvbgLvfjxHoyVbWZkr1KHmNMHLDA7T",
+  "fee_funding": {
+    "amount_sol": "0.2",
+    "signature": "3GBMwsnq3MKhw81ABuNaKBAeuWp3vJqQgbvWdLWE5KqXQMHBKieGAcXgt9iVNZUfuGEpAj3jyzy1hAyonh4a6qvD"
+  },
+  "smoke_claims": [
+    {
+      "purpose": "initial prepare-submit-reconcile validation",
+      "claim_id": "ddf4432b2306793074b4594b82d4c19b710dc09175dc14b20b27e1f2484a5121",
+      "signature": "2eYdhMpwf3fY9wxnpgXezVxZrv9PcKgD2iwWMbb4baJ3WZ3xBURQhXdFoqK718LP3kGvd3bUPMTa3sbKt6HCKN8w",
+      "receipt": "GMFdCfumQtZq38EH2GC3moFffnzgpxVXgKvXRyhE12mX",
+      "amount_base_units": "5000000"
+    },
+    {
+      "purpose": "final wallet-scoped claim validation",
+      "claim_id": "5e064375f499c48ed677db61c222f433ef6a0e3c94d3acfef22a9c0c255e47ea",
+      "signature": "22ozFj2cRxRjZyfn3wCYgisgEwmGXEMw6q14HMErwVnghar4rJMyUcLaMxkL1UHfGjwwiRJkxAtfCi78jDnHqmdK",
+      "receipt": "DSrMMpw8yF7CaLae7CgetczwqAWihJ7d2LWNWNqD4Kpu",
+      "amount_base_units": "5000000"
+    }
+  ],
+  "post_validation": {
+    "claims_count": 2,
+    "total_distributed_base_units": "10000000",
+    "vault_balance_hkdv": "999990",
+    "recipient_balance_hkdv": "10",
+    "distributor_balance_sol": "0.19629684",
+    "paused": false
+  }
+}

@@ -25,6 +25,14 @@ class TransactionInfo:
         return self.status == "success"
 
 
+@dataclass(frozen=True)
+class PreparedRewardSubmission:
+    signature: str
+    receipt_address: str
+    signed_transaction: str
+    last_valid_block_height: int
+
+
 @dataclass
 class NftInfo:
     object_id: str
@@ -99,9 +107,25 @@ class BlockchainAdapter(ABC):
         ...
 
     @abstractmethod
-    def send_reward(self, recipient: str, amount: int, battle_id: int) -> str:
-        """Battle Result -> Reward on-chain. Trả về tx digest."""
+    def prepare_reward(
+        self, recipient: str, amount: int, claim_id: bytes
+    ) -> PreparedRewardSubmission:
+        """Build and sign one deterministic reward transaction without broadcasting it."""
         ...
+
+    @abstractmethod
+    def submit_reward(self, prepared: PreparedRewardSubmission) -> str:
+        """Broadcast a previously persisted reward transaction and return its signature."""
+        ...
+
+    @abstractmethod
+    def get_reward_receipt(self, claim_id: bytes) -> dict | None:
+        """Read the program receipt that permanently guards this claim from replay."""
+        ...
+
+    def send_reward(self, recipient: str, amount: int, claim_id: bytes) -> str:
+        """Compatibility helper for adapters without durable prepare/submit orchestration."""
+        return self.submit_reward(self.prepare_reward(recipient, amount, claim_id))
 
     @abstractmethod
     def get_faction_nfts(self, wallet: str) -> list[NftInfo]:

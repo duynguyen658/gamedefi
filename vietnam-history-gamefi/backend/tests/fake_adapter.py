@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.blockchain.interface import BlockchainAdapter, NftInfo, TransactionInfo
+from app.blockchain.interface import BlockchainAdapter, NftInfo, PreparedRewardSubmission, TransactionInfo
 
 
 class FakeAdapter(BlockchainAdapter):
@@ -10,6 +10,8 @@ class FakeAdapter(BlockchainAdapter):
         self.ownership: dict[str, str] = {}
         self.nfts: dict[str, list[NftInfo]] = {}
         self._seq = 0
+        self.reward_receipts: dict[str, dict] = {}
+        self.prepared_rewards: dict[str, tuple[str, int, str]] = {}
 
     def _norm(self, wallet: str) -> str:
         return wallet
@@ -35,17 +37,42 @@ class FakeAdapter(BlockchainAdapter):
         )
         return digest, object_id
 
-    def send_reward(self, recipient: str, amount: int, battle_id: int) -> str:
+    def prepare_reward(
+        self, recipient: str, amount: int, claim_id: bytes
+    ) -> PreparedRewardSubmission:
         self._seq += 1
-        digest = f"{self._chain}-fakedigest{self._seq}"
-        self.txs[digest] = TransactionInfo(
-            digest=digest,
-            status="success",
-            sender="admin",
-            timestamp_ms=1_700_000_000_001,
-            events=[{"recipient": recipient, "amount": amount, "battle_id": battle_id}],
+        signature = f"{self._chain}-reward{self._seq}"
+        claim_hex = claim_id.hex()
+        receipt = f"receipt-{claim_hex[:40]}"
+        self.prepared_rewards[signature] = (recipient, amount, claim_hex)
+        return PreparedRewardSubmission(
+            signature=signature,
+            receipt_address=receipt,
+            signed_transaction=f"signed-{signature}",
+            last_valid_block_height=999_999_999,
         )
-        return digest
+
+    def submit_reward(self, prepared: PreparedRewardSubmission) -> str:
+        recipient, amount, claim_hex = self.prepared_rewards[prepared.signature]
+        self.txs[prepared.signature] = TransactionInfo(
+            digest=prepared.signature,
+            status="success",
+            sender="6RigAPgKTdEwxmRqaoMiJj6GYnkipTSwRRc9Wkw79rTv",
+            timestamp_ms=1_700_000_000_001,
+            events=[{"recipient": recipient, "amount": amount, "claim_id": claim_hex}],
+        )
+        self.reward_receipts[claim_hex] = {
+            "address": prepared.receipt_address,
+            "claim_id": claim_hex,
+            "recipient": recipient,
+            "amount": amount,
+            "slot": 1,
+            "bump": 255,
+        }
+        return prepared.signature
+
+    def get_reward_receipt(self, claim_id: bytes) -> dict | None:
+        return self.reward_receipts.get(claim_id.hex())
 
     def get_transaction(self, digest: str) -> TransactionInfo | None:
         return self.txs.get(digest)

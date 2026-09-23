@@ -176,8 +176,30 @@ export interface Quest {
   faction_id?: number | null;
   required_battles: number;
   completed: boolean;
+  completed_battles: number;
   reward_gold: number;
   reward_rice: number;
+  reward_hkdv_base_units: number;
+  reward_claim_status: string | null;
+}
+
+export interface RewardClaim {
+  id: string;
+  claim_id: string;
+  wallet: string;
+  chain: ChainType;
+  network: string;
+  source_type: 'battle' | 'quest';
+  source_id: string;
+  battle_id?: string | null;
+  amount: number;
+  tx_digest?: string | null;
+  receipt_address?: string | null;
+  status: 'reserved' | 'preparing' | 'submitted' | 'submission_unknown' | 'confirmed' | 'failed';
+  error?: string | null;
+  created_at: string;
+  updated_at: string;
+  explorer_url?: string | null;
 }
 
 // ---------------------------------------------------------------------------

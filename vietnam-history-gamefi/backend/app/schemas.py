@@ -1,5 +1,4 @@
 from pydantic import BaseModel, field_validator
-from typing import Any
 
 from app.blockchain.adapter_resolver import SUPPORTED_CHAINS
 from app.core.security import is_valid_solana_wallet
@@ -199,8 +198,11 @@ class QuestOut(BaseModel):
     faction_id: int | None = None
     required_battles: int = 1
     completed: bool = False
+    completed_battles: int = 0
     reward_gold: int = 1000
     reward_rice: int = 500
+    reward_hkdv_base_units: int = 0
+    reward_claim_status: str | None = None
 
 
 class LeaderboardEntryOut(BaseModel):
@@ -291,14 +293,28 @@ class RewardClaimRequest(BaseModel):
     battle_id: str
 
 
+class QuestRewardClaimRequest(BaseModel):
+    wallet: str
+    quest_id: str
+
+
 class RewardOut(BaseModel):
-    id: int
+    id: str
+    claim_id: str
     wallet: str
     chain: str
-    battle_id: str
+    network: str
+    source_type: str
+    source_id: str
+    battle_id: str | None = None
     amount: int
-    tx_digest: str
+    tx_digest: str | None = None
+    receipt_address: str | None = None
     status: str
+    error: str | None = None
+    created_at: str
+    updated_at: str
+    explorer_url: str | None = None
 
 
 class TransactionOut(BaseModel):

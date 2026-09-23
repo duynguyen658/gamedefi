@@ -1,4 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException, Request
+
+from app.api.dependencies import require_session, require_wallet
+from app.core.security import SessionPrincipal, normalize_wallet
+from app.core.store import store
 
 from app.schemas import QuestOut
 
@@ -57,3 +61,42 @@ def list_quests(faction_id: int | None = None):
         results.append(QuestOut(**q))
     return results
 
+
+
+def quest_scenario_id(quest_id: str) -> str:
+    return quest_id.removeprefix("quest_")
+
+
+@router.get("/players/{wallet}", response_model=list[QuestOut])
+def list_player_quests(
+    wallet: str,
+    request: Request,
+    principal: SessionPrincipal = Depends(require_session),
+):
+    require_wallet(principal, wallet)
+    player = store.get_player(principal.chain, principal.wallet)
+    if player is None:
+        raise HTTPException(status_code=404, detail="Player chưa tồn tại")
+    normalized = normalize_wallet(principal.chain, principal.wallet)
+    repository = request.app.state.reward_claims
+    network = request.app.state.settings.solana_network
+    results: list[QuestOut] = []
+    for quest in DEFAULT_QUESTS:
+        if quest["faction_id"] is not None and quest["faction_id"] != player.faction_id:
+            continue
+        completed_battles = repository.count_eligible_battles(
+            network=network,
+            wallet=normalized,
+            scenario_id=quest_scenario_id(quest["id"]),
+        )
+        claim = repository.get_claim_for_event(
+            network=network, wallet=normalized, source_type="quest", source_id=quest["id"]
+        )
+        results.append(QuestOut(**{
+            **quest,
+            "completed": completed_battles >= quest["required_battles"],
+            "completed_battles": completed_battles,
+            "reward_hkdv_base_units": request.app.state.settings.quest_reward_amount_base_units,
+            "reward_claim_status": claim.status if claim else None,
+        }))
+    return results
