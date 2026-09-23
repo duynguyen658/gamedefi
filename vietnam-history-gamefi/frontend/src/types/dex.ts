@@ -40,6 +40,15 @@ export interface DexExecution {
   error: string | null;
 }
 
+export interface DexConfig {
+  network: string;
+  provider: 'mock' | 'raydium' | 'jupiter';
+  supports_execution: boolean;
+  tokens: { symbol: DexTokenSymbol; mint: string; decimals: number }[];
+  pool_id: string | null;
+  program_id: string | null;
+}
+
 
 export interface DexSwapHistory {
   request_id: string;

@@ -15,7 +15,7 @@ import {
   TradeProposal,
   WalletVerifyRequest,
 } from '../types';
-import type { DexExecution, DexOrder, DexOrderRequest, DexSwapHistory } from '../types/dex';
+import type { DexConfig, DexExecution, DexOrder, DexOrderRequest, DexSwapHistory } from '../types/dex';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
@@ -458,6 +458,12 @@ class GameApiService {
   // -------------------------------------------------------------------------
   // DEX provider gateway
   // -------------------------------------------------------------------------
+
+  async getDexConfig(): Promise<DexConfig> {
+    const res = await fetch(`${API_BASE_URL}/dex/config`);
+    if (!res.ok) throw await apiError(res);
+    return await res.json();
+  }
 
   async createDexOrder(payload: DexOrderRequest): Promise<DexOrder> {
     const res = await fetch(`${API_BASE_URL}/dex/order`, {

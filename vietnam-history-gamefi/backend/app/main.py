@@ -6,6 +6,8 @@ from app.api import advisor, army, auth, battle, blockchain, dex, faction, leade
 from app.blockchain.adapter_resolver import AdapterResolver
 from app.blockchain.solana_adapter import SolanaAdapterError
 from app.core.config import get_settings
+from app.core.mainnet import validate_mainnet_configuration
+from app.core.readiness import check_mainnet_readiness
 from app.core.security import NonceStore, SessionStore
 from app.dex.persistence import DexSwapRepository
 from app.dex.resolver import create_dex_provider
@@ -14,6 +16,7 @@ from app.rewards.persistence import RewardPersistenceError, RewardRepository
 
 def create_app() -> FastAPI:
     settings = get_settings()
+    validate_mainnet_configuration(settings)
     app = FastAPI(title="Hào Khí Đại Việt — Gameplay-First Strategy Game")
 
     @app.exception_handler(SolanaAdapterError)
@@ -54,6 +57,15 @@ def create_app() -> FastAPI:
     @app.get("/health")
     def health() -> dict:
         return {"status": "ok", "mode": "gameplay_first", "tagline": "History is the Game. Blockchain is the Marketplace."}
+
+    @app.get("/health/ready")
+    def ready():
+        report = check_mainnet_readiness(
+            settings, app.state.resolver.get("solana"), app.state.dex_swaps, app.state.reward_claims,
+        )
+        if report["status"] != "ok":
+            return JSONResponse(status_code=503, content=report)
+        return report
 
     return app
 

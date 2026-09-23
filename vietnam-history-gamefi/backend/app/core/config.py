@@ -39,10 +39,11 @@ class Settings(BaseSettings):
     reward_distributor_authority: str = "6RigAPgKTdEwxmRqaoMiJj6GYnkipTSwRRc9Wkw79rTv"
     reward_max_amount_base_units: int = 1_000_000_000
     reward_vault_allocation_base_units: int = 1_000_000_000_000
+    reward_vault_alert_threshold_base_units: int = 10_000_000_000
     reward_distributor_keypair_path: str = "~/.config/solana/gamefi-hkdv/devnet-reward-distributor-keypair.json"
 
     # --- DEX ---
-    # Devnet uses the deployed HKDV/SOL Raydium CPMM pool. Mainnet uses Jupiter.
+    # Devnet uses Raydium HKDV/SOL. Mainnet routes the same pair through Jupiter.
     raydium_cpmm_program_id: str = "DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb"
     raydium_pool_id: str = "6dg1ELPzBmmqs7UDTr8pAZmGNQY9XymEDo6KQx8h4J2r"
     raydium_config_id: str = "5MxLgy9oPdTC3YgkiePHqr3EoCRD9uLVYRQS2ANAs7wy"
@@ -50,6 +51,10 @@ class Settings(BaseSettings):
     raydium_hkdv_vault: str = "DYv7LuMu5Qnt9PTSft7R83Aan5ANo88GRXmEMbmcDZdD"
     jupiter_api_key: str = ""
     jupiter_base_url: str = "https://api.jup.ag/swap/v2"
+    dex_mainnet_enabled: bool = False
+    mainnet_treasury_multisig: str = ""
+    mainnet_admin_multisig: str = ""
+    mainnet_upgrade_authority: str = ""
     dex_mock_sol_usdc_rate: float = 100.0
 
     nonce_ttl_seconds: int = 300

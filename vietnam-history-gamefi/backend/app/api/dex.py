@@ -8,6 +8,7 @@ from solders.transaction import VersionedTransaction
 
 from app.api.dependencies import require_session, require_wallet
 from app.core.security import SessionPrincipal
+from app.core.mainnet import MAINNET_GENESIS
 from app.dex.interface import DexOrderRequestData, DexProviderError, token_registry
 from app.dex.persistence import (
     DexIdempotencyConflict,
@@ -37,6 +38,7 @@ def signed_transaction_signature(
     value: str,
     expected_wallet: str,
     required_instruction: tuple[str, str] | None = None,
+    quoted_transaction: str | None = None,
 ) -> str:
     try:
         transaction = VersionedTransaction.from_bytes(base64.b64decode(value, validate=True))
@@ -46,6 +48,10 @@ def signed_transaction_signature(
         account_keys = transaction.message.account_keys
         if not account_keys or str(account_keys[0]) != expected_wallet:
             raise ValueError("Ví ký không phải fee payer của giao dịch DEX")
+        if quoted_transaction is not None:
+            expected = VersionedTransaction.from_bytes(base64.b64decode(quoted_transaction, validate=True))
+            if bytes(transaction.message) != bytes(expected.message):
+                raise ValueError("Giao dịch đã ký khác giao dịch Jupiter đã báo giá")
         if required_instruction:
             program_id, pool_id = required_instruction
             static_accounts = [str(key) for key in account_keys]
@@ -66,6 +72,23 @@ def signed_transaction_signature(
         raise ValueError("signed_transaction không phải Solana versioned transaction hợp lệ") from exc
 
 
+def require_mainnet_rpc(request: Request) -> None:
+    if request.app.state.settings.solana_network != "mainnet-beta":
+        return
+    try:
+        genesis = request.app.state.resolver.get("solana").get_genesis_hash()
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="Không xác minh được Solana Mainnet RPC") from exc
+    if genesis != MAINNET_GENESIS:
+        raise HTTPException(status_code=503, detail="RPC backend không phải Solana Mainnet")
+
+
+def require_trading_enabled(request: Request) -> None:
+    settings = request.app.state.settings
+    if settings.solana_network == "mainnet-beta" and not settings.dex_mainnet_enabled:
+        raise HTTPException(status_code=503, detail="DEX Mainnet đang tạm đóng để kiểm tra vận hành")
+
+
 @router.get("/config")
 def dex_config(request: Request):
     settings = request.app.state.settings
@@ -73,9 +96,11 @@ def dex_config(request: Request):
     return {
         "network": settings.solana_network,
         "provider": provider.name,
-        "supports_execution": provider.supports_execution,
+        "supports_execution": provider.supports_execution and (
+            settings.solana_network != "mainnet-beta" or settings.dex_mainnet_enabled
+        ),
         "persistence": "sql",
-        "tokens": [token.__dict__ for token in token_registry(settings.solana_network).values()],
+        "tokens": [token.__dict__ for token in token_registry(settings.solana_network, settings.game_token_mint).values()],
         "pool_id": getattr(provider, "pool_id", None),
         "program_id": getattr(provider, "program_id", None),
     }
@@ -86,6 +111,8 @@ def create_order(body: DexOrderRequest, request: Request, principal: SessionPrin
     require_wallet(principal, body.wallet)
     if principal.is_guest:
         raise HTTPException(status_code=403, detail="Tài khoản guest không thể tạo lệnh DEX")
+    require_trading_enabled(request)
+    require_mainnet_rpc(request)
     network = request.app.state.settings.solana_network
     digest = intent_digest(
         wallet=body.wallet, network=network, input_symbol=body.input_symbol,
@@ -98,7 +125,7 @@ def create_order(body: DexOrderRequest, request: Request, principal: SessionPrin
             if existing.intent_hash != digest:
                 raise DexIdempotencyConflict("Khóa idempotency đã được dùng cho một lệnh khác")
             return DexOrderOut(**existing.to_order().__dict__)
-        tokens = token_registry(network)
+        tokens = token_registry(network, request.app.state.settings.game_token_mint)
         if body.input_symbol not in tokens or body.output_symbol not in tokens:
             raise HTTPException(status_code=422, detail="Cặp token không được hỗ trợ trên mạng này")
         order = request.app.state.dex_provider.get_order(DexOrderRequestData(
@@ -123,17 +150,33 @@ def execute_order(body: DexExecuteRequest, request: Request, principal: SessionP
     require_wallet(principal, body.wallet)
     if principal.is_guest:
         raise HTTPException(status_code=403, detail="Tài khoản guest không thể thực thi DEX")
+    require_trading_enabled(request)
+    require_mainnet_rpc(request)
+    repository = request.app.state.dex_swaps
     try:
         provider = request.app.state.dex_provider
+        quote = repository.get_order(
+            network=request.app.state.settings.solana_network,
+            wallet=body.wallet,
+            request_id=body.request_id,
+        )
+        if quote is None or quote.provider != provider.name or not quote.executable:
+            raise DexOrderUnavailable("Không tìm thấy lệnh DEX hợp lệ cho ví này")
         required_instruction = (
             (provider.program_id, provider.pool_id)
             if hasattr(provider, "program_id") and hasattr(provider, "pool_id")
             else None
         )
-        signature = signed_transaction_signature(body.signed_transaction, body.wallet, required_instruction)
+        if provider.name == "jupiter" and not quote.transaction:
+            raise DexOrderUnavailable("Lệnh Jupiter không có giao dịch để ký")
+        signature = signed_transaction_signature(
+            body.signed_transaction, body.wallet, required_instruction,
+            quoted_transaction=quote.transaction if provider.name == "jupiter" else None,
+        )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
-    repository = request.app.state.dex_swaps
+    except DexPersistenceError as exc:
+        raise persistence_error(exc) from exc
     try:
         repository.reserve_execution(request_id=body.request_id, wallet=body.wallet, signature=signature)
         result = request.app.state.dex_provider.execute(body.signed_transaction, body.request_id)

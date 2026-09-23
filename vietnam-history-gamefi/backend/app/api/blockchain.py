@@ -4,6 +4,7 @@ from app.blockchain.adapter_resolver import UnsupportedChainError
 from app.blockchain.solana_adapter import SolanaAdapterError
 from app.schemas import TransactionOut
 from app.core.config import get_settings
+from app.core.mainnet import MAINNET_GENESIS
 from app.rewards.reconciliation import reconcile_claim
 
 router = APIRouter(prefix="/blockchain", tags=["blockchain"])
@@ -23,8 +24,11 @@ def solana_game_token(request: Request):
     on_chain = adapter.get_token_mint_info(settings.game_token_mint)
     treasury_on_chain = adapter.get_token_account_info(settings.game_token_treasury_account)
     expected_supply = str(int(settings.game_token_total_supply) * (10 ** settings.game_token_decimals))
+    cluster_verified = settings.solana_network == "devnet" or (
+        settings.solana_network == "mainnet-beta" and adapter.get_genesis_hash() == MAINNET_GENESIS
+    )
     verified = (
-        settings.solana_network == "devnet"
+        cluster_verified
         and on_chain["program_id"] == settings.game_token_program
         and on_chain["decimals"] == settings.game_token_decimals
         and on_chain["supply"] == expected_supply
@@ -61,8 +65,11 @@ def solana_reward_distributor(request: Request):
     adapter = request.app.state.resolver.get("solana")
     on_chain = adapter.get_reward_distributor_info(settings.reward_distributor_config)
     vault_on_chain = adapter.get_token_account_info(settings.reward_distributor_vault)
+    cluster_verified = settings.solana_network == "devnet" or (
+        settings.solana_network == "mainnet-beta" and adapter.get_genesis_hash() == MAINNET_GENESIS
+    )
     verified = (
-        settings.solana_network == "devnet"
+        cluster_verified
         and on_chain["address"] == settings.reward_distributor_config
         and on_chain["admin"] == settings.reward_distributor_admin
         and on_chain["distributor"] == settings.reward_distributor_authority

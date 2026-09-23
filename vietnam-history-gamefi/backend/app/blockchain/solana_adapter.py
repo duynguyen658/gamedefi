@@ -49,6 +49,12 @@ class SolanaAdapter(BlockchainAdapter):
     def chain_name(self) -> str:
         return "solana"
 
+    def get_genesis_hash(self) -> str:
+        result = self._rpc("getGenesisHash", [])
+        if not isinstance(result, str):
+            raise SolanaAdapterError("RPC không trả genesis hash hợp lệ")
+        return result
+
     def _program_id(self) -> Pubkey:
         try:
             program = Pubkey.from_string(self.s.solana_program_id)

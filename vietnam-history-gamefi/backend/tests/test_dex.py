@@ -6,7 +6,7 @@ import httpx
 import pytest
 from solders.keypair import Keypair
 
-from app.dex.interface import MAINNET_USDC_MINT, SOL_MINT, DexOrder, DexOrderRequestData, token_registry
+from app.dex.interface import SOL_MINT, DexOrder, DexOrderRequestData, token_registry
 from app.dex.jupiter_provider import JupiterDexProvider
 from app.dex.mock_provider import MockDexProvider
 from conftest import login
@@ -111,12 +111,12 @@ def test_mock_provider_quotes_both_directions_without_transaction():
 def test_jupiter_provider_without_key_is_reported_unavailable_without_breaking_startup():
     provider = JupiterDexProvider("", "https://api.jup.ag/swap/v2")
     assert provider.supports_execution is False
-    tokens = token_registry("mainnet-beta")
+    tokens = token_registry("mainnet-beta", str(Keypair().pubkey()))
     with pytest.raises(Exception, match="JUPITER_API_KEY"):
         provider.get_order(DexOrderRequestData(
             wallet=str(Keypair().pubkey()),
             input_token=tokens["SOL"],
-            output_token=tokens["USDC"],
+            output_token=tokens["HKDV"],
             amount="1",
             slippage_bps=50,
         ))
@@ -124,13 +124,14 @@ def test_jupiter_provider_without_key_is_reported_unavailable_without_breaking_s
 
 def test_jupiter_provider_maps_order_and_execute_contract():
     requests = []
+    mainnet_hkdv_mint = str(Keypair().pubkey())
 
     def handler(request: httpx.Request):
         requests.append(request)
         assert request.headers["x-api-key"] == "test-key"
         if request.url.path.endswith("/order"):
             assert request.url.params["inputMint"] == SOL_MINT
-            assert request.url.params["outputMint"] == MAINNET_USDC_MINT
+            assert request.url.params["outputMint"] == mainnet_hkdv_mint
             assert request.url.params["slippageBps"] == "50"
             return httpx.Response(200, json={
                 "requestId": "request_123",
@@ -154,11 +155,11 @@ def test_jupiter_provider_maps_order_and_execute_contract():
 
     client = httpx.Client(transport=httpx.MockTransport(handler))
     provider = JupiterDexProvider("test-key", "https://api.jup.ag/swap/v2", client)
-    tokens = token_registry("mainnet-beta")
+    tokens = token_registry("mainnet-beta", mainnet_hkdv_mint)
     order = provider.get_order(DexOrderRequestData(
         wallet=str(Keypair().pubkey()),
         input_token=tokens["SOL"],
-        output_token=tokens["USDC"],
+        output_token=tokens["HKDV"],
         amount="1000000000",
         slippage_bps=50,
     ))

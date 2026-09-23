@@ -6,6 +6,7 @@
 - Giai đoạn 7 hoàn thành trên Devnet: pool Raydium CPMM `HKDV/SOL` có thanh khoản khởi tạo 100.000 HKDV + 1 SOL.
 - Frontend đọc số dư, lấy quote, tạo versioned transaction và yêu cầu Phantom/Solflare ký. Backend không giữ private key, chỉ xác minh/gửi transaction đã ký và đối soát signature.
 - Hai chiều SOL → HKDV và HKDV → SOL đã smoke test thành công. Public signature nằm trong deployment record `blockchain/solana/deployments/devnet-raydium-hkdv-sol-pool.json`.
+- Giai đoạn 8 đã có cổng cấu hình và kiểm tra Mainnet ở [mainnet-release.md](mainnet-release.md). Chưa triển khai tài sản hoặc pool Mainnet; `GET /health/ready` và script release phải đạt trước khi mở giao dịch thật.
 
 ### Chạy DEX local
 

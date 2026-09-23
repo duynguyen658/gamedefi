@@ -52,8 +52,10 @@ class JupiterDexProvider(DexProvider):
         )
         request_id = payload.get("requestId")
         out_amount = payload.get("outAmount")
-        if not isinstance(request_id, str) or not request_id or not str(out_amount).isdigit():
-            raise DexProviderError("Jupiter không trả requestId hoặc outAmount hợp lệ")
+        in_amount = payload.get("inAmount")
+        if (not isinstance(request_id, str) or not request_id or not str(out_amount).isdigit()
+                or int(out_amount) <= 0 or str(in_amount) != request.amount):
+            raise DexProviderError("Jupiter không trả requestId hoặc số lượng hợp lệ")
         transaction = payload.get("transaction")
         if transaction is not None and not isinstance(transaction, str):
             raise DexProviderError("Jupiter trả transaction không hợp lệ")
@@ -62,7 +64,7 @@ class JupiterDexProvider(DexProvider):
             request_id=request_id,
             input_symbol=request.input_token.symbol,
             output_symbol=request.output_token.symbol,
-            in_amount=str(payload.get("inAmount") or request.amount),
+            in_amount=request.amount,
             out_amount=str(out_amount),
             input_decimals=request.input_token.decimals,
             output_decimals=request.output_token.decimals,

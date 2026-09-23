@@ -163,6 +163,18 @@ class DexSwapRepository:
         except SQLAlchemyError as exc:
             raise DexPersistenceError("Không thể đọc kho giao dịch DEX") from exc
 
+    def get_order(self, *, network: str, wallet: str, request_id: str) -> DexSwapRecord | None:
+        try:
+            with self.sessions() as db:
+                row = db.scalar(select(DexSwapModel).where(
+                    DexSwapModel.network == network,
+                    DexSwapModel.wallet == wallet,
+                    DexSwapModel.request_id == request_id,
+                ))
+                return self._record(row) if row else None
+        except SQLAlchemyError as exc:
+            raise DexPersistenceError("Không thể đọc lệnh DEX") from exc
+
     def save_order(self, *, network: str, wallet: str, key: str, digest: str, order: DexOrder) -> DexSwapRecord:
         existing = self.get_idempotent(network=network, wallet=wallet, key=key)
         if existing:

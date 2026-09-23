@@ -98,6 +98,19 @@ def test_signed_transaction_requires_pool_in_raydium_instruction():
         raise AssertionError("transaction with an unrelated pool account must be rejected")
 
 
+def test_signed_jupiter_transaction_must_match_quoted_message():
+    owner = Keypair()
+    quoted = signed_transaction(owner)
+    assert signed_transaction_signature(quoted, str(owner.pubkey()), quoted_transaction=quoted)
+    different = signed_transaction(owner)
+    try:
+        signed_transaction_signature(different, str(owner.pubkey()), quoted_transaction=quoted)
+    except ValueError as exc:
+        assert "khác giao dịch Jupiter" in str(exc)
+    else:
+        raise AssertionError("a different signed transaction must be rejected")
+
+
 def test_order_is_idempotent_and_conflicting_reuse_is_rejected(client):
     owner_key = Keypair()
     wallet, player = login(client, owner_key)

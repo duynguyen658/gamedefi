@@ -64,11 +64,13 @@ class DexExecution:
     error: str | None = None
 
 
-def token_registry(network: str) -> dict[str, DexToken]:
-    if network == "devnet":
+def token_registry(network: str, hkdv_mint: str | None = None) -> dict[str, DexToken]:
+    if network in {"devnet", "mainnet-beta"}:
+        if network == "mainnet-beta" and (not hkdv_mint or hkdv_mint == HKDV_MINT):
+            raise DexProviderError("Cần cấu hình mint HKDV Mainnet trước khi mở DEX")
         return {
             "SOL": DexToken("SOL", "Solana", SOL_MINT, 9),
-            "HKDV": DexToken("HKDV", "H\u00e0o Kh\u00ed \u0110\u1ea1i Vi\u1ec7t", HKDV_MINT, 6),
+            "HKDV": DexToken("HKDV", "H\u00e0o Kh\u00ed \u0110\u1ea1i Vi\u1ec7t", hkdv_mint or HKDV_MINT, 6),
         }
     usdc_mint = MAINNET_USDC_MINT if network == "mainnet-beta" else DEVNET_USDC_MINT
     return {

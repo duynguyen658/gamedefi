@@ -33,7 +33,7 @@ type BalanceStatus = 'loading' | 'ready' | 'error' | 'wallet-required';
 type RequestStatus = 'idle' | 'quoting' | 'signing' | 'executing';
 
 const EMPTY_BALANCES: DexBalances = { SOL: '0', HKDV: '0', USDC: '0' };
-const QUOTE_TOKEN: DexTokenSymbol = SOLANA_NETWORK === 'mainnet-beta' ? 'USDC' : 'HKDV';
+const QUOTE_TOKEN: DexTokenSymbol = SOLANA_NETWORK === 'devnet' || SOLANA_NETWORK === 'mainnet-beta' ? 'HKDV' : 'USDC';
 
 function newIdempotencyKey(): string {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -82,11 +82,22 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum }
     setBalanceStatus('loading');
     setError(null);
     try {
+      const config = await apiService.getDexConfig();
+      const quoteToken = dexTokens().find((item) => item.symbol !== 'SOL');
+      const backendToken = config.tokens.find((item) => item.symbol === quoteToken?.symbol);
+      if (config.network !== SOLANA_NETWORK || !quoteToken?.mint || backendToken?.mint !== quoteToken.mint
+          || (SOLANA_NETWORK === 'mainnet-beta' && config.provider !== 'jupiter')
+          || (SOLANA_NETWORK === 'devnet' && config.provider !== 'raydium')) {
+        throw new Error('Cấu hình DEX của frontend và backend không khớp mạng hoặc mint token.');
+      }
+      if (!config.supports_execution && SOLANA_NETWORK === 'mainnet-beta') {
+        throw new Error('DEX Mainnet đang tạm đóng để kiểm tra vận hành.');
+      }
       setBalances(await loadDexBalances(player.wallet));
       setBalanceStatus('ready');
-    } catch {
+    } catch (balanceError) {
       setBalanceStatus('error');
-      setError('Không đọc được số dư từ Solana RPC. Hãy thử tải lại.');
+      setError(apiError(balanceError));
     }
   };
 
@@ -316,14 +327,20 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum }
         <div className={`rounded-xl border p-3 text-[11px] ${order.simulation ? 'border-amber-700/50 bg-amber-950/20' : 'border-emerald-800/50 bg-emerald-950/20'}`}>
           <div className="mb-2 flex items-center justify-between">
             <span className={order.simulation ? 'font-bold text-amber-300' : 'font-bold text-emerald-300'}>
-              {order.simulation ? 'Báo giá mô phỏng' : order.provider === 'raydium' ? 'Raydium HKDV/SOL Devnet' : 'Báo giá Jupiter Mainnet'}
+              {order.simulation ? 'Báo giá mô phỏng' : order.provider === 'raydium' ? 'Raydium HKDV/SOL Devnet' : 'Jupiter HKDV/SOL Mainnet'}
             </span>
             <span className="text-slate-400">{order.router} · {order.mode}</span>
           </div>
           <div className="grid grid-cols-2 gap-2 text-slate-400">
             <span>Nhận tối thiểu</span><span className="text-right text-slate-200">{minimumReceived} {toToken}</span>
-            <span>Phí pool</span><span className="text-right text-slate-200">{(order.fee_bps / 100).toFixed(2)}%</span>
-            <span>Price impact</span><span className="text-right text-slate-200">{(order.price_impact_bps / 100).toFixed(2)}%</span>
+            <span>{order.provider === 'jupiter' ? 'Phí Jupiter' : 'Phí pool'}</span>
+            <span className="text-right text-slate-200">{(order.fee_bps / 100).toFixed(2)}%</span>
+            <span>Price impact</span>
+            <span className="text-right text-slate-200">
+              {order.provider === 'jupiter' && order.price_impact_bps === 0
+                ? 'Chưa có dữ liệu'
+                : `${(order.price_impact_bps / 100).toFixed(2)}%`}
+            </span>
             <span>Pool</span>
             <span className="truncate text-right text-slate-200">
               {order.provider === 'raydium'
