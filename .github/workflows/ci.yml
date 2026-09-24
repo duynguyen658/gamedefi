@@ -51,7 +51,7 @@ jobs:
           set -e
           trap 'code=$?; if [ "$code" -ne 0 ]; then docker ps -a --filter name=gamefi-devnet-preview; docker logs gamefi-devnet-preview 2>&1 | tail -n 20 | sed "s/^/::error title=Devnet container::/"; fi' EXIT
           docker run -d --name gamefi-devnet-preview -p 8000:8000 gamefi-backend:devnet
-          curl --retry 20 --retry-connrefused --retry-delay 1 --fail --silent --show-error http://127.0.0.1:8000/ -o /tmp/gamefi-index.html
+          curl --retry 20 --retry-all-errors --retry-delay 1 --fail --silent --show-error http://127.0.0.1:8000/ -o /tmp/gamefi-index.html
           grep -q 'id="root"' /tmp/gamefi-index.html
           curl --fail --silent --show-error http://127.0.0.1:8000/api/health | python -c 'import json,sys; assert json.load(sys.stdin)["status"] == "ok"'
       - name: Stop preview container
