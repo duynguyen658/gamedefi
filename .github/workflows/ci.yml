@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: npm
           cache-dependency-path: vietnam-history-gamefi/frontend/package-lock.json
       - run: npm ci
@@ -48,6 +48,8 @@ jobs:
         working-directory: vietnam-history-gamefi
       - name: Verify the hosted frontend and API route through one origin
         run: |
+          set -e
+          trap 'code=$?; if [ "$code" -ne 0 ]; then docker ps -a --filter name=gamefi-devnet-preview; docker logs gamefi-devnet-preview 2>&1 | tail -n 20 | sed "s/^/::error title=Devnet container::/"; fi' EXIT
           docker run -d --name gamefi-devnet-preview -p 8000:8000 gamefi-backend:devnet
           curl --retry 20 --retry-connrefused --retry-delay 1 --fail --silent --show-error http://127.0.0.1:8000/ -o /tmp/gamefi-index.html
           grep -q 'id="root"' /tmp/gamefi-index.html
