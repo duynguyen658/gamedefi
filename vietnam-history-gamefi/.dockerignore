@@ -1,0 +1,16 @@
+.git
+.github
+**/.env
+**/.env.*
+**/*.env
+**/*.env.*
+**/*-keypair.json
+**/node_modules
+**/dist
+**/__pycache__
+**/.pytest_cache
+**/*.db
+**/*.sqlite*
+**/.venv
+blockchain/solana/target
+blockchain/solana/.anchor

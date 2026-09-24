@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -64,6 +65,15 @@ class Settings(BaseSettings):
     # browser client sends bearer credentials for write operations.
     cors_allow_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
     factions_file: str = "assets/nft/factions.json"
+
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def use_psycopg_driver(cls, value: str) -> str:
+        if value.startswith("postgres://"):
+            return "postgresql+psycopg://" + value[len("postgres://"):]
+        if value.startswith("postgresql://"):
+            return "postgresql+psycopg://" + value[len("postgresql://"):]
+        return value
 
 
 @lru_cache

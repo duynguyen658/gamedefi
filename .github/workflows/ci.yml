@@ -1,0 +1,57 @@
+name: Build and test
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: vietnam-history-gamefi/backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: vietnam-history-gamefi/backend/requirements.txt
+      - run: python -m pip install -r requirements.txt
+      - run: python -m pytest -q
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: vietnam-history-gamefi/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: vietnam-history-gamefi/frontend/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
+  backend-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the Devnet backend image without local secrets
+        run: docker build -f deploy/devnet/backend.Dockerfile -t gamefi-backend:devnet .
+        working-directory: vietnam-history-gamefi
+      - name: Verify the hosted frontend and API route through one origin
+        run: |
+          docker run -d --name gamefi-devnet-preview -p 8000:8000 gamefi-backend:devnet
+          curl --retry 20 --retry-connrefused --retry-delay 1 --fail --silent --show-error http://127.0.0.1:8000/ -o /tmp/gamefi-index.html
+          grep -q 'id="root"' /tmp/gamefi-index.html
+          curl --fail --silent --show-error http://127.0.0.1:8000/api/health | python -c 'import json,sys; assert json.load(sys.stdin)["status"] == "ok"'
+      - name: Stop preview container
+        if: always()
+        run: docker rm -f gamefi-devnet-preview || true

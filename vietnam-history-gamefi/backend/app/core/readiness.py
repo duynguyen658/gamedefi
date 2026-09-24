@@ -1,4 +1,4 @@
-"""Read-only Mainnet checks for deployment and operational monitoring."""
+"""Read-only chain checks for deployment and operational monitoring."""
 
 import base64
 from datetime import datetime, timedelta, timezone
@@ -14,6 +14,7 @@ from app.rewards.persistence import RewardClaimModel, RewardRepository
 
 
 UPGRADEABLE_LOADER = "BPFLoaderUpgradeab1e11111111111111111111111"
+DEVNET_GENESIS = "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG"
 TOKEN_METADATA_PROGRAM = Pubkey.from_string("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")
 
 
@@ -64,12 +65,55 @@ def _metadata_matches(adapter: SolanaAdapter, settings: Settings) -> bool:
     return fields == [settings.game_token_name, settings.game_token_symbol, settings.game_token_metadata_uri]
 
 
+def check_devnet_readiness(
+    settings: Settings,
+    adapter: SolanaAdapter,
+    dex_swaps: DexSwapRepository,
+    reward_claims: RewardRepository,
+) -> dict:
+    checks: dict[str, bool] = {}
+    try:
+        checks["rpc_devnet"] = adapter.get_genesis_hash() == DEVNET_GENESIS
+    except Exception:
+        checks["rpc_devnet"] = False
+
+    try:
+        program, _ = _account(adapter, settings.solana_program_id)
+        checks["program"] = program.get("owner") == UPGRADEABLE_LOADER and program.get("executable") is True
+    except Exception:
+        checks["program"] = False
+
+    try:
+        checks["reward_signer"] = (
+            str(adapter._load_reward_distributor_keypair().pubkey()) == settings.reward_distributor_authority
+        )
+    except Exception:
+        checks["reward_signer"] = False
+
+    try:
+        with dex_swaps.engine.connect() as connection:
+            connection.execute(text("SELECT 1 FROM dex_swaps LIMIT 1"))
+        with reward_claims.engine.connect() as connection:
+            connection.execute(text("SELECT 1 FROM reward_claims LIMIT 1"))
+        checks["database"] = True
+    except Exception:
+        checks["database"] = False
+
+    return {
+        "status": "ok" if all(checks.values()) else "unavailable",
+        "network": settings.solana_network,
+        "checks": checks,
+    }
+
+
 def check_mainnet_readiness(
     settings: Settings,
     adapter: SolanaAdapter,
     dex_swaps: DexSwapRepository,
     reward_claims: RewardRepository,
 ) -> dict:
+    if settings.solana_network == "devnet":
+        return check_devnet_readiness(settings, adapter, dex_swaps, reward_claims)
     if settings.solana_network != "mainnet-beta":
         return {"status": "ok", "network": settings.solana_network, "checks": {}}
 

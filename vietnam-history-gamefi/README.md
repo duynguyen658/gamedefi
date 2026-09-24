@@ -52,6 +52,9 @@ Chạy `python scripts/check-secrets.py` trước khi commit; GitHub Actions cũ
 
 ## Deploy
 
+Triển khai frontend + API + PostgreSQL trên Devnet: [hướng dẫn Devnet](docs/devnet-deploy.md).
+CI chạy build/test và smoke test image trước khi Render tự deploy sau khi check đạt.
+
 Cần Rust, Solana CLI và Anchor 0.30.1 (Windows nên dùng WSL).
 Chạy từ repo bằng Bash khi đã có ví deploy và SOL Devnet:
 
