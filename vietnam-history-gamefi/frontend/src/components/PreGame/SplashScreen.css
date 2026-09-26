@@ -1,4 +1,6 @@
 .portal-home {
+  position: relative;
+  isolation: isolate;
   --portal-bg: #05111c;
   --portal-panel: #0a1b29;
   --portal-line: #496070;
@@ -6,17 +8,24 @@
   --portal-ivory: #f4eee2;
   --portal-muted: #b6c3cb;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 0 60%, rgb(46 73 76 / 20%), transparent 25%),
-    linear-gradient(#04101b, #071521 55%, #04101b);
+  background: #04101b;
   color: var(--portal-ivory);
 }
-.portal-container { width: min(100%, 1500px); margin-inline: auto; padding: 0 clamp(20px, 4.2vw, 70px) 68px; }
-.portal-hero { position: relative; isolation: isolate; min-height: 480px; border-bottom: 1px solid #775b37; background: #06111b; }
-.portal-hero-art { position: absolute; inset: 0; z-index: -2; background: url('/dai-viet-hero.webp') center 42% / cover no-repeat; }
+.portal-home::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, #04101b13 0%, #04101b69 55%, #04101b95 100%),
+    url('/dai-viet-page-background.png') center center / cover no-repeat;
+}
+.portal-container { width: min(100%, 1500px); margin-inline: auto; padding: 0 clamp(20px, 4.2vw, 70px) 68px; background: linear-gradient(180deg, #04101b38, #04101b8c); }
+.portal-hero { position: relative; isolation: isolate; min-height: 480px; border-bottom: 1px solid #775b37; }
 .portal-hero::before {
   content: ''; position: absolute; inset: 0; z-index: -1;
-  background: linear-gradient(90deg, rgb(3 12 23 / 98%) 0%, rgb(3 12 23 / 91%) 18%, rgb(3 12 23 / 50%) 44%, transparent 70%), linear-gradient(0deg, rgb(3 12 23 / 88%), transparent 25%);
+  background: linear-gradient(90deg, #03101de8 0%, #03101dc3 25%, #03101d58 48%, transparent 70%), linear-gradient(0deg, #03101dc9, transparent 29%);
 }
 .portal-hero-content { position: relative; display: flex; align-items: center; width: min(100%, 1500px); min-height: 480px; margin: auto; padding: 34px clamp(20px, 4.2vw, 70px) 48px; }
 .portal-hero-copy { width: min(630px, 57%); }
@@ -60,7 +69,7 @@
 .portal-heading > button:hover, .portal-panel-heading button:hover { text-decoration: underline; text-underline-offset: 4px; }
 .portal-heading button svg, .portal-panel-heading button svg { width: 15px; height: 15px; }
 .portal-world-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
-.portal-world { display: flex; flex-direction: column; min-width: 0; overflow: hidden; border: 1px solid #a98955; border-radius: 6px; background: #091c2a; transition: border-color .2s ease, transform .2s ease; }
+.portal-world { display: flex; flex-direction: column; min-width: 0; overflow: hidden; border: 1px solid #a98955; border-radius: 6px; background: #091c2aeb; transition: border-color .2s ease, transform .2s ease; }
 .portal-world:hover { transform: translateY(-3px); border-color: #f0c979; }
 .portal-world-art { display: flex; align-items: end; min-height: 155px; padding: 15px; background-repeat: no-repeat; }
 .portal-world-art svg { width: 35px; height: 35px; padding: 7px; border: 1px solid #e8bb68; border-radius: 50%; background: #091c2ad9; color: #f5c76c; }
@@ -84,7 +93,7 @@
 .portal-legend figcaption span { color: #f2c576; font-size: .58rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
 .portal-legend figcaption strong { color: #f7f0e5; font-family: 'Noto Serif', 'Be Vietnam Pro', serif; font-size: 1.12rem; }
 .portal-feature-grid { display: grid; grid-template-columns: minmax(0, 1.28fr) minmax(310px, .72fr); gap: 12px; margin-top: 19px; }
-.portal-panel { min-width: 0; padding: 16px; border: 1px solid #60707a; border-radius: 6px; background: linear-gradient(145deg, #0b2231, #071824); }
+.portal-panel { min-width: 0; padding: 16px; border: 1px solid #60707a; border-radius: 6px; background: linear-gradient(145deg, #0b2231f0, #071824e8); }
 .portal-panel-heading { display: flex; align-items: start; justify-content: space-between; gap: 14px; }
 .portal-panel-heading .portal-kicker { margin-bottom: 3px; }
 .portal-panel h2 { font-size: 1.25rem; }
@@ -130,9 +139,9 @@
   .portal-feature-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 700px) {
+  .portal-home::before { background-position: center, 57% center; }
   .portal-hero { min-height: 635px; }
   .portal-hero-content { min-height: 635px; align-items: end; padding-top: 190px; padding-bottom: 54px; }
-  .portal-hero-art { background-position: 60% top; }
   .portal-hero::before { background: linear-gradient(0deg, #03101cfb, #03101cf1 40%, #03101c66 70%, transparent); }
   .portal-hero-copy { width: 100%; }
   .portal-hero h1 { font-size: clamp(3.2rem, 10.8vw, 4.9rem); }
