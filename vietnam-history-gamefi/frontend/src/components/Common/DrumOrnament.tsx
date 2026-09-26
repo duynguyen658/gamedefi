@@ -20,7 +20,7 @@ export const DrumOrnament: React.FC<DrumOrnamentProps> = ({
     >
       <svg
         viewBox="0 0 200 200"
-        className={`w-full h-full text-amber-500/25 ${animate ? 'animate-spin-slow' : ''}`}
+        className={`w-full h-full text-amber-500/25 ${animate ? 'motion-safe:animate-spin-slow' : ''}`}
         fill="none"
         stroke="currentColor"
       >

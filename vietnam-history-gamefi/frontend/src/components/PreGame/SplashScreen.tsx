@@ -39,10 +39,12 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
         <div className="splash-copy">
           <p className="splash-eyebrow"><span className="splash-eyebrow-mark" /> Bước vào sử Việt</p>
           <h1 className="splash-title">Hào Khí <span>Đại Việt</span></h1>
-          <p className="splash-verse">“Nam quốc sơn hà Nam đế cư”</p>
+          <p className="splash-verse">
+            <span>“Nam quốc sơn hà Nam đế cư</span>
+            <span>Tiệt nhiên định phận tại thiên thư”</span>
+          </p>
           <p className="splash-intro">
             Chọn một triều đại, chiêu mộ binh mã và dẫn quân qua những trận đánh vang dội.
-            Chiến thuật là cốt lõi; bạn có thể bắt đầu hành trình mà không cần ví điện tử.
           </p>
 
           <div className="splash-actions">
@@ -76,7 +78,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
         <div className="splash-visual" aria-hidden="true">
           <div className="splash-visual-disc" />
           <div className="splash-visual-ring" />
-          <DrumOrnament className="splash-drum" size={500} fluid animate={false} />
+          <DrumOrnament className="splash-drum" size={500} fluid animate />
           <div className="splash-visual-caption">
             <span>Ấn tượng Đông Sơn</span>
             <strong>Khởi đầu một thiên sử mới</strong>

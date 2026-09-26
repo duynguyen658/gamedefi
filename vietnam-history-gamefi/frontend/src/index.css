@@ -97,12 +97,17 @@
   line-height: 1.5;
 }
 
+.splash-verse span {
+  display: block;
+}
+
 .splash-intro {
   max-width: 56ch;
   margin: 22px 0 0;
   color: oklch(81% 0.016 78);
   font-size: 0.98rem;
   line-height: 1.8;
+  text-wrap: balance;
 }
 
 .splash-actions {
@@ -209,7 +214,7 @@
 .splash-visual-caption {
   position: absolute;
   right: 0;
-  bottom: 0;
+  bottom: -70px;
   z-index: 2;
   display: flex;
   flex-direction: column;
@@ -232,7 +237,7 @@
 }
 
 .splash-journey {
-  margin-top: clamp(32px, 5vh, 56px);
+  margin-top: clamp(76px, 9vh, 92px);
   border-top: 1px solid oklch(67% 0.05 78 / 0.28);
 }
 
@@ -352,7 +357,7 @@
 
   .splash-visual-caption {
     right: 8px;
-    bottom: -4px;
+    bottom: -64px;
   }
 
   .splash-journey-heading span:last-child {
