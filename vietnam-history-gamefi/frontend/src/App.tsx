@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import { ChainType, PreGameStep, MapLocation, PlayerResources, Player } from './types';
 import { useWallet } from './hooks/useWallet';
 import { useFaction } from './hooks/useFaction';
@@ -21,6 +21,11 @@ export const App: React.FC = () => {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState<boolean>(false);
   const [selectedLocation, setSelectedLocation] = useState<MapLocation | null>(null);
   const [resources] = useState<PlayerResources>({ rice: 4500, gold: 12800, morale: 85 });
+
+  useLayoutEffect(() => {
+    if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual';
+    window.scrollTo(0, 0);
+  }, [step]);
 
   // Guest player state (F2P — no wallet required)
   const [guestPlayer, setGuestPlayer] = useState<Player | null>(null);

@@ -4,17 +4,19 @@ interface DrumOrnamentProps {
   className?: string;
   size?: number;
   animate?: boolean;
+  fluid?: boolean;
 }
 
 export const DrumOrnament: React.FC<DrumOrnamentProps> = ({ 
   className = '', 
   size = 400,
-  animate = true 
+  animate = true,
+  fluid = false,
 }) => {
   return (
     <div 
       className={`relative flex items-center justify-center select-none pointer-events-none ${className}`}
-      style={{ width: size, height: size }}
+      style={fluid ? { width: '100%', maxWidth: size, aspectRatio: '1 / 1' } : { width: size, height: size }}
     >
       <svg
         viewBox="0 0 200 200"
