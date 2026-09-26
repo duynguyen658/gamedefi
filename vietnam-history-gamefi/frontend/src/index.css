@@ -170,13 +170,6 @@
   outline-offset: 4px;
 }
 
-.splash-action-note {
-  margin: 14px 0 0;
-  color: oklch(66% 0.02 76);
-  font-size: 0.78rem;
-  line-height: 1.6;
-}
-
 .splash-visual {
   position: relative;
   display: grid;

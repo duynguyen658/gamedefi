@@ -8,7 +8,6 @@ interface HeaderProps {
   onDisconnect: () => void;
   isMuted: boolean;
   onToggleMute: () => void;
-  onPlayGong: () => void;
   onOpenAdvisorCouncil?: () => void;
   onOpenMarketplace?: () => void;
   onOpenDefiHub?: () => void;
@@ -20,17 +19,18 @@ export const Header: React.FC<HeaderProps> = ({
   onDisconnect,
   isMuted,
   onToggleMute,
-  onPlayGong,
   onOpenAdvisorCouncil,
   onOpenMarketplace,
   onOpenDefiHub,
 }) => {
+  const isWalletConnected = Boolean(player && !player.is_guest);
+
   return (
     <header className="sticky top-0 z-40 w-full bg-imperial-obsidian/90 backdrop-blur-md border-b border-imperial-border/80 px-4 lg:px-8 py-3 transition-all">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         
         {/* Brand & Logo */}
-        <div className="flex shrink-0 items-center space-x-2 sm:space-x-3 cursor-pointer" onClick={onPlayGong}>
+        <div className="flex shrink-0 items-center space-x-2 sm:space-x-3">
           <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-imperial-darkred to-imperial-crimson p-0.5 border border-imperial-gold shadow-lg shadow-red-950/50 flex items-center justify-center">
             <span className="font-display text-imperial-gold font-black text-lg">越</span>
           </div>
@@ -38,15 +38,12 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="block font-display whitespace-nowrap text-sm sm:text-base lg:text-lg font-black tracking-wider text-imperial-lightgold uppercase">
               Hào Khí Đại Việt
             </span>
-            <p className="text-[11px] text-slate-400 hidden sm:block">
-              Lịch sử là Trò chơi &bull; Blockchain là Thị trường
-            </p>
           </div>
         </div>
 
         {/* Right Actions: Advisor, Market, Sound, Wallet */}
         <div className="flex items-center space-x-2 sm:space-x-3">
-          {onOpenAdvisorCouncil && (
+          {isWalletConnected && onOpenAdvisorCouncil && (
             <button
               onClick={onOpenAdvisorCouncil}
               className="hidden lg:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-amber-950/40 hover:bg-amber-900/50 border border-amber-600/40 text-amber-200 text-xs font-semibold cursor-pointer"
@@ -56,7 +53,7 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           )}
 
-          {onOpenMarketplace && (
+          {isWalletConnected && onOpenMarketplace && (
             <button
               onClick={onOpenMarketplace}
               className="hidden lg:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-purple-950/40 hover:bg-purple-900/50 border border-purple-600/40 text-purple-200 text-xs font-semibold cursor-pointer"
@@ -66,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           )}
 
-          {onOpenDefiHub && (
+          {isWalletConnected && onOpenDefiHub && (
             <button
               onClick={onOpenDefiHub}
               className="hidden lg:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-600/40 text-emerald-200 text-xs font-semibold cursor-pointer"
@@ -77,13 +74,15 @@ export const Header: React.FC<HeaderProps> = ({
           )}
 
           {/* Sound Toggle */}
-          <button
-            onClick={onToggleMute}
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-imperial-lacquer hover:bg-imperial-slate border border-imperial-border text-slate-300 hover:text-imperial-gold transition-colors"
-            title={isMuted ? 'Bật âm thanh trận mạc' : 'Tắt âm thanh'}
-          >
-            {isMuted ? <VolumeX className="w-4 h-4 text-slate-500" /> : <Volume2 className="w-4 h-4 text-imperial-gold" />}
-          </button>
+          {isWalletConnected && (
+            <button
+              onClick={onToggleMute}
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-imperial-lacquer hover:bg-imperial-slate border border-imperial-border text-slate-300 hover:text-imperial-gold transition-colors"
+              title={isMuted ? 'Bật âm thanh trận mạc' : 'Tắt âm thanh'}
+            >
+              {isMuted ? <VolumeX className="w-4 h-4 text-slate-500" /> : <Volume2 className="w-4 h-4 text-imperial-gold" />}
+            </button>
+          )}
 
           {/* Wallet Action */}
           {player && !player.is_guest ? (
@@ -122,6 +121,25 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
       </div>
+      {isWalletConnected && (
+        <nav aria-label="Khu vực trò chơi" className="lg:hidden max-w-7xl mx-auto mt-3 flex items-center gap-2 overflow-x-auto pb-1">
+          {onOpenAdvisorCouncil && (
+            <button type="button" onClick={onOpenAdvisorCouncil} className="flex min-h-11 shrink-0 items-center gap-2 rounded-lg border border-amber-600/40 bg-amber-950/40 px-3 text-xs font-semibold text-amber-200">
+              <Crown className="h-4 w-4" aria-hidden="true" /> Quân Sư
+            </button>
+          )}
+          {onOpenMarketplace && (
+            <button type="button" onClick={onOpenMarketplace} className="flex min-h-11 shrink-0 items-center gap-2 rounded-lg border border-purple-600/40 bg-purple-950/40 px-3 text-xs font-semibold text-purple-200">
+              <ShoppingBag className="h-4 w-4" aria-hidden="true" /> Chợ Tướng
+            </button>
+          )}
+          {onOpenDefiHub && (
+            <button type="button" onClick={onOpenDefiHub} className="flex min-h-11 shrink-0 items-center gap-2 rounded-lg border border-emerald-600/40 bg-emerald-950/40 px-3 text-xs font-semibold text-emerald-200">
+              <ArrowLeftRight className="h-4 w-4" aria-hidden="true" /> Giao Thương
+            </button>
+          )}
+        </nav>
+      )}
     </header>
   );
 };

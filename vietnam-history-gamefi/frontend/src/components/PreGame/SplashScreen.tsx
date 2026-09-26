@@ -72,7 +72,6 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
               <span>Kết nối ví</span>
             </button>
           </div>
-          <p className="splash-action-note">Chợ Tướng và giao thương luôn là lựa chọn của bạn.</p>
         </div>
 
         <div className="splash-visual" aria-hidden="true">
