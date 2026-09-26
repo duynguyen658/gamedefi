@@ -1,145 +1,75 @@
-import React from 'react';
-import { Volume2, VolumeX, Wallet, LogOut, Crown, ShoppingBag, ArrowLeftRight } from 'lucide-react';
-import { Player } from '../../types';
+import React, { useState } from 'react';
+import { ArrowLeftRight, Crown, LogOut, Menu, Shield, ShoppingBag, Trophy, Wallet, X } from 'lucide-react';
+import { Player, PreGameStep } from '../../types';
+import './Header.css';
 
 interface HeaderProps {
   player: Player | null;
+  activeStep: PreGameStep;
+  onOpenHome: () => void;
+  onOpenCampaign: () => void;
+  onOpenAdvisors: () => void;
+  onOpenMarketplace: () => void;
+  onOpenDex: () => void;
+  onOpenLeaderboard: () => void;
   onOpenWalletModal: () => void;
   onDisconnect: () => void;
-  isMuted: boolean;
-  onToggleMute: () => void;
-  onOpenAdvisorCouncil?: () => void;
-  onOpenMarketplace?: () => void;
-  onOpenDefiHub?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   player,
+  activeStep,
+  onOpenHome,
+  onOpenCampaign,
+  onOpenAdvisors,
+  onOpenMarketplace,
+  onOpenDex,
+  onOpenLeaderboard,
   onOpenWalletModal,
   onDisconnect,
-  isMuted,
-  onToggleMute,
-  onOpenAdvisorCouncil,
-  onOpenMarketplace,
-  onOpenDefiHub,
 }) => {
-  const isWalletConnected = Boolean(player && !player.is_guest);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const connected = Boolean(player && !player.is_guest);
+  const nav = [
+    { label: 'Trang chủ', action: onOpenHome, active: activeStep === 'splash', Icon: Shield },
+    { label: 'Chiến dịch', action: onOpenCampaign, active: ['faction_select', 'lobby', 'campaign_map', 'battle'].includes(activeStep), Icon: Shield },
+    { label: 'Tướng lĩnh', action: onOpenAdvisors, active: activeStep === 'advisor_council', Icon: Crown },
+    { label: 'Marketplace', action: onOpenMarketplace, active: activeStep === 'marketplace', Icon: ShoppingBag },
+    { label: 'DEX', action: onOpenDex, active: activeStep === 'defi', Icon: ArrowLeftRight },
+    { label: 'Bảng xếp hạng', action: onOpenLeaderboard, active: false, Icon: Trophy },
+  ];
+
+  const navigate = (action: () => void) => {
+    setMenuOpen(false);
+    action();
+  };
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-imperial-obsidian/90 backdrop-blur-md border-b border-imperial-border/80 px-4 lg:px-8 py-3 transition-all">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        
-        {/* Brand & Logo */}
-        <div className="flex shrink-0 items-center space-x-2 sm:space-x-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-imperial-darkred to-imperial-crimson p-0.5 border border-imperial-gold shadow-lg shadow-red-950/50 flex items-center justify-center">
-            <span className="font-display text-imperial-gold font-black text-lg">越</span>
-          </div>
-          <div>
-            <span className="block font-display whitespace-nowrap text-sm sm:text-base lg:text-lg font-black tracking-wider text-imperial-lightgold uppercase">
-              Hào Khí Đại Việt
-            </span>
-          </div>
-        </div>
-
-        {/* Right Actions: Advisor, Market, Sound, Wallet */}
-        <div className="flex items-center space-x-2 sm:space-x-3">
-          {isWalletConnected && onOpenAdvisorCouncil && (
-            <button
-              onClick={onOpenAdvisorCouncil}
-              className="hidden lg:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-amber-950/40 hover:bg-amber-900/50 border border-amber-600/40 text-amber-200 text-xs font-semibold cursor-pointer"
-            >
-              <Crown className="w-3.5 h-3.5 text-imperial-lightgold" />
-              <span>Quân Sư</span>
-            </button>
-          )}
-
-          {isWalletConnected && onOpenMarketplace && (
-            <button
-              onClick={onOpenMarketplace}
-              className="hidden lg:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-purple-950/40 hover:bg-purple-900/50 border border-purple-600/40 text-purple-200 text-xs font-semibold cursor-pointer"
-            >
-              <ShoppingBag className="w-3.5 h-3.5 text-purple-300" />
-              <span>Chợ Tướng</span>
-            </button>
-          )}
-
-          {isWalletConnected && onOpenDefiHub && (
-            <button
-              onClick={onOpenDefiHub}
-              className="hidden lg:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-600/40 text-emerald-200 text-xs font-semibold cursor-pointer"
-            >
-              <ArrowLeftRight className="w-3.5 h-3.5 text-emerald-300" />
-              <span>Giao Thương</span>
-            </button>
-          )}
-
-          {/* Sound Toggle */}
-          {isWalletConnected && (
-            <button
-              onClick={onToggleMute}
-              className="flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-imperial-lacquer hover:bg-imperial-slate border border-imperial-border text-slate-300 hover:text-imperial-gold transition-colors"
-              title={isMuted ? 'Bật âm thanh trận mạc' : 'Tắt âm thanh'}
-            >
-              {isMuted ? <VolumeX className="w-4 h-4 text-slate-500" /> : <Volume2 className="w-4 h-4 text-imperial-gold" />}
-            </button>
-          )}
-
-          {/* Wallet Action */}
-          {player && !player.is_guest ? (
-            <div className="flex items-center space-x-2">
-              <div className="bg-imperial-lacquer/90 border border-imperial-gold/40 rounded-lg px-3 py-1.5 flex items-center space-x-2 shadow-sm">
-                <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
-                <div className="text-left">
-                  <div className="text-xs font-semibold text-imperial-lightgold flex items-center space-x-1">
-                    <span>{player.username}</span>
-                    <span className="text-[10px] text-amber-300 uppercase">({player.chain})</span>
-                  </div>
-                  <div className="text-[10px] font-mono text-slate-400">
-                    {player.wallet.substring(0, 5)}...{player.wallet.substring(player.wallet.length - 4)}
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={onDisconnect}
-                className="p-2 rounded-lg bg-red-950/40 hover:bg-red-900/60 border border-red-800/50 text-red-300 transition-colors"
-                title="Đăng xuất ví"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
+    <header className="portal-header">
+      <div className="portal-header-inner">
+        <button type="button" className="portal-brand" onClick={() => navigate(onOpenHome)} aria-label="Về trang chủ Hào Khí Đại Việt">
+          <img src="/drum_icon.svg" alt="" />
+          <span>Hào Khí <strong>Đại Việt</strong></span>
+        </button>
+        <nav className="portal-desktop-nav" aria-label="Điều hướng chính">
+          {nav.map(({ label, action, active }) => <button type="button" key={label} onClick={() => navigate(action)} aria-current={active ? 'page' : undefined}>{label}</button>)}
+        </nav>
+        <div className="portal-header-actions">
+          <span className="portal-network" title="Mạng thử nghiệm Solana">● <span>Solana Devnet</span></span>
+          {connected && player ? (
+            <div className="portal-account">
+              <span title={player.wallet}><Wallet aria-hidden="true" /> <strong>{player.username}</strong></span>
+              <button type="button" onClick={onDisconnect} title="Ngắt kết nối ví" aria-label="Ngắt kết nối ví"><LogOut aria-hidden="true" /></button>
             </div>
           ) : (
-            <button
-              onClick={onOpenWalletModal}
-              className="flex min-h-11 items-center space-x-2 px-3 sm:px-4 py-2 rounded-lg bg-gradient-to-r from-imperial-crimson to-imperial-darkred hover:from-red-600 hover:to-imperial-crimson text-imperial-lightgold border border-imperial-gold/60 font-semibold text-xs sm:text-sm shadow-md hover:shadow-red-900/40 transition-all cursor-pointer"
-            >
-              <Wallet className="w-4 h-4" />
-              <span className="sm:hidden">Ví</span>
-              <span className="hidden sm:inline">{player?.is_guest ? 'Nối Ví (Tùy Chọn)' : 'Kết Nối Ví'}</span>
-            </button>
+            <button type="button" className="portal-connect" onClick={onOpenWalletModal}><Wallet aria-hidden="true" /><span>{player?.is_guest ? 'Nối ví' : 'Kết nối ví'}</span></button>
           )}
+          <button type="button" className="portal-menu-trigger" aria-label={menuOpen ? 'Đóng menu' : 'Mở menu'} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}</button>
         </div>
-
       </div>
-      {isWalletConnected && (
-        <nav aria-label="Khu vực trò chơi" className="lg:hidden max-w-7xl mx-auto mt-3 flex items-center gap-2 overflow-x-auto pb-1">
-          {onOpenAdvisorCouncil && (
-            <button type="button" onClick={onOpenAdvisorCouncil} className="flex min-h-11 shrink-0 items-center gap-2 rounded-lg border border-amber-600/40 bg-amber-950/40 px-3 text-xs font-semibold text-amber-200">
-              <Crown className="h-4 w-4" aria-hidden="true" /> Quân Sư
-            </button>
-          )}
-          {onOpenMarketplace && (
-            <button type="button" onClick={onOpenMarketplace} className="flex min-h-11 shrink-0 items-center gap-2 rounded-lg border border-purple-600/40 bg-purple-950/40 px-3 text-xs font-semibold text-purple-200">
-              <ShoppingBag className="h-4 w-4" aria-hidden="true" /> Chợ Tướng
-            </button>
-          )}
-          {onOpenDefiHub && (
-            <button type="button" onClick={onOpenDefiHub} className="flex min-h-11 shrink-0 items-center gap-2 rounded-lg border border-emerald-600/40 bg-emerald-950/40 px-3 text-xs font-semibold text-emerald-200">
-              <ArrowLeftRight className="h-4 w-4" aria-hidden="true" /> Giao Thương
-            </button>
-          )}
-        </nav>
-      )}
+      {menuOpen && <nav className="portal-mobile-nav" aria-label="Điều hướng di động">
+        {nav.map(({ label, action, active, Icon }) => <button type="button" key={label} onClick={() => navigate(action)} aria-current={active ? 'page' : undefined}><Icon aria-hidden="true" />{label}</button>)}
+      </nav>}
     </header>
   );
 };

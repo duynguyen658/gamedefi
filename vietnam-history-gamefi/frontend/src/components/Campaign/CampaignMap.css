@@ -1,0 +1,45 @@
+.campaign-screen { background: #061421; }
+.campaign-hero { min-height: 360px; border-bottom: 1px solid #aa885b; background: linear-gradient(90deg, #061421f7, #061421cd 47%, #06142153), url('/dai-viet-worlds.webp') 50% center / 300% 100%; }
+.campaign-hero-inner { width: min(100%, 1400px); margin: auto; padding: 26px clamp(20px, 4.2vw, 70px) 40px; }
+.campaign-back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 31px; color: #d7e0dd; font-size: .7rem; }
+.campaign-back:hover { color: #f3c981; }
+.campaign-back svg { width: 15px; height: 15px; }
+.campaign-kicker { margin: 0 0 5px; color: #ebbf77; font-size: .67rem; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+.campaign-hero h1 { margin: 0; color: #f6f0e3; font-family: 'Noto Serif', 'Be Vietnam Pro', serif; font-size: clamp(2.4rem, 4.8vw, 4.7rem); line-height: 1.13; letter-spacing: -.05em; }
+.campaign-hero h1 span { color: #f2cb83; }
+.campaign-hero p:not(.campaign-kicker) { max-width: 56ch; margin: 12px 0 0; color: #d5dfe1; font-size: .86rem; line-height: 1.65; }
+.campaign-deploy, .campaign-main-copy button { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; margin-top: 22px; padding: 0 16px; border: 1px solid #e2b971; border-radius: 4px; background: linear-gradient(#a92e25, #781611); color: #faecd2; font-size: .78rem; font-weight: 800; }
+.campaign-deploy:hover, .campaign-main-copy button:hover { filter: brightness(1.15); }
+.campaign-deploy svg, .campaign-main-copy button svg { width: 16px; height: 16px; }
+.campaign-container { width: min(100%, 1400px); margin: auto; padding: 0 clamp(20px, 4.2vw, 70px) 70px; }
+.campaign-summary { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; margin-top: -24px; }
+.campaign-summary > div { display: flex; align-items: center; gap: 11px; min-width: 0; min-height: 72px; padding: 12px; border: 1px solid #5b7380; border-radius: 5px; background: #0b2231; box-shadow: 0 8px 24px #020a12aa; }
+.campaign-summary svg { flex: none; width: 32px; height: 32px; padding: 6px; border: 1px solid #c09b64; border-radius: 5px; color: #eec67e; }
+.campaign-summary span { display: grid; min-width: 0; }
+.campaign-summary small { color: #a8bcc5; font-size: .63rem; }
+.campaign-summary strong { overflow: hidden; color: #f5ead6; font-size: .87rem; text-overflow: ellipsis; white-space: nowrap; }
+.campaign-content { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(300px, .75fr); gap: 14px; margin-top: 24px; }
+.campaign-main-card, .campaign-other { overflow: hidden; border: 1px solid #6a7880; border-radius: 6px; background: #0b2231; }
+.campaign-main-art { height: 245px; background: url('/dai-viet-hero.webp') 83% 64% / cover; }
+.campaign-main-copy { padding: 21px; }
+.campaign-available { display: inline-block; padding: 5px 8px; border: 1px solid #b59256; border-radius: 3px; color: #f3ca81; font-size: .62rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.campaign-main-copy h2, .campaign-other h2 { margin: 10px 0 0; color: #f7ecdd; font-family: 'Noto Serif', 'Be Vietnam Pro', serif; font-size: 1.6rem; }
+.campaign-main-copy p, .campaign-other > p:not(.campaign-kicker) { max-width: 60ch; margin: 8px 0 0; color: #c1ced1; font-size: .77rem; line-height: 1.7; }
+.campaign-terrain { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 13px; }
+.campaign-terrain span { padding: 5px 9px; border: 1px solid #826d4e; border-radius: 20px; color: #ead2a6; font-size: .63rem; }
+.campaign-other { padding: 21px; }
+.campaign-other h2 { margin-top: 0; }
+.campaign-other ul { display: grid; gap: 8px; margin: 20px 0 0; padding: 0; list-style: none; }
+.campaign-other li { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #506974; border-radius: 4px; background: #102b3c; }
+.campaign-other li svg { flex: none; width: 25px; height: 25px; color: #e9bf74; }
+.campaign-other li span { display: grid; min-width: 0; gap: 2px; }
+.campaign-other li strong { color: #f0e6d7; font-size: .75rem; }
+.campaign-other li small { overflow: hidden; color: #aebfc5; font-size: .62rem; text-overflow: ellipsis; white-space: nowrap; }
+.campaign-other li em { margin-left: auto; color: #d5aa6e; font-size: .58rem; font-style: normal; white-space: nowrap; }
+.campaign-screen button:focus-visible { outline: 2px solid #f5d28c; outline-offset: 3px; }
+@media (max-width: 850px) { .campaign-content { grid-template-columns: 1fr; } }
+@media (max-width: 600px) {
+  .campaign-hero { background: linear-gradient(0deg, #061421f8, #061421dc), url('/dai-viet-worlds.webp') 50% center / 300% 100%; }
+  .campaign-summary { grid-template-columns: 1fr; }
+  .campaign-main-art { height: 190px; }
+}

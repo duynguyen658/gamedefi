@@ -17,7 +17,7 @@ export const MAP_LOCATIONS: MapLocation[] = [
     location_id: 'thang_long',
     chapter_id: 1,
     name: 'Thăng Long',
-    sub_label: 'Imperial Capital (Nhà Lý)',
+    sub_label: 'Kinh đô Nhà Lý',
     flag_glyph: '李',
     x: 44,
     y: 34,
@@ -32,7 +32,7 @@ export const MAP_LOCATIONS: MapLocation[] = [
     x: 61,
     y: 24,
     is_target: true,
-    tooltip: 'Strategic Point',
+    tooltip: 'Điểm chiến lược',
   },
   {
     location_id: 'lam_son',
@@ -98,27 +98,27 @@ function buildBachDangHexes(): HexTile[] {
   const hill = tiles.find(t => t.col === 1 && t.row === 3)!;
   hill.terrain = 'hill';
   hill.zone = 'ally';
-  hill.label = 'High-ground Hill';
-  hill.effect = '+20% Archer range';
+  hill.label = 'Gò cao';
+  hill.effect = '+20% tầm bắn cung thủ';
 
   // Ô rừng tre / rừng ngập mặn (ẩn nấp)
   const forest = tiles.find(t => t.col === 6 && t.row === 5)!;
   forest.terrain = 'forest';
-  forest.label = 'Dense Mangrove/Bamboo forest';
-  forest.effect = 'Cover & Ambush concealment';
+  forest.label = 'Rừng ngập mặn';
+  forest.effect = 'Ẩn nấp và phục kích';
 
   // Ô bãi lầy (giảm tốc độ di chuyển)
   const mud = tiles.find(t => t.col === 7 && t.row === 4)!;
   mud.terrain = 'mud';
-  mud.label = 'Muddy tidal flats';
-  mud.effect = '-Movement penalty';
+  mud.label = 'Bãi lầy triều';
+  mud.effect = 'Giảm tốc độ di chuyển';
 
   // Ô cọc ngầm — hiểm hoạ cho thuyền địch
   const stakes = tiles.find(t => t.col === 9 && t.row === 2)!;
   stakes.terrain = 'stakes';
   stakes.zone = 'neutral';
-  stakes.label = 'Submerged Wooden River Stakes';
-  stakes.effect = 'Anti-ship hazard';
+  stakes.label = 'Cọc ngầm Bạch Đằng';
+  stakes.effect = 'Cản thuyền địch';
 
   return tiles;
 }
@@ -128,7 +128,7 @@ export const BACH_DANG_HEXES: HexTile[] = buildBachDangHexes();
 export const BACH_DANG_UNITS: BattleUnit[] = [
   {
     unit_id: 'p1',
-    name: 'Trần Spearmen',
+    name: 'Thương binh Trần',
     side: 'player',
     icon: 'spear',
     col: 2,
@@ -137,7 +137,7 @@ export const BACH_DANG_UNITS: BattleUnit[] = [
   },
   {
     unit_id: 'p2',
-    name: 'Trần Elephant Corps',
+    name: 'Tượng binh Trần',
     side: 'player',
     icon: 'elephant',
     col: 1,
@@ -146,7 +146,7 @@ export const BACH_DANG_UNITS: BattleUnit[] = [
   },
   {
     unit_id: 'p3',
-    name: 'Trần Archer Guard',
+    name: 'Cung thủ Trần',
     side: 'player',
     icon: 'archer',
     col: 1,
@@ -155,7 +155,7 @@ export const BACH_DANG_UNITS: BattleUnit[] = [
   },
   {
     unit_id: 'p4',
-    name: 'Trần Spearmen (2nd)',
+    name: 'Thương binh Trần II',
     side: 'player',
     icon: 'spear',
     col: 2,
@@ -164,7 +164,7 @@ export const BACH_DANG_UNITS: BattleUnit[] = [
   },
   {
     unit_id: 'e1',
-    name: 'Mongol Cavalry',
+    name: 'Kỵ binh Nguyên',
     side: 'enemy',
     icon: 'cavalry',
     col: 6,
@@ -173,7 +173,7 @@ export const BACH_DANG_UNITS: BattleUnit[] = [
   },
   {
     unit_id: 'e2',
-    name: 'Mongol Vanguard',
+    name: 'Tiền quân Nguyên',
     side: 'enemy',
     icon: 'spear',
     col: 7,

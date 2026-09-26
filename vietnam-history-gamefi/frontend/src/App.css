@@ -1,0 +1,58 @@
+.app-root {
+  min-width: 0;
+  background:
+    radial-gradient(circle at 8% 40%, #16313a66, transparent 30%),
+    radial-gradient(circle at 92% 80%, #3b241b50, transparent 30%),
+    #06131f;
+  color: #f2ecdf;
+}
+.app-root > main { min-width: 0; }
+.app-screen { position: relative; width: 100%; min-height: 70vh; color: #f3ede0; }
+.app-screen h2, .app-screen h3 { font-family: 'Noto Serif', 'Be Vietnam Pro', serif; letter-spacing: -.025em; }
+.app-screen [class*="bg-imperial-lacquer"] { background-color: #0c2231 !important; }
+.app-screen [class*="bg-imperial-obsidian"] { background-color: #071724 !important; }
+.app-screen [class*="bg-imperial-slate"] { background-color: #152f3b !important; }
+.app-screen [class*="border-imperial-border"] { border-color: #526873 !important; }
+.app-screen [class*="bg-clip-text"] { background: none !important; color: #f3ce88 !important; -webkit-text-fill-color: #f3ce88 !important; }
+.app-screen [class*="rounded-2xl"], .app-screen [class*="rounded-xl"] { border-radius: 7px !important; }
+.app-screen button:focus-visible, .app-screen a:focus-visible { outline: 2px solid #f5d28e; outline-offset: 3px; }
+.market-banner { background: linear-gradient(90deg, #071521f7 0%, #0a1e2de8 55%, #07152191 100%), url('/dai-viet-worlds.webp') 0% center / 300% 100%; }
+.market-empty { display: grid; grid-template-columns: minmax(220px, .85fr) minmax(330px, 1.15fr); min-height: 285px; overflow: hidden; border-radius: 6px; background: #0a2230; }
+.market-empty-art { background: linear-gradient(90deg, #07152100 70%, #0a2230), url('/dai-viet-legends.webp') 0% 33% / 400% auto; }
+.market-empty-copy { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: 32px clamp(24px, 4vw, 55px); }
+.market-empty-copy > span { color: #e3b873; font-size: .62rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+.market-empty-copy h2 { margin: 9px 0 8px; color: #f3ddaf; font-size: clamp(1.3rem, 2.2vw, 2rem); }
+.market-empty-copy p { max-width: 55ch; color: #bfd0d2; font-size: .78rem; line-height: 1.65; }
+.market-empty-copy button { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; margin-top: 18px; padding: 8px 12px; border: 1px solid #c89b5d; border-radius: 4px; color: #f3d393; font-size: .73rem; font-weight: 750; }
+.market-empty-copy button:hover { background: #723027; }
+.market-empty-copy button svg { width: 15px; height: 15px; transform: rotate(180deg); }
+.advisor-banner { background: linear-gradient(90deg, #071521f5 0%, #0a1e2de6 56%, #0715218a), url('/dai-viet-worlds.webp') 100% center / 300% 100%; }
+.advisor-empty { border: 1px solid #6b7480; border-radius: 6px; background: #0b2331; }
+.dex-screen-hero { border-radius: 6px; background: linear-gradient(90deg, #071521f5 0%, #0b2231ee 55%, #0715219c), url('/dai-viet-worlds.webp') 50% center / 300% 100%; }
+.battle-intro { min-height: 125px; margin-bottom: 12px; padding: 18px 22px; border: 1px solid #8b744f; border-radius: 6px; background: linear-gradient(90deg, #071521f7, #071521c7 60%, #07152180), url('/dai-viet-worlds.webp') 50% center / 300% 100%; }
+.battle-intro p { margin: 0 0 4px; color: #eec477; font-size: .63rem; font-weight: 800; letter-spacing: .17em; text-transform: uppercase; }
+.battle-intro h1 { margin: 0; color: #f5d08b; font-family: 'Noto Serif', 'Be Vietnam Pro', serif; font-size: clamp(1.7rem, 2.7vw, 2.7rem); line-height: 1.25; }
+.battle-intro span { display: block; margin-top: 3px; color: #d5e0df; font-size: .73rem; }
+.battle-board { background: linear-gradient(#0a2430e9, #071e21ef), url('/dai-viet-worlds.webp') 50% center / 300% 100%; }
+.faction-select-heading { border-radius: 6px; background: linear-gradient(90deg, #071521f7, #071521d9 55%, #07152166), url('/dai-viet-hero.webp') 81% center / cover; }
+.faction-detail { background: linear-gradient(125deg, #0d2636, #071724) !important; }
+.app-footer { border-top: 1px solid #82694b; background: #04101b; }
+.app-footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; width: min(100%, 1500px); margin: auto; padding: 22px clamp(20px, 4.2vw, 70px); }
+.app-footer-brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.app-footer-brand img { width: 38px; height: 38px; }
+.app-footer-brand div { display: grid; gap: 2px; }
+.app-footer-brand strong { color: #efc77f; font-family: 'Noto Serif', 'Be Vietnam Pro', serif; font-size: .9rem; text-transform: uppercase; }
+.app-footer-brand span { color: #9fb4bb; font-size: .63rem; }
+.app-footer nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 20px; }
+.app-footer nav button { color: #c6d2d4; font-size: .68rem; }
+.app-footer nav button:hover { color: #f4c77a; }
+.app-footer-github { display: grid; flex: none; place-items: center; width: 38px; height: 38px; border: 1px solid #617784; border-radius: 50%; color: #d3dee0; transition: color .2s ease, border-color .2s ease; }
+.app-footer-github:hover { border-color: #e6c17b; color: #f5d28e; }
+.app-footer-github svg { width: 20px; height: 20px; }
+.app-footer :is(button, a):focus-visible { outline: 2px solid #f5d28e; outline-offset: 3px; }
+@media (max-width: 700px) {
+  .market-empty { grid-template-columns: 1fr; }
+  .market-empty-art { min-height: 165px; background: linear-gradient(0deg, #0a2230, #0a223000), url('/dai-viet-legends.webp') 0% 32% / 400% auto; }
+  .app-footer-inner { align-items: flex-start; flex-direction: column; }
+  .app-footer nav { justify-content: flex-start; }
+}

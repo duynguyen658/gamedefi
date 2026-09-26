@@ -59,8 +59,8 @@ export const DefiHub: React.FC<DefiHubProps> = ({ player, onBack, onPlayDrum }) 
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1480px] px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
-      <div className="flex flex-col gap-5 border-b border-imperial-border pb-7 sm:flex-row sm:items-end sm:justify-between">
+    <div className="app-screen mx-auto w-full max-w-[1480px] px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+      <div className="dex-screen-hero flex flex-col gap-5 border border-imperial-border p-5 pb-7 sm:flex-row sm:items-end sm:justify-between sm:p-7">
         <div>
           <button
             onClick={() => { onPlayDrum(); onBack(); }}
@@ -74,7 +74,7 @@ export const DefiHub: React.FC<DefiHubProps> = ({ player, onBack, onPlayDrum }) 
             <span>Hào Khí Đại Việt · Khu Giao Thương</span>
           </div>
           <h2 className="font-display text-3xl font-black text-imperial-lightgold sm:text-4xl">
-            {module === 'dex' ? 'Khu Giao Thương' : 'Kinh Tế On-Chain'}
+            {module === 'dex' ? 'DEX HKDV / SOL' : 'Kinh Tế On-Chain'}
           </h2>
           <p className="mt-3 max-w-[65ch] text-sm leading-relaxed text-slate-300">
             {module === 'dex'

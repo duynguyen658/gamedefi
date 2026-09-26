@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useState } from 'react';
-import { ChainType, PreGameStep, MapLocation, PlayerResources, Player } from './types';
+import { ChainType, PreGameStep, MapLocation, Player } from './types';
 import { useWallet } from './hooks/useWallet';
 import { useFaction } from './hooks/useFaction';
 import { useAudio } from './hooks/useAudio';
@@ -9,18 +9,17 @@ import { WalletModal } from './components/Wallet/WalletModal';
 import { SplashScreen } from './components/PreGame/SplashScreen';
 import { FactionSelection } from './components/PreGame/FactionSelection';
 import { PreGameLobby } from './components/PreGame/PreGameLobby';
-import { BattleTransition } from './components/PreGame/BattleTransition';
 import { CampaignMap } from './components/Campaign/CampaignMap';
 import { BattleScreen } from './components/Battle/BattleScreen';
 import { AdvisorCouncil } from './components/Advisor/AdvisorCouncil';
 import { AdvisorMarketplace } from './components/Marketplace/AdvisorMarketplace';
 import { DefiHub } from './components/Defi/DefiHub';
+import './App.css';
 
 export const App: React.FC = () => {
   const [step, setStep] = useState<PreGameStep>('splash');
   const [isWalletModalOpen, setIsWalletModalOpen] = useState<boolean>(false);
   const [selectedLocation, setSelectedLocation] = useState<MapLocation | null>(null);
-  const [resources] = useState<PlayerResources>({ rice: 4500, gold: 12800, morale: 85 });
 
   useLayoutEffect(() => {
     if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual';
@@ -31,7 +30,7 @@ export const App: React.FC = () => {
   const [guestPlayer, setGuestPlayer] = useState<Player | null>(null);
 
   // Audio system
-  const { isMuted, toggleMute, playDrum, playGong, playSwordShink } = useAudio();
+  const { playDrum, playGong, playSwordShink } = useAudio();
 
   // Wallet system
   const {
@@ -105,30 +104,54 @@ export const App: React.FC = () => {
     setStep('splash');
   };
 
+  const handleOpenCampaign = () => {
+    if (!effectivePlayer) { void handleEnterF2P(); return; }
+    setStep(effectivePlayer.faction_id ? 'campaign_map' : 'faction_select');
+  };
+
+  const handleOpenAdvisors = () => {
+    if (!effectivePlayer) { void handleEnterF2P(); return; }
+    setStep(effectivePlayer.faction_id ? 'advisor_council' : 'faction_select');
+  };
+
+  const handleOpenDex = () => {
+    if (!effectivePlayer || effectivePlayer.is_guest) setIsWalletModalOpen(true);
+    else setStep('defi');
+  };
+
+  const handleOpenLeaderboard = () => {
+    setStep('splash');
+    window.setTimeout(() => document.getElementById('leaderboard')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+  };
+
   return (
-    <div className="min-h-screen bg-imperial-obsidian text-slate-100 flex flex-col selection:bg-amber-600 selection:text-white relative">
+    <div className="app-root min-h-screen flex flex-col selection:bg-amber-600 selection:text-white relative">
       
       {/* Ancient Header Navigation */}
       <Header
         player={effectivePlayer ?? null}
+        activeStep={step}
+        onOpenHome={() => setStep('splash')}
+        onOpenCampaign={handleOpenCampaign}
+        onOpenAdvisors={handleOpenAdvisors}
+        onOpenLeaderboard={handleOpenLeaderboard}
         onOpenWalletModal={() => setIsWalletModalOpen(true)}
         onDisconnect={handleDisconnect}
-        isMuted={isMuted}
-        onToggleMute={toggleMute}
-        onOpenAdvisorCouncil={() => setStep('advisor_council')}
         onOpenMarketplace={() => setStep('marketplace')}
-        onOpenDefiHub={() => {
-          if (!effectivePlayer || effectivePlayer.is_guest) setIsWalletModalOpen(true);
-          else setStep('defi');
-        }}
+        onOpenDex={handleOpenDex}
       />
 
       {/* Main Pre-Game Flow Routing */}
       <main className="flex-1 flex flex-col">
         {step === 'splash' && (
           <SplashScreen
+            player={effectivePlayer ?? null}
             onEnterF2P={handleEnterF2P}
             onEnterWithWallet={handleEnterWithWallet}
+            onOpenCampaign={handleOpenCampaign}
+            onOpenAdvisors={handleOpenAdvisors}
+            onOpenMarketplace={() => setStep('marketplace')}
+            onOpenDex={handleOpenDex}
             onPlayDrum={playDrum}
             onPlayGong={playGong}
           />
@@ -161,10 +184,10 @@ export const App: React.FC = () => {
             player={effectivePlayer}
             faction={selectedFaction}
             onChangeFaction={() => setStep('faction_select')}
-            onEnterBattle={() => setStep('battle_transition')}
+            onEnterBattle={() => setStep('campaign_map')}
             onOpenAdvisorCouncil={() => setStep('advisor_council')}
             onOpenMarketplace={() => setStep('marketplace')}
-            onOpenDefiHub={() => setStep('defi')}
+            onOpenDefiHub={handleOpenDex}
             onPlayDrum={playDrum}
             onPlayGong={playGong}
             onPlaySword={playSwordShink}
@@ -185,7 +208,7 @@ export const App: React.FC = () => {
         {step === 'marketplace' && (
           <AdvisorMarketplace
             player={effectivePlayer ?? null}
-            onBack={() => setStep(effectivePlayer?.faction_id ? 'lobby' : 'advisor_council')}
+            onBack={() => setStep(effectivePlayer?.faction_id ? 'lobby' : 'splash')}
             onOpenWalletModal={() => setIsWalletModalOpen(true)}
             onPlayDrum={playDrum}
             onPlaySword={playSwordShink}
@@ -200,27 +223,15 @@ export const App: React.FC = () => {
           />
         )}
 
-        {step === 'battle_transition' && effectivePlayer && (
-          <BattleTransition
-            player={effectivePlayer}
-            faction={selectedFaction}
-            onReturnToLobby={() => setStep('lobby')}
-            onEnterCampaign={() => setStep('campaign_map')}
-            onPlayDrum={playDrum}
-          />
-        )}
-
         {step === 'campaign_map' && effectivePlayer && (
           <CampaignMap
             player={effectivePlayer}
             faction={selectedFaction}
-            resources={resources}
             onDeploy={(location) => {
               setSelectedLocation(location);
               setStep('battle');
             }}
             onBackToLobby={() => setStep('lobby')}
-            onPlayDrum={playDrum}
             onPlayGong={playGong}
           />
         )}
@@ -250,15 +261,22 @@ export const App: React.FC = () => {
         onPlayGong={playGong}
       />
 
-      <footer className="w-full border-t border-imperial-border/60 bg-imperial-lacquer/80 px-4 py-4">
-        <div className="max-w-7xl mx-auto flex justify-center">
+      <footer className="app-footer">
+        <div className="app-footer-inner">
+          <div className="app-footer-brand"><img src="/drum_icon.svg" alt="" /><div><strong>Hào Khí Đại Việt</strong><span>Kiêu hùng quá khứ. Kiến tạo tương lai.</span></div></div>
+          <nav aria-label="Liên kết cuối trang">
+            <button type="button" onClick={() => setStep('splash')}>Trang chủ</button>
+            <button type="button" onClick={handleOpenCampaign}>Chiến dịch</button>
+            <button type="button" onClick={() => setStep('marketplace')}>Marketplace</button>
+            <button type="button" onClick={handleOpenDex}>DEX</button>
+          </nav>
           <a
             href="https://github.com/duynguyen658/gamedefi"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Mở GitHub của Hào Khí Đại Việt"
             title="GitHub của Hào Khí Đại Việt"
-            className="flex min-h-12 min-w-12 items-center justify-center rounded-lg text-imperial-lightgold/80 hover:text-imperial-lightgold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-imperial-gold transition-colors"
+            className="app-footer-github"
           >
             <svg viewBox="0 0 16 16" className="h-6 w-6" fill="currentColor" aria-hidden="true">
               <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.65 7.65 0 018 4.44c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />

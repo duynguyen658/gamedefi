@@ -65,7 +65,6 @@ export type PreGameStep =
   | 'advisor_council'  // Hội Đồng Quân Sư (xem và trang bị tướng cố vấn)
   | 'marketplace'      // Chợ Tướng Cố Vấn (mua, bán, trao đổi P2P trên blockchain)
   | 'defi'             // Trung tâm tài chính và DEX của người chơi
-  | 'battle_transition' // Chuyển cảnh tiến vào trận chiến
   | 'campaign_map'      // Bản đồ Chiến Dịch Lịch Sử (chọn mặt trận)
   | 'battle';           // Bàn cờ chiến thuật theo lượt (hex tactical battle)
 

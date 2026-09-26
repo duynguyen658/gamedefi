@@ -59,24 +59,31 @@ export const AdvisorCouncil: React.FC<AdvisorCouncilProps> = ({
   const [advisors, setAdvisors] = useState<Advisor[]>([]);
   const [army, setArmy] = useState<Army | null>(null);
   const [selectedAdvisor, setSelectedAdvisor] = useState<Advisor | null>(null);
-  const [filterFaction, setFilterFaction] = useState<number | null>(faction?.faction_id || null);
+  const [filterFaction, setFilterFaction] = useState<number | null>(null);
   const [filterRarity, setFilterRarity] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState<boolean>(false);
 
   useEffect(() => {
     async function load() {
       setLoading(true);
-      const advs = await apiService.getAdvisors();
-      setAdvisors(advs);
-      const a = await apiService.getPlayerArmy(player.wallet);
-      setArmy(a);
-      if (advs.length > 0) {
-        const equipped = advs.find(ad => ad.id === a.equipped_advisor_id);
-        setSelectedAdvisor(equipped || advs[0]);
+      setLoadError(false);
+      try {
+        const advs = await apiService.getAdvisors();
+        setAdvisors(advs);
+        const a = await apiService.getPlayerArmy(player.wallet);
+        setArmy(a);
+        if (advs.length > 0) {
+          const equipped = advs.find(ad => ad.id === a?.equipped_advisor_id);
+          setSelectedAdvisor(equipped || advs[0]);
+        }
+      } catch {
+        setLoadError(true);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
-    load();
+    void load();
   }, [player.wallet]);
 
   const handleEquip = async (advisor: Advisor) => {
@@ -97,7 +104,7 @@ export const AdvisorCouncil: React.FC<AdvisorCouncilProps> = ({
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="app-screen advisor-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       
       {/* Navigation Top Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
@@ -121,7 +128,7 @@ export const AdvisorCouncil: React.FC<AdvisorCouncilProps> = ({
       </div>
 
       {/* Header Banner */}
-      <div className="relative rounded-2xl bg-gradient-to-r from-imperial-lacquer via-imperial-slate to-imperial-obsidian border border-imperial-border p-6 mb-8 overflow-hidden">
+      <div className="advisor-banner relative rounded-2xl border border-imperial-border p-6 mb-8 overflow-hidden">
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div>
             <div className="flex items-center space-x-2 text-imperial-lightgold text-xs font-bold uppercase tracking-wider mb-1">
@@ -156,7 +163,7 @@ export const AdvisorCouncil: React.FC<AdvisorCouncilProps> = ({
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-xs text-slate-400 mr-2 flex items-center gap-1">
             <Users className="w-3.5 h-3.5" />
-            <span>Tộc hệ:</span>
+              <span>Triều đại:</span>
           </span>
           <button
             onClick={() => setFilterFaction(null)}
@@ -173,7 +180,7 @@ export const AdvisorCouncil: React.FC<AdvisorCouncilProps> = ({
                 filterFaction === faction.faction_id ? 'bg-amber-600 text-white' : 'bg-imperial-obsidian text-slate-300 hover:text-white'
               }`}
             >
-              {faction.name} (Tộc Bạn)
+              {faction.name} (đã chọn)
             </button>
           )}
         </div>
@@ -191,7 +198,7 @@ export const AdvisorCouncil: React.FC<AdvisorCouncilProps> = ({
                 filterRarity === r ? 'bg-amber-500/30 text-amber-300 border border-amber-500/50' : 'bg-imperial-obsidian text-slate-400 hover:text-white'
               }`}
             >
-              {r}
+              {r === 'legendary' ? 'Huyền thoại' : r === 'epic' ? 'Sử thi' : 'Hiếm'}
             </button>
           ))}
         </div>
@@ -205,7 +212,12 @@ export const AdvisorCouncil: React.FC<AdvisorCouncilProps> = ({
           {loading ? (
             <div className="col-span-2 text-center py-12 text-slate-400">Đang triệu tập danh tướng Đại Việt...</div>
           ) : filteredAdvisors.length === 0 ? (
-            <div className="col-span-2 text-center py-12 text-slate-500">Không tìm thấy tướng cố vấn phù hợp với bộ lọc.</div>
+            <div className="advisor-empty col-span-2 text-center py-12">
+              <Crown className="mx-auto mb-3 h-8 w-8 text-amber-300" aria-hidden="true" />
+              <h2 className="text-lg text-imperial-lightgold">{loadError ? 'Chưa tải được danh sách tướng' : advisors.length === 0 ? 'Danh sách tướng đang trống' : 'Chưa có tướng phù hợp'}</h2>
+              <p className="mt-2 text-sm text-slate-300">{loadError ? 'Hãy kiểm tra kết nối và quay lại sau.' : advisors.length === 0 ? 'Danh tướng sẽ xuất hiện tại đây khi dữ liệu trò chơi được cập nhật.' : 'Thử xem tất cả triều đại và bỏ lọc phẩm cấp để khám phá thêm.'}</p>
+              {advisors.length > 0 && <button type="button" onClick={() => { setFilterFaction(null); setFilterRarity(null); }} className="mt-4 border border-imperial-gold px-4 py-2 text-sm text-imperial-lightgold">Xóa bộ lọc</button>}
+            </div>
           ) : (
             filteredAdvisors.map((adv) => {
               const isEquipped = army?.equipped_advisor_id === adv.id;

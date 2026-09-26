@@ -72,23 +72,23 @@ export const FactionSelection: React.FC<FactionSelectionProps> = ({
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="app-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       
       {/* Top Breadcrumb & Title */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-4 border-b border-imperial-border">
+      <div className="faction-select-heading flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 p-5 sm:p-7 border border-imperial-border">
         <div>
           <button
             onClick={onBackToSplash}
             className="inline-flex items-center space-x-1.5 text-xs text-slate-400 hover:text-imperial-lightgold transition-colors mb-2 cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Quay lại Màn hình Khởi đầu</span>
+            <span>Về trang chủ</span>
           </button>
           <h2 className="text-2xl sm:text-3xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-imperial-lightgold to-yellow-500">
-            Chiêu Mộ Tộc Hệ &bull; Lựa Chọn Triều Đại
+            Chọn Triều Đại
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 mt-1">
-            Chọn một trong 8 triều đại hào hùng để khởi đầu sự nghiệp giang sơn. Hoàn toàn miễn phí, không bắt buộc đúc NFT!
+            Bước vào sử Việt cùng một trong tám triều đại. Chơi miễn phí, không bắt buộc đúc NFT.
           </p>
         </div>
 
@@ -120,7 +120,7 @@ export const FactionSelection: React.FC<FactionSelectionProps> = ({
       </div>
 
       {/* Inspector / Detail Banner for Selected Faction */}
-      <div className="bg-imperial-lacquer/90 border-2 border-imperial-gold/70 rounded-2xl p-6 sm:p-8 gold-glow relative overflow-hidden corner-ornament">
+      <div className="faction-detail bg-imperial-lacquer/90 border border-imperial-gold/70 rounded-2xl p-6 sm:p-8 relative overflow-hidden">
         <div className="absolute -right-10 -bottom-10 text-9xl font-serif text-white/[0.03] pointer-events-none select-none">
           {selectedFaction.coat_of_arms?.charAt(0) || '越'}
         </div>
@@ -143,7 +143,7 @@ export const FactionSelection: React.FC<FactionSelectionProps> = ({
             </h3>
 
             {selectedFaction.motto && (
-              <blockquote className="border-l-4 border-imperial-gold pl-4 py-1 italic text-amber-200/90 text-sm sm:text-base font-serif">
+              <blockquote className="border-t border-imperial-gold pt-3 italic text-amber-200/90 text-sm sm:text-base font-serif">
                 "{selectedFaction.motto}"
               </blockquote>
             )}

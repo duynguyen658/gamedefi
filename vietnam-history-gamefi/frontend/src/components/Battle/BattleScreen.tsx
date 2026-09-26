@@ -50,10 +50,10 @@ const TERRAIN_NAME_VI: Record<TerrainType, string> = {
 };
 
 const ACTIONS: { key: TacticalAction; label: string; icon: React.ReactNode }[] = [
-  { key: 'move', label: 'Move', icon: <Move className="w-4 h-4" /> },
-  { key: 'attack', label: 'Attack', icon: <Swords className="w-4 h-4" /> },
-  { key: 'formation', label: 'Formation', icon: <LayoutGrid className="w-4 h-4" /> },
-  { key: 'fire_arrow', label: 'Special - Fire Arrow', icon: <Flame className="w-4 h-4" /> },
+  { key: 'move', label: 'Di chuyển', icon: <Move className="w-4 h-4" /> },
+  { key: 'attack', label: 'Tấn công', icon: <Swords className="w-4 h-4" /> },
+  { key: 'formation', label: 'Đội hình', icon: <LayoutGrid className="w-4 h-4" /> },
+  { key: 'fire_arrow', label: 'Hỏa tiễn', icon: <Flame className="w-4 h-4" /> },
 ];
 
 export const BattleScreen: React.FC<BattleScreenProps> = ({
@@ -204,15 +204,21 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   const playerInitiative = turnSide === 'player';
 
   return (
-    <div className="max-w-[1500px] mx-auto px-3 sm:px-4 lg:px-6 py-4">
+    <div className="app-screen battle-screen max-w-[1500px] mx-auto px-3 sm:px-4 lg:px-6 py-4">
 
       <button
         onClick={onExitBattle}
         className="mb-3 inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-imperial-lightgold transition-colors cursor-pointer"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
-        <span>Rời Trận Địa &bull; Về Bản Đồ Chiến Dịch</span>
+          <span>Về chiến dịch</span>
       </button>
+
+      <div className="battle-intro">
+        <p>Chiến dịch lịch sử · Bạch Đằng</p>
+        <h1>Thủy chiến Bạch Đằng</h1>
+        <span>Chọn quân, đọc địa hình và hành động theo lượt.</span>
+      </div>
 
       {/* ------------------------------------------------------------------ */}
       {/* Top HUD: environment / tide meter / initiative timeline             */}
@@ -220,17 +226,17 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
         <div className="flex items-center gap-2 bg-imperial-lacquer/90 border border-imperial-border rounded-xl px-3 py-2 text-xs">
           <Sun className="w-4 h-4 text-amber-300" />
-          <span className="text-slate-300">Battlefield Environment:</span>
-          <span className="font-bold text-white">Clear Day</span>
+          <span className="text-slate-300">Bối cảnh:</span>
+          <span className="font-bold text-white">Ban ngày</span>
         </div>
 
         <div className="bg-imperial-lacquer/90 border border-imperial-gold/50 rounded-xl px-3 py-2 text-xs">
           <div className="flex items-center justify-between mb-1">
             <span className="flex items-center gap-1.5 text-slate-300">
               <Waves className="w-4 h-4 text-cyan-300" />
-              Tide Meter: <span className="font-bold text-cyan-300">Ebbing / Triều Rút</span>
+              Thủy triều: <span className="font-bold text-cyan-300">Đang rút</span>
             </span>
-            <span className="font-bold text-imperial-lightgold">{tideTurnsLeft} Turns Left</span>
+            <span className="font-bold text-imperial-lightgold">Còn {tideTurnsLeft} lượt</span>
           </div>
           <div className="w-full h-1.5 rounded-full bg-black/50 overflow-hidden">
             <div className="h-full bg-gradient-to-r from-cyan-500 to-blue-700 transition-all" style={{ width: `${(tideTurnsLeft / 3) * 100}%` }} />
@@ -238,20 +244,20 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
         </div>
 
         <div className="bg-imperial-lacquer/90 border border-imperial-border rounded-xl px-3 py-2 text-xs">
-          <div className="text-slate-300 mb-1">Turn Initiative Timeline</div>
+          <div className="text-slate-300 mb-1">Thứ tự lượt</div>
           <div className="flex items-center justify-center gap-3">
             <div className={`flex flex-col items-center gap-0.5 ${playerInitiative ? 'opacity-100' : 'opacity-40'}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${playerInitiative ? 'border-imperial-gold bg-blue-900' : 'border-slate-700 bg-black/30'}`}>
                 <Swords className="w-4 h-4 text-blue-200" />
               </div>
-              <span className="text-[9px] text-slate-400">Trần Spear</span>
+              <span className="text-[9px] text-slate-400">Quân Trần</span>
             </div>
             <ArrowLeft className="w-3.5 h-3.5 text-slate-500 rotate-180" />
             <div className={`flex flex-col items-center gap-0.5 ${!playerInitiative ? 'opacity-100' : 'opacity-40'}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${!playerInitiative ? 'border-imperial-gold bg-red-900' : 'border-slate-700 bg-black/30'}`}>
                 <Swords className="w-4 h-4 text-red-200" />
               </div>
-              <span className="text-[9px] text-slate-400">Mongol Cavalry</span>
+              <span className="text-[9px] text-slate-400">Quân Nguyên</span>
             </div>
           </div>
         </div>
@@ -262,7 +268,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
         {/* ------------------------------------------------------------------ */}
         {/* Hex battlefield                                                     */}
         {/* ------------------------------------------------------------------ */}
-        <div className="relative bg-gradient-to-b from-[#0a2231] to-[#0a1c1a] border border-imperial-gold/40 rounded-2xl overflow-auto p-2">
+        <div className="battle-board relative border border-imperial-gold/40 rounded-2xl overflow-auto p-2">
           <svg
             viewBox={`0 0 ${boardSize.width} ${boardSize.height}`}
             width="100%"
@@ -351,7 +357,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           {/* Tactical radar mini-map */}
           <div className="absolute top-3 right-3 bg-black/70 border border-imperial-border rounded-lg p-2 w-28">
             <div className="flex items-center gap-1 text-[9px] text-slate-400 mb-1">
-              <Radar className="w-3 h-3" /> Tactical Radar
+              <Radar className="w-3 h-3" /> Sơ đồ trận
             </div>
             <div className="relative w-full aspect-[12/7] bg-imperial-obsidian rounded overflow-hidden">
               {units.map(u => (
@@ -400,14 +406,14 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
 
           {/* Terrain advantage indicator */}
           <div className="bg-imperial-lacquer/90 border border-imperial-border rounded-xl p-3">
-            <div className="text-[10px] uppercase text-slate-400 tracking-wide mb-1">Terrain Advantage Indicator</div>
+            <div className="text-[10px] uppercase text-slate-400 tracking-wide mb-1">Địa hình đang chọn</div>
             {selectedTile ? (
               <>
                 <div className="text-xs text-slate-300">
-                  Selected Hex: <span className="font-bold text-white">{TERRAIN_NAME_VI[selectedTile.terrain]}</span>
+                  Ô chiến trường: <span className="font-bold text-white">{TERRAIN_NAME_VI[selectedTile.terrain]}</span>
                 </div>
                 <div className="text-xs font-bold text-imperial-lightgold mt-0.5">
-                  {selectedTile.effect || (selectedTile.terrain === 'hill' ? '+20% Ranged ATK' : selectedTile.terrain === 'mud' ? '-Movement penalty' : 'Không có hiệu ứng đặc biệt')}
+                  {selectedTile.effect || (selectedTile.terrain === 'hill' ? '+20% tầm bắn' : selectedTile.terrain === 'mud' ? 'Giảm tốc độ di chuyển' : 'Không có hiệu ứng đặc biệt')}
                 </div>
               </>
             ) : (
@@ -440,7 +446,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
             <span className="text-red-400 font-semibold animate-pulse">Quân Mông Cổ đang hành động...</span>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {ACTIONS.map((action) => (
             <button
               key={action.key}

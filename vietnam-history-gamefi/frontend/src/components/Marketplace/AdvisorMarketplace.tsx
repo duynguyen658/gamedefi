@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Advisor, ChainType, Faction, MarketplaceListing, Player, RarityType, TradeProposal } from '../../types';
+import { Advisor, MarketplaceListing, Player, RarityType, TradeProposal } from '../../types';
 import { apiService } from '../../services/api';
 import {
   ArrowLeft,
@@ -44,8 +44,6 @@ export const AdvisorMarketplace: React.FC<AdvisorMarketplaceProps> = ({
   const [activeTab, setActiveTab] = useState<'browse' | 'list' | 'trades'>('browse');
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
   const [advisors, setAdvisors] = useState<Advisor[]>([]);
-  const [selectedChain, setSelectedChain] = useState<ChainType | 'all'>('all');
-  const [selectedFaction, setSelectedFaction] = useState<number | 'all'>('all');
   const [loading, setLoading] = useState<boolean>(true);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
@@ -63,9 +61,7 @@ export const AdvisorMarketplace: React.FC<AdvisorMarketplaceProps> = ({
   const loadData = async () => {
     setLoading(true);
     try {
-      const chainFilter = selectedChain === 'all' ? undefined : selectedChain;
-      const factionFilter = selectedFaction === 'all' ? undefined : selectedFaction;
-      const list = await apiService.getMarketplace(chainFilter, factionFilter);
+      const list = await apiService.getMarketplace('solana');
       setListings(list);
       const advs = await apiService.getAdvisors();
       setAdvisors(advs);
@@ -77,7 +73,7 @@ export const AdvisorMarketplace: React.FC<AdvisorMarketplaceProps> = ({
 
   useEffect(() => {
     loadData();
-  }, [selectedChain, selectedFaction]);
+  }, []);
 
   const handleBuy = async (listing: MarketplaceListing) => {
     if (!player || player.is_guest) {
@@ -110,7 +106,7 @@ export const AdvisorMarketplace: React.FC<AdvisorMarketplaceProps> = ({
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="app-screen market-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       
       {/* Navigation Top */}
       <div className="flex items-center justify-between gap-4 mb-6">
@@ -119,7 +115,7 @@ export const AdvisorMarketplace: React.FC<AdvisorMarketplaceProps> = ({
           className="inline-flex items-center space-x-2 text-xs font-semibold text-slate-400 hover:text-imperial-lightgold transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Về Hội Đồng Quân Sư</span>
+          <span>Quay lại</span>
         </button>
 
         {/* Wallet Status Badge */}
@@ -142,7 +138,7 @@ export const AdvisorMarketplace: React.FC<AdvisorMarketplaceProps> = ({
       </div>
 
       {/* Header Banner */}
-      <div className="relative rounded-2xl bg-gradient-to-r from-amber-950/50 via-imperial-slate to-imperial-obsidian border border-amber-600/40 p-6 mb-6 overflow-hidden">
+      <div className="market-banner relative rounded-2xl border border-amber-600/40 p-6 mb-6 overflow-hidden">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center space-x-2 text-amber-400 text-xs font-bold uppercase tracking-wider mb-1">
@@ -153,16 +149,10 @@ export const AdvisorMarketplace: React.FC<AdvisorMarketplaceProps> = ({
               Chợ Tướng Cố Vấn Đại Việt
             </h1>
             <p className="text-xs text-slate-300 mt-1 max-w-2xl">
-              Nơi người chơi tự do mua, bán hoặc trao đổi (P2P Trade) Tướng Cố Vấn độc bản bằng công nghệ blockchain. Hoàn toàn tùy chọn và độc lập với tiến trình chiến dịch cốt lõi.
+              Khám phá Tướng Cố Vấn trên Solana Devnet. Mua bán và trao đổi đang tạm khóa cho đến khi escrow on-chain được triển khai.
             </p>
           </div>
 
-          <div className="text-right hidden sm:block">
-            <div className="text-[11px] text-slate-400">Triết lý thiết kế</div>
-            <div className="text-xs font-bold text-imperial-lightgold font-display">
-              History is the Game. Blockchain is the Marketplace.
-            </div>
-          </div>
         </div>
       </div>
 
@@ -188,7 +178,7 @@ export const AdvisorMarketplace: React.FC<AdvisorMarketplaceProps> = ({
           }`}
         >
           <ShoppingBag className="w-4 h-4" />
-          <span>Mua Tướng ({listings.length})</span>
+          <span>Danh Sách Tướng ({listings.length})</span>
         </button>
 
         <button
@@ -221,22 +211,9 @@ export const AdvisorMarketplace: React.FC<AdvisorMarketplaceProps> = ({
         <div>
           {/* Filters */}
           <div className="flex flex-wrap items-center justify-between gap-3 mb-6 bg-imperial-lacquer/70 border border-imperial-border/70 rounded-xl p-3">
-            <div className="flex items-center gap-2">
-              <Filter className="w-3.5 h-3.5 text-slate-400" />
-              <span className="text-xs text-slate-400">Chuỗi:</span>
-              {(['all', 'solana'] as const).map(c => (
-                <button
-                  key={c}
-                  onClick={() => setSelectedChain(c)}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold uppercase transition-all ${
-                    selectedChain === c
-                      ? 'bg-amber-600 text-white shadow'
-                      : 'bg-imperial-obsidian text-slate-400 hover:text-white'
-                  }`}
-                >
-                  {c === 'all' ? 'Tất cả chain' : c}
-                </button>
-              ))}
+            <div className="flex items-center gap-2 text-xs text-amber-200">
+              <Filter className="w-3.5 h-3.5" />
+              <span>Solana Devnet · giao dịch đang tạm khóa</span>
             </div>
 
             <button
@@ -252,8 +229,14 @@ export const AdvisorMarketplace: React.FC<AdvisorMarketplaceProps> = ({
           {loading ? (
             <div className="text-center py-16 text-slate-400">Đang đồng bộ dữ liệu niêm yết từ Solana...</div>
           ) : listings.length === 0 ? (
-            <div className="text-center py-16 text-slate-500 bg-imperial-lacquer/40 rounded-2xl border border-imperial-border">
-              Chưa có tướng nào đang được niêm yết với bộ lọc này. Hãy là người đầu tiên niêm yết!
+            <div className="market-empty border border-imperial-border" role="status">
+              <div className="market-empty-art" aria-hidden="true" />
+              <div className="market-empty-copy">
+                <span>Marketplace · Solana Devnet</span>
+                <h2>Danh sách niêm yết đang trống</h2>
+                <p>Chưa có Tướng Cố Vấn nào được niêm yết. Mua bán và trao đổi sẽ mở sau khi escrow on-chain hoàn tất.</p>
+                <button type="button" onClick={onBack}>Trở về game <ArrowLeft aria-hidden="true" /></button>
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">

@@ -1,0 +1,55 @@
+.lobby-screen { --lobby-line: #5c7180; --lobby-gold: #e9bf75; background: #061522; }
+.lobby-hero { display: flex; align-items: center; min-height: 345px; padding: 34px clamp(20px, 4.2vw, 70px); border-bottom: 1px solid #9f7a4b; background: linear-gradient(90deg, #061421f7, #061421db 42%, #06142144 78%), url('/dai-viet-hero.webp') 72% center / cover; }
+.lobby-hero > div { width: min(100%, 1300px); margin: auto; }
+.lobby-kicker { margin: 0 0 6px; color: var(--lobby-gold); font-size: .68rem; font-weight: 800; letter-spacing: .17em; text-transform: uppercase; }
+.lobby-hero h1 { max-width: 700px; margin: 0; color: #f6f0e5; font-family: 'Noto Serif', 'Be Vietnam Pro', serif; font-size: clamp(2.3rem, 4.4vw, 4.5rem); font-weight: 900; letter-spacing: -.05em; line-height: 1.1; }
+.lobby-hero h1 span { color: #f5cd82; }
+.lobby-hero p:not(.lobby-kicker) { max-width: 55ch; margin: 12px 0 0; color: #d4dfdf; font-size: .86rem; line-height: 1.65; }
+.lobby-hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.lobby-hero-actions button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 44px; padding: 0 15px; border: 1px solid #dfb26e; border-radius: 4px; color: #f9ecd6; font-size: .76rem; font-weight: 800; }
+.lobby-hero-actions svg { width: 16px; height: 16px; }
+.lobby-primary { background: linear-gradient(#af3025, #781711); }
+.lobby-secondary { background: #0a1c2bc9; }
+.lobby-hero-actions button:hover { filter: brightness(1.15); }
+.lobby-container { width: min(100%, 1430px); margin: auto; padding: 0 clamp(20px, 4.2vw, 70px) 66px; }
+.lobby-stats { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; margin-top: -25px; }
+.lobby-stats > div { display: flex; align-items: center; gap: 10px; min-width: 0; min-height: 71px; padding: 12px; border: 1px solid var(--lobby-line); border-radius: 5px; background: #0b2332; box-shadow: 0 7px 20px #020b13aa; }
+.lobby-stats svg { flex: none; width: 32px; height: 32px; padding: 6px; border: 1px solid #ac8753; border-radius: 5px; color: #f1c778; }
+.lobby-stats span { display: grid; min-width: 0; }
+.lobby-stats small { color: #a9bcc3; font-size: .62rem; }
+.lobby-stats strong { overflow: hidden; color: #f7ead5; font-size: .93rem; text-overflow: ellipsis; white-space: nowrap; }
+.lobby-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 26px; }
+.lobby-panel { min-width: 0; padding: 24px; border: 1px solid var(--lobby-line); border-radius: 6px; background: #0a2130; }
+.lobby-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 15px; }
+.lobby-panel-heading h2 { margin: 0; color: #f5ece0; font-family: 'Noto Serif', 'Be Vietnam Pro', serif; font-size: 1.55rem; }
+.lobby-panel-heading > svg { width: 35px; height: 35px; padding: 6px; border: 1px solid #aa8554; border-radius: 50%; color: #edc378; }
+.lobby-panel-intro { margin: 8px 0 18px; color: #b7c7cd; font-size: .8rem; line-height: 1.6; }
+.lobby-unit-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.lobby-unit-grid > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 51px; padding: 10px 12px; border: 1px solid #435f6c; border-radius: 4px; background: #0e293a; }
+.lobby-unit-grid span { color: #bdcbd0; font-size: .72rem; }
+.lobby-unit-grid strong { color: #f3cc83; font-size: .85rem; }
+.lobby-advisor-summary { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding: 12px; border: 1px solid #a0814d; border-radius: 4px; background: #32281977; }
+.lobby-advisor-summary svg { width: 25px; height: 25px; color: #f0c77c; }
+.lobby-advisor-summary div { display: grid; gap: 2px; }
+.lobby-advisor-summary small { color: #c7bb9e; font-size: .62rem; }
+.lobby-advisor-summary strong { color: #f5ecd8; font-size: .82rem; }
+.lobby-text-link { display: inline-flex; align-items: center; gap: 7px; margin-top: 16px; color: #f0c87f; font-size: .77rem; font-weight: 800; }
+.lobby-text-link svg { width: 16px; height: 16px; }
+.lobby-next { display: flex; flex-direction: column; }
+.lobby-next-primary, .lobby-next-link { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 66px; margin-top: 8px; padding: 10px 12px; border: 1px solid #997952; border-radius: 4px; color: #f5e9d5; text-align: left; }
+.lobby-next-primary { border-color: #efbc73; background: linear-gradient(95deg, #ad2c23, #6e1915); }
+.lobby-next-link { background: #102b3b; }
+.lobby-next-primary:hover, .lobby-next-link:hover { filter: brightness(1.16); }
+.lobby-next-primary > svg:first-child, .lobby-next-link > svg:first-child { flex: none; width: 27px; height: 27px; padding: 5px; border: 1px solid #d8b075; border-radius: 50%; color: #f4cd83; }
+.lobby-next-primary > svg:last-child, .lobby-next-link > svg:last-child { flex: none; width: 17px; height: 17px; margin-left: auto; color: #f2c77b; }
+.lobby-next-primary span, .lobby-next-link span { display: grid; gap: 2px; }
+.lobby-next-primary strong, .lobby-next-link strong { font-size: .82rem; }
+.lobby-next-primary small, .lobby-next-link small { color: #d6c7b0; font-size: .64rem; }
+.lobby-next-link small { color: #aac0c8; }
+.lobby-screen button:focus-visible { outline: 2px solid #f7d792; outline-offset: 3px; }
+@media (max-width: 850px) { .lobby-grid { grid-template-columns: 1fr; } }
+@media (max-width: 600px) {
+  .lobby-hero { min-height: 390px; background: linear-gradient(0deg, #061421fa, #061421eb 58%, #06142144), url('/dai-viet-hero.webp') 62% center / cover; }
+  .lobby-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lobby-panel { padding: 17px; }
+}

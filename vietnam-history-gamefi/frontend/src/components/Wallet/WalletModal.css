@@ -1,0 +1,25 @@
+.wallet-overlay { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 18px; background: #020a12d9; backdrop-filter: blur(8px); }
+.wallet-dialog { position: relative; display: grid; grid-template-columns: minmax(190px, .8fr) minmax(320px, 1.2fr); width: min(100%, 720px); min-height: 430px; overflow: hidden; border: 1px solid #a57e4e; border-radius: 9px; background: #071b29; box-shadow: 0 30px 100px #000b, 0 0 50px #7e241b40; }
+.wallet-art { background: linear-gradient(90deg, #06152200 40%, #071b29), url('/dai-viet-worlds.webp') 99% center / 300% 100%; }
+.wallet-content { position: relative; align-self: center; padding: 38px 38px 32px; }
+.wallet-close { position: absolute; top: 14px; right: 14px; z-index: 1; display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid #6c747a; border-radius: 4px; background: #071b29d9; color: #eee5d3; }
+.wallet-close svg { width: 17px; height: 17px; }
+.wallet-kicker { margin: 0 0 12px; color: #d7ae6a; font-size: .65rem; font-weight: 800; letter-spacing: .17em; text-transform: uppercase; }
+.wallet-content h2 { margin: 0; color: #f5e6c6; font-family: 'Noto Serif', 'Be Vietnam Pro', serif; font-size: clamp(1.6rem, 2.7vw, 2.3rem); line-height: 1.18; }
+.wallet-content h2 span { color: #eac17c; }
+.wallet-content > p:not(.wallet-kicker, .wallet-error, .wallet-progress) { margin: 13px 0 20px; color: #bfd0d2; font-size: .83rem; line-height: 1.6; }
+.wallet-network { display: flex; align-items: center; gap: 7px; width: max-content; max-width: 100%; padding: 8px 11px; border: 1px solid #56707a; border-radius: 4px; color: #b5c7c9; font-size: .72rem; }
+.wallet-network strong { color: #f1d199; }
+.wallet-network-dot { width: 7px; height: 7px; border-radius: 50%; background: #65d9b1; box-shadow: 0 0 10px #65d9b1; }
+.wallet-assurance { display: flex; gap: 9px; margin: 19px 0; color: #afc1c4; font-size: .69rem; line-height: 1.5; }
+.wallet-assurance svg { flex: none; width: 16px; height: 16px; color: #eac17c; }
+.wallet-error { padding: 10px; border: 1px solid #bc5952; border-radius: 4px; color: #ffd7d2; background: #60221e66; font-size: .72rem; }
+.wallet-progress { color: #e8c58d; font-size: .73rem; }
+.wallet-connect { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; min-height: 48px; padding: 10px 16px; border: 1px solid #f2ba75; border-radius: 5px; color: #fff1d6; background: linear-gradient(180deg, #c54232, #8b1b19); box-shadow: 0 0 18px #b1332955; font-size: .85rem; font-weight: 800; }
+.wallet-connect:hover:not(:disabled) { filter: brightness(1.15); }
+.wallet-connect svg { width: 17px; height: 17px; }
+.wallet-connect svg:last-child { margin-left: auto; }
+.wallet-connect:disabled, .wallet-play:disabled { opacity: .6; cursor: wait; }
+.wallet-play { display: block; width: 100%; margin-top: 12px; padding: 8px; color: #c6d6d8; font-size: .72rem; text-decoration: underline; text-underline-offset: 3px; }
+.wallet-dialog button:focus-visible { outline: 2px solid #f3cd8b; outline-offset: 3px; }
+@media (max-width: 620px) { .wallet-dialog { display: block; min-height: 0; } .wallet-art { height: 90px; background: linear-gradient(0deg, #071b29, #071b2900), url('/dai-viet-worlds.webp') 99% center / 300% 100%; } .wallet-content { padding: 20px 24px 24px; } }
