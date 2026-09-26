@@ -1,0 +1,389 @@
+.splash-page {
+  --splash-ink: oklch(13% 0.026 249);
+  --splash-panel: oklch(17% 0.031 248);
+  --splash-line: oklch(60% 0.055 78 / .42);
+  --splash-gold: oklch(80% 0.105 82);
+  --splash-muted: oklch(75% 0.025 245);
+  overflow: hidden;
+  background: var(--splash-ink);
+  color: oklch(95% 0.018 82);
+}
+
+.splash-hero {
+  position: relative;
+  isolation: isolate;
+  min-height: min(670px, calc(100svh - 76px));
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--splash-line);
+  background: oklch(12% 0.03 249);
+}
+
+.splash-hero-image {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-image: url('/dai-viet-hero.webp');
+  background-size: cover;
+  background-position: center 41%;
+}
+
+.splash-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, oklch(10% 0.025 248 / .95) 0%, oklch(11% 0.025 248 / .90) 19%, oklch(12% 0.025 248 / .55) 42%, transparent 69%),
+    linear-gradient(0deg, oklch(11% 0.026 249 / .94), transparent 27%);
+}
+
+.splash-hero-inner, .splash-shell {
+  width: min(100%, 1440px);
+  margin-inline: auto;
+  padding-inline: clamp(22px, 4.5vw, 72px);
+}
+
+.splash-hero-inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: inherit;
+  padding-block: 44px 60px;
+}
+
+.splash-copy {
+  width: min(620px, 58%);
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.splash-eyebrow, .splash-section-kicker {
+  color: var(--splash-gold);
+  font-size: .68rem;
+  font-weight: 800;
+  line-height: 1.5;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+}
+
+.splash-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 16px;
+}
+
+.splash-eyebrow span {
+  width: 26px;
+  height: 1px;
+  background: currentColor;
+}
+
+.splash-title {
+  margin: 0;
+  font-family: 'Noto Serif', 'Be Vietnam Pro', serif;
+  font-size: clamp(3.5rem, 6vw, 6.4rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -.055em;
+  text-transform: uppercase;
+  text-shadow: 0 3px 18px oklch(4% 0.015 250 / .55);
+}
+
+.splash-title span { display: block; color: oklch(85% 0.11 83); }
+
+.splash-verse {
+  display: grid;
+  gap: 2px;
+  margin: 26px 0 0;
+  padding-left: 16px;
+  border-left: 1px solid var(--splash-gold);
+  color: oklch(87% 0.075 83);
+  font-family: 'Noto Serif', 'Be Vietnam Pro', serif;
+  font-size: clamp(.9rem, 1.2vw, 1.1rem);
+  font-style: italic;
+  line-height: 1.6;
+}
+
+.splash-intro {
+  max-width: 48ch;
+  margin: 24px 0 0;
+  color: oklch(91% 0.017 250);
+  font-size: clamp(.95rem, 1.1vw, 1.05rem);
+  line-height: 1.7;
+  text-wrap: pretty;
+}
+
+.splash-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+.splash-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 20px;
+  border-radius: 4px;
+  font-size: .84rem;
+  font-weight: 800;
+  white-space: nowrap;
+  transition: transform .22s ease, background-color .22s ease, border-color .22s ease;
+}
+.splash-actions button:hover { transform: translateY(-2px); }
+.splash-actions button:active { transform: translateY(0); }
+.splash-play-button {
+  border: 1px solid oklch(82% 0.11 82);
+  background: oklch(43% 0.17 28);
+  color: oklch(98% 0.015 83);
+  box-shadow: 0 6px 24px oklch(10% 0.1 28 / .28), inset 0 1px oklch(87% 0.12 80 / .35);
+}
+.splash-play-button:hover { background: oklch(49% 0.18 28); }
+.splash-wallet-button {
+  border: 1px solid oklch(80% 0.06 80 / .65);
+  background: oklch(13% 0.026 248 / .7);
+  color: oklch(94% 0.025 82);
+}
+.splash-wallet-button:hover { background: oklch(20% 0.027 245); }
+.splash-hero-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 29px; }
+.splash-hero-tags span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border: 1px solid oklch(72% 0.06 82 / .42);
+  border-radius: 20px;
+  background: oklch(12% 0.022 250 / .65);
+  color: oklch(89% 0.02 80);
+  font-size: .68rem;
+  font-weight: 650;
+}
+.splash-hero-tags svg { width: 13px; height: 13px; color: var(--splash-gold); }
+.splash-hero-seal {
+  position: absolute;
+  right: clamp(12px, 4vw, 65px);
+  bottom: 22px;
+  width: 104px;
+  opacity: .7;
+  color: var(--splash-gold);
+}
+.splash-hero-seal svg { color: var(--splash-gold); }
+
+.splash-shell { padding-block: 54px 72px; }
+.splash-section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 22px;
+}
+.splash-section-kicker { margin: 0 0 8px; }
+.splash-section-heading h2, .splash-journey h2 {
+  margin: 0;
+  font-family: 'Noto Serif', 'Be Vietnam Pro', serif;
+  font-size: clamp(1.55rem, 2.4vw, 2.25rem);
+  font-weight: 750;
+  line-height: 1.35;
+  letter-spacing: -.03em;
+}
+.splash-section-heading > p { margin: 0 0 3px; color: var(--splash-muted); font-size: .82rem; }
+
+.splash-experience-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.splash-experience {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--splash-line);
+  border-radius: 6px;
+  background: var(--splash-panel);
+  transition: transform .25s ease, border-color .25s ease;
+}
+.splash-experience:hover { transform: translateY(-4px); border-color: var(--splash-gold); }
+.splash-experience-art {
+  position: relative;
+  display: flex;
+  align-items: end;
+  padding: 18px;
+  min-height: 150px;
+  overflow: hidden;
+  background: oklch(23% 0.06 35);
+}
+.splash-experience-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, var(--splash-panel), transparent 80%);
+}
+.splash-experience-art svg {
+  position: relative;
+  z-index: 1;
+  width: 38px;
+  height: 38px;
+  padding: 7px;
+  border: 1px solid oklch(82% 0.1 82 / .85);
+  border-radius: 50%;
+  background: oklch(13% 0.024 249 / .82);
+  color: var(--splash-gold);
+}
+.splash-experience-campaign .splash-experience-art {
+  background-image: linear-gradient(90deg, oklch(15% 0.025 250 / .35), transparent), url('/dai-viet-hero.webp');
+  background-size: cover;
+  background-position: 67% 64%;
+}
+.splash-experience-advisor .splash-experience-art {
+  background: radial-gradient(circle at 70% 25%, oklch(54% 0.115 76 / .34), transparent 38%), repeating-conic-gradient(from 45deg at 72% 48%, oklch(74% 0.085 80 / .14) 0 2deg, transparent 2deg 30deg), oklch(19% 0.045 42);
+}
+.splash-experience-market .splash-experience-art {
+  background: radial-gradient(circle at 72% 34%, oklch(61% 0.115 29 / .46), transparent 43%), linear-gradient(135deg, oklch(18% 0.035 248), oklch(26% 0.071 28));
+}
+.splash-experience-dex .splash-experience-art {
+  background: radial-gradient(circle at 68% 42%, oklch(74% 0.095 83 / .35), transparent 41%), repeating-linear-gradient(135deg, transparent 0 17px, oklch(72% 0.07 85 / .09) 18px 19px), oklch(19% 0.033 247);
+}
+.splash-experience-body { display: flex; flex: 1; flex-direction: column; padding: 0 18px 18px; }
+.splash-experience-eyebrow { color: var(--splash-gold); font-size: .64rem; font-weight: 750; letter-spacing: .14em; text-transform: uppercase; }
+.splash-experience h3 { margin: 6px 0 0; font-family: 'Noto Serif', 'Be Vietnam Pro', serif; font-size: 1.25rem; line-height: 1.3; }
+.splash-experience p { min-height: 66px; margin: 9px 0 18px; color: var(--splash-muted); font-size: .77rem; line-height: 1.65; }
+.splash-experience button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 40px;
+  margin-top: auto;
+  padding: 0 12px;
+  border: 1px solid oklch(77% 0.085 82 / .7);
+  border-radius: 3px;
+  color: oklch(88% 0.075 82);
+  font-size: .72rem;
+  font-weight: 750;
+  transition: background-color .2s ease;
+}
+.splash-experience button:hover { background: oklch(70% 0.095 80 / .12); }
+.splash-experience button svg { width: 15px; height: 15px; }
+
+.splash-legends {
+  margin-top: 58px;
+}
+.splash-legends-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+.splash-legend {
+  position: relative;
+  min-width: 0;
+  aspect-ratio: .82;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--splash-line);
+  border-radius: 6px;
+  background: oklch(20% 0.03 248);
+}
+.splash-legend-art {
+  position: absolute;
+  inset: 0;
+  background-image: url('/dai-viet-legends.webp');
+  background-size: 400% 100%;
+  background-repeat: no-repeat;
+  transition: transform .45s cubic-bezier(.2, .7, .2, 1);
+}
+.splash-legend:hover .splash-legend-art { transform: scale(1.045); }
+.splash-legend-art-1 { background-position: 0% center; }
+.splash-legend-art-2 { background-position: 33.333% center; }
+.splash-legend-art-3 { background-position: 66.666% center; }
+.splash-legend-art-4 { background-position: 100% center; }
+.splash-legend::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, oklch(8% 0.02 248 / .95) 0%, oklch(8% 0.02 248 / .55) 19%, transparent 50%);
+  pointer-events: none;
+}
+.splash-legend figcaption {
+  position: absolute;
+  z-index: 1;
+  inset: auto 16px 16px;
+  display: grid;
+  gap: 2px;
+}
+.splash-legend figcaption span {
+  color: var(--splash-gold);
+  font-size: .62rem;
+  font-weight: 750;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.splash-legend figcaption strong {
+  color: oklch(97% 0.014 85);
+  font-family: 'Noto Serif', 'Be Vietnam Pro', serif;
+  font-size: clamp(1rem, 1.5vw, 1.3rem);
+  line-height: 1.35;
+}
+
+.splash-journey {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  gap: clamp(32px, 8vw, 110px);
+  margin-top: 52px;
+  padding: 42px 0 0;
+  border-top: 1px solid var(--splash-line);
+}
+.splash-journey-intro > p:not(.splash-section-kicker) { max-width: 43ch; margin: 14px 0 0; color: var(--splash-muted); font-size: .88rem; line-height: 1.7; }
+.splash-journey-intro button { display: inline-flex; align-items: center; gap: 9px; margin-top: 19px; color: var(--splash-gold); font-size: .83rem; font-weight: 750; }
+.splash-journey-intro button:hover { text-decoration: underline; text-underline-offset: 4px; }
+.splash-journey-intro button svg { width: 17px; height: 17px; }
+.splash-journey-list { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.splash-journey-list li { display: flex; gap: 22px; padding: 13px 0; border-bottom: 1px solid var(--splash-line); }
+.splash-journey-list li:first-child { padding-top: 0; }
+.splash-journey-list li:last-child { border-bottom: 0; }
+.splash-journey-list li > span { min-width: 32px; color: var(--splash-gold); font-family: 'Noto Serif', serif; font-size: 1.25rem; }
+.splash-journey-list h3 { margin: 0; color: oklch(93% 0.019 81); font-size: .88rem; font-weight: 750; }
+.splash-journey-list p { margin: 4px 0 0; color: var(--splash-muted); font-size: .77rem; }
+
+.splash-page button:focus-visible { outline: 2px solid oklch(89% 0.1 82); outline-offset: 3px; }
+
+@media (max-width: 1050px) {
+  .splash-experience-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .splash-legends-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .splash-hero-image { background-position: 55% center; }
+}
+@media (max-width: 700px) {
+  .splash-hero { min-height: 680px; align-items: end; }
+  .splash-hero-image { background-position: 60% top; }
+  .splash-hero::after { background: linear-gradient(0deg, oklch(10% 0.025 248 / .98) 0%, oklch(10% 0.025 248 / .95) 29%, oklch(10% 0.025 248 / .40) 68%, transparent 100%); }
+  .splash-hero-inner { align-items: end; padding-block: 210px 32px; }
+  .splash-copy { width: 100%; }
+  .splash-title { font-size: clamp(3.1rem, 12vw, 4.7rem); }
+  .splash-verse { margin-top: 16px; }
+  .splash-intro { margin-top: 15px; }
+  .splash-actions { margin-top: 20px; }
+  .splash-hero-tags { margin-top: 18px; }
+  .splash-hero-seal { display: none; }
+  .splash-section-heading { display: block; }
+  .splash-section-heading > p { margin-top: 8px; }
+  .splash-journey { grid-template-columns: 1fr; gap: 30px; }
+}
+@media (max-width: 460px) {
+  .splash-hero { min-height: 690px; }
+  .splash-title { font-size: clamp(2.75rem, 11.7vw, 3.4rem); }
+  .splash-eyebrow { font-size: .57rem; letter-spacing: .15em; }
+  .splash-verse { font-size: .76rem; }
+  .splash-intro { font-size: .87rem; }
+  .splash-actions { width: 100%; }
+  .splash-actions button { width: 100%; min-height: 46px; }
+  .splash-shell { padding-block: 42px 54px; }
+  .splash-experience-grid { grid-template-columns: 1fr; }
+  .splash-legends-grid { gap: 8px; }
+  .splash-legend { aspect-ratio: .7; }
+  .splash-legend figcaption { inset: auto 10px 10px; }
+  .splash-legend figcaption span { font-size: .5rem; }
+  .splash-legend figcaption strong { font-size: .9rem; }
+  .splash-experience-art { min-height: 135px; }
+  .splash-experience p { min-height: 0; }
+  .splash-hero-tags span { font-size: .61rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash-page *, .splash-page *::before, .splash-page *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}
