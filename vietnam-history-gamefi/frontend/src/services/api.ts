@@ -562,8 +562,11 @@ class GameApiService {
     return await res.json();
   }
 
-  async getDexHistory(limit = 5): Promise<DexSwapHistory[]> {
-    const res = await fetch(`${API_BASE_URL}/dex/history?limit=${limit}`, {
+  async getDexHistory(limit = 10, offset = 0, executedOnly = true): Promise<DexSwapHistory[]> {
+    const query = new URLSearchParams({
+      limit: String(limit), offset: String(offset), executed_only: String(executedOnly),
+    });
+    const res = await fetch(`${API_BASE_URL}/dex/history?${query}`, {
       headers: this.authHeaders(),
     });
     if (!res.ok) throw await apiError(res);

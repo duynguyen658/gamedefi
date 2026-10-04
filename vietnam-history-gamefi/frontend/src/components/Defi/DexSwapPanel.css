@@ -156,6 +156,10 @@
   font-weight: 650;
 }
 .dex-token-meta > span:last-child { text-align: right; overflow-wrap: anywhere; }
+.dex-balance-actions { display: inline-flex; align-items: center; justify-content: flex-end; gap: 5px; }
+.dex-balance-actions button { display: inline-grid; place-items: center; width: 28px; height: 28px; flex: none; border-radius: 6px; color: var(--dex-gold-light); }
+.dex-balance-actions button:hover:not(:disabled) { background: rgba(213, 173, 74, .1); }
+.dex-balance-actions button:disabled { opacity: .45; cursor: not-allowed; }
 .dex-amount-input,
 .dex-output-amount {
   display: block;
@@ -394,6 +398,10 @@
 .dex-history-heading h3 { display: flex; align-items: center; gap: 9px; }
 .dex-history-heading h3 svg { color: var(--dex-gold); flex: none; }
 .dex-history-heading > span { color: var(--dex-muted); font-size: .73rem; text-align: right; }
+.dex-history-tools { display: inline-flex; align-items: center; gap: 8px; color: var(--dex-muted); font-size: .73rem; text-align: right; }
+.dex-history-tools button { display: inline-grid; place-items: center; width: 30px; height: 30px; flex: none; border-radius: 6px; color: var(--dex-gold-light); }
+.dex-history-tools button:hover:not(:disabled) { background: rgba(213, 173, 74, .1); }
+.dex-history-tools button:disabled { opacity: .45; cursor: not-allowed; }
 .dex-history-empty { padding: 19px 0 2px; color: var(--dex-muted); font-size: .79rem; line-height: 1.5; }
 .dex-history-empty.is-error { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; color: #f2c777; }
 .dex-history-empty button { min-height: 39px; color: var(--dex-gold-light); text-decoration: underline; }
@@ -417,6 +425,10 @@
 .dex-history-status.is-failed,
 .dex-history-status.is-expired { color: #ff9d97; }
 .dex-history-link { display: inline-flex; align-items: center; gap: 4px; min-height: 35px; color: var(--dex-gold-light); text-decoration: underline; }
+.dex-history-more { display: block; min-height: 42px; margin: 18px auto 0; padding: 0 18px; border: 1px solid var(--dex-border); border-radius: 8px; color: var(--dex-gold-light); font-size: .78rem; font-weight: 700; }
+.dex-history-more:hover { border-color: var(--dex-gold); background: rgba(218, 166, 75, .08); }
+.dex-history-more:disabled { cursor: wait; opacity: .6; }
+.dex-history-page-error { margin: 10px 0 0; color: #ff9d97; font-size: .76rem; }
 .dex-reward-section { padding: 18px clamp(18px, 2.3vw, 25px); }
 .dex-reward-heading { display: flex; align-items: start; gap: 10px; color: var(--dex-gold); }
 .dex-reward-heading h3 { font-size: 1.05rem; }
@@ -448,7 +460,7 @@
   .dex-token-box { padding: 13px; }
   .dex-token-meta { font-size: .7rem; }
   .dex-history-heading { align-items: start; }
-  .dex-history-heading > span { max-width: 75px; }
+  .dex-history-tools { max-width: 125px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .dex-pair-switch,

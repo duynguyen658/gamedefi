@@ -141,6 +141,14 @@ async function main() {
       : built.transaction.signatures.filter((entry) => entry.signature !== null).length,
   };
   if (!submit) {
+    const unsignedOutput = args.get('--output-unsigned');
+    if (typeof unsignedOutput === 'string') {
+      const bytes = built.transaction instanceof VersionedTransaction
+        ? Buffer.from(built.transaction.serialize())
+        : built.transaction.serialize({ requireAllSignatures: false, verifySignatures: false });
+      fs.writeFileSync(path.resolve(unsignedOutput), Buffer.from(bytes).toString('base64'), 'utf8');
+      metadata.unsigned_transaction_file = path.resolve(unsignedOutput);
+    }
     if (args.has('--simulate')) {
       const simulation = built.transaction instanceof VersionedTransaction
         ? await connection.simulateTransaction(built.transaction, { sigVerify: false, commitment: 'confirmed' })

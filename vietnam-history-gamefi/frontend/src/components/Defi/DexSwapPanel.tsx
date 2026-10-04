@@ -38,6 +38,7 @@ type RequestStatus = 'idle' | 'quoting' | 'signing' | 'executing';
 const EMPTY_BALANCES: DexBalances = { SOL: '0', USDC: '0', USDT: '0' };
 const QUOTE_TOKEN: DexTokenSymbol = 'USDC';
 const STANDARD_SLIPPAGE_BPS = 50;
+const HISTORY_PAGE_SIZE = 10;
 
 function tokenLogo(symbol: DexTokenSymbol): string | null {
   return symbol === 'SOL' ? '/solana-token.svg' : symbol === 'USDC' ? '/usdc-token.svg' : '/usdt-token.svg';
@@ -77,10 +78,14 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum, 
   const [execution, setExecution] = useState<DexExecution | null>(null);
   const [history, setHistory] = useState<DexSwapHistory[]>([]);
   const [historyStatus, setHistoryStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [historyHasMore, setHistoryHasMore] = useState(false);
+  const [historyLoadingMore, setHistoryLoadingMore] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
   const [quoteRetry, setQuoteRetry] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const quoteVersion = useRef(0);
   const quoteAbort = useRef<AbortController | null>(null);
+  const historyVersion = useRef(0);
 
   useEffect(() => () => {
     quoteVersion.current += 1;
@@ -123,19 +128,41 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum, 
   };
 
   const refreshHistory = async () => {
+    const version = ++historyVersion.current;
+    setHistoryLoadingMore(false);
+    setHistoryError(null);
     if (player.is_guest) {
       setHistory([]);
+      setHistoryHasMore(false);
       setHistoryStatus('ready');
       return;
     }
     setHistoryStatus('loading');
     try {
-      const activeSymbols = new Set(tokens.map((token) => token.symbol));
-      setHistory((await apiService.getDexHistory(20)).filter((item) =>
-        activeSymbols.has(item.input_symbol) && activeSymbols.has(item.output_symbol)).slice(0, 5));
+      const firstPage = await apiService.getDexHistory(HISTORY_PAGE_SIZE, 0);
+      if (version !== historyVersion.current) return;
+      setHistory(firstPage);
+      setHistoryHasMore(firstPage.length === HISTORY_PAGE_SIZE);
       setHistoryStatus('ready');
     } catch {
-      setHistoryStatus('error');
+      if (version === historyVersion.current) setHistoryStatus('error');
+    }
+  };
+
+  const loadMoreHistory = async () => {
+    if (!historyHasMore || historyLoadingMore || historyStatus !== 'ready') return;
+    const version = historyVersion.current;
+    setHistoryLoadingMore(true);
+    setHistoryError(null);
+    try {
+      const nextPage = await apiService.getDexHistory(HISTORY_PAGE_SIZE, history.length);
+      if (version !== historyVersion.current) return;
+      setHistory((current) => [...current, ...nextPage]);
+      setHistoryHasMore(nextPage.length === HISTORY_PAGE_SIZE);
+    } catch (historyError) {
+      if (version === historyVersion.current) setHistoryError(apiError(historyError));
+    } finally {
+      if (version === historyVersion.current) setHistoryLoadingMore(false);
     }
   };
 
@@ -204,7 +231,6 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum, 
       }, controller.signal);
       if (version !== quoteVersion.current) return;
       setOrder(nextOrder);
-      if (!automatic) await refreshHistory();
     } catch (requestError) {
       if (controller.signal.aborted || version !== quoteVersion.current) return;
       setOrder(null);
@@ -235,6 +261,7 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum, 
     onPlayDrum();
     setError(null);
     setExecution(null);
+    let signed = false;
     try {
       setRequestStatus('signing');
       const unsignedTransaction = order.provider === 'raydium'
@@ -242,6 +269,7 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum, 
         : order.transaction;
       if (!unsignedTransaction) throw new Error('DEX không trả giao dịch để ký.');
       const signedTransaction = await solanaAdapter.signDexTransaction(unsignedTransaction, player.wallet);
+      signed = true;
       setRequestStatus('executing');
       const result = await apiService.executeDexOrder({
         wallet: player.wallet,
@@ -250,10 +278,24 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum, 
       });
       setExecution(result);
       if (result.status !== 'Success') setError(result.error || `Giao dịch thất bại với mã ${result.code}.`);
-      if (result.status === 'Success') await refreshBalances();
+      if (result.status === 'Success') {
+        try {
+          setBalances(await loadDexBalances(player.wallet));
+        } catch {
+          setError('Giao dịch đã xác nhận nhưng chưa tải lại được số dư. Hãy làm mới trang để kiểm tra.');
+        }
+      } else {
+        setOrder(null);
+      }
       await refreshHistory();
     } catch (executeError) {
-      setError(apiError(executeError));
+      setError(signed
+        ? `${apiError(executeError)} Hãy kiểm tra lịch sử hoặc Explorer trước khi tạo lệnh khác.`
+        : apiError(executeError));
+      if (signed) {
+        setOrder(null);
+        await refreshHistory();
+      }
     } finally {
       setRequestStatus('idle');
     }
@@ -307,7 +349,16 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum, 
             <div className="dex-token-box">
               <div className="dex-token-meta">
                 <label htmlFor="dex-amount">Bạn bán</label>
-                <span>Số dư: {balanceLabel}</span>
+                <span className="dex-balance-actions">
+                  <span>Số dư: {balanceLabel}</span>
+                  {!player.is_guest && (
+                    <button type="button" onClick={() => void refreshBalances()}
+                      disabled={balanceStatus === 'loading' || requestStatus === 'signing' || requestStatus === 'executing'}
+                      aria-label="Cập nhật số dư ví" title="Cập nhật số dư ví">
+                      <RefreshCw size={14} aria-hidden="true" />
+                    </button>
+                  )}
+                </span>
               </div>
               <input
                 id="dex-amount"
@@ -509,7 +560,15 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum, 
             <span className="dex-eyebrow">Hoạt động của ví</span>
             <h3 id="dex-history-title"><Clock3 size={19} aria-hidden="true" />Giao dịch gần đây</h3>
           </div>
-          <span>Tối đa 5 lệnh gần nhất</span>
+          <div className="dex-history-tools">
+            <span>Giao dịch qua DEX này</span>
+            {!player.is_guest && (
+              <button type="button" onClick={() => void refreshHistory()} disabled={historyStatus === 'loading'}
+                aria-label="Cập nhật lịch sử giao dịch" title="Cập nhật lịch sử giao dịch">
+                <RefreshCw size={15} aria-hidden="true" />
+              </button>
+            )}
+          </div>
         </header>
         {historyStatus === 'loading' ? (
           <p className="dex-history-empty">Đang tải lịch sử giao dịch…</p>
@@ -519,7 +578,7 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum, 
             <button type="button" onClick={() => void refreshHistory()}>Thử tải lại</button>
           </div>
         ) : history.length === 0 ? (
-          <p className="dex-history-empty">{player.is_guest ? 'Kết nối ví Solana để xem lịch sử giao dịch.' : 'Chưa có lệnh nào. Nhập số lượng ở ô Swap để bắt đầu.'}</p>
+          <p className="dex-history-empty">{player.is_guest ? 'Kết nối ví Solana để xem lịch sử giao dịch.' : 'Chưa có giao dịch nào được gửi từ ví này.'}</p>
         ) : (
           <ul className="dex-history-list">
             {history.map((item) => {
@@ -530,7 +589,7 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum, 
                 <li key={item.request_id}>
                   <span className="dex-history-pair">
                     {formatBaseUnits(BigInt(item.in_amount), item.input_decimals, 4)} {item.input_symbol}
-                    {' → '}
+                    {' → ≈ '}
                     {formatBaseUnits(BigInt(item.out_amount), item.output_decimals, 4)} {item.output_symbol}
                   </span>
                   <time dateTime={item.created_at}>{new Date(item.created_at).toLocaleString('vi-VN')}</time>
@@ -541,6 +600,12 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum, 
             })}
           </ul>
         )}
+        {historyStatus === 'ready' && historyHasMore && (
+          <button type="button" className="dex-history-more" onClick={() => void loadMoreHistory()} disabled={historyLoadingMore}>
+            {historyLoadingMore ? 'Đang tải…' : 'Xem thêm giao dịch'}
+          </button>
+        )}
+        {historyError && <p className="dex-history-page-error" role="alert">{historyError}</p>}
       </section>
 
       <section className="dex-reward-section" aria-labelledby="dex-reward-title">

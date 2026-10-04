@@ -92,6 +92,15 @@ def test_dex_rejects_another_wallet_and_invalid_pair(client):
     assert client.post("/dex/order", json=body, headers=auth_headers(player)).status_code == 422
 
 
+def test_dex_rejects_amount_larger_than_solana_u64(client):
+    wallet, player = login(client)
+    response = client.post("/dex/order", json={
+        "wallet": wallet, "input_symbol": "SOL", "output_symbol": "USDC",
+        "amount": str(2**64), "idempotency_key": "too-large-amount",
+    }, headers=auth_headers(player))
+    assert response.status_code == 422
+
+
 def test_mock_provider_quotes_both_directions_without_transaction():
     provider = MockDexProvider(Decimal("100"))
     tokens = token_registry("testnet")

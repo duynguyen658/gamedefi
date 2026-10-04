@@ -25,6 +25,13 @@ class DexOrderRequest(BaseModel):
             raise ValueError("wallet phải là địa chỉ Solana base58 hợp lệ")
         return value
 
+    @field_validator("amount")
+    @classmethod
+    def valid_base_units(cls, value: str) -> str:
+        if int(value) > 2**64 - 1:
+            raise ValueError("Số lượng vượt giới hạn giao dịch Solana")
+        return value
+
     @model_validator(mode="after")
     def distinct_tokens(self):
         if self.input_symbol == self.output_symbol:

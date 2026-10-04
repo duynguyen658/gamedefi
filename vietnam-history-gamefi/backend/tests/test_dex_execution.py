@@ -183,6 +183,12 @@ def test_executable_order_is_wallet_bound_and_single_use(client):
     assert history.json()[0]["status"] == "confirmed"
     assert history.json()[0]["signature"] == execution.json()["signature"]
 
+    second_quote = client.post("/dex/order", headers=headers(owner), json=order_body(owner_wallet, "history-quote-key"))
+    assert second_quote.status_code == 200
+    executed_history = client.get("/dex/history?executed_only=true&limit=10&offset=0", headers=headers(owner))
+    assert executed_history.status_code == 200
+    assert [item["request_id"] for item in executed_history.json()] == [request_id]
+
 
 def test_history_is_wallet_scoped_and_reconciles_pending_signature(client, adapter):
     owner_key = Keypair()

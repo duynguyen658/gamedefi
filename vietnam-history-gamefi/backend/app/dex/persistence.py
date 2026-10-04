@@ -253,11 +253,17 @@ class DexSwapRepository:
         except SQLAlchemyError as exc:
             raise DexPersistenceError("Không thể lưu trạng thái đối soát DEX") from exc
 
-    def list_wallet(self, wallet: str, *, limit: int = 20, offset: int = 0) -> list[DexSwapRecord]:
+    def list_wallet(self, wallet: str, *, limit: int = 20, offset: int = 0,
+                    executed_only: bool = False, network: str | None = None) -> list[DexSwapRecord]:
         try:
             with self.sessions() as db:
-                rows = db.scalars(select(DexSwapModel).where(DexSwapModel.wallet == wallet)
-                    .order_by(DexSwapModel.created_at.desc()).limit(limit).offset(offset)).all()
+                query = select(DexSwapModel).where(DexSwapModel.wallet == wallet)
+                if network is not None:
+                    query = query.where(DexSwapModel.network == network)
+                if executed_only:
+                    query = query.where(DexSwapModel.status.in_(("pending_confirmation", "confirmed", "failed")))
+                rows = db.scalars(query.order_by(DexSwapModel.created_at.desc())
+                    .limit(limit).offset(offset)).all()
                 return [self._record(row) for row in rows]
         except SQLAlchemyError as exc:
             raise DexPersistenceError("Không thể đọc lịch sử DEX") from exc

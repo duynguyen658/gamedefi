@@ -18,6 +18,7 @@ from app.dex.persistence import (
     intent_digest,
 )
 from app.dex.reconciliation import reconcile_wallet
+from app.dex.raydium_transaction import validate_raydium_transaction
 from app.dex.schemas import (
     DexExecuteRequest,
     DexExecutionOut,
@@ -181,6 +182,18 @@ def execute_order(body: DexExecuteRequest, request: Request, principal: SessionP
             body.signed_transaction, body.wallet, required_instruction,
             quoted_transaction=quote.transaction if provider.name == "jupiter" else None,
         )
+        if provider.name == "raydium":
+            token_symbol = quote.output_symbol if quote.input_symbol == "SOL" else quote.input_symbol
+            pool = provider.pools.get(token_symbol)
+            if pool is None:
+                raise DexOrderUnavailable("Pool của lệnh DEX không còn được hỗ trợ")
+            validate_raydium_transaction(
+                VersionedTransaction.from_bytes(base64.b64decode(body.signed_transaction)),
+                wallet=body.wallet,
+                quote=quote.to_order(),
+                program_id=provider.program_id,
+                pool=pool,
+            )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except DexProviderError as exc:
@@ -207,6 +220,7 @@ def dex_history(
     request: Request,
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
+    executed_only: bool = Query(default=False),
     principal: SessionPrincipal = Depends(require_session),
 ):
     if principal.is_guest:
@@ -214,7 +228,10 @@ def dex_history(
     try:
         reconcile_wallet(request.app.state.dex_swaps, request.app.state.resolver.get("solana"), principal.wallet)
         return [DexSwapHistoryOut(**{field: getattr(item, field) for field in DexSwapHistoryOut.model_fields})
-                for item in request.app.state.dex_swaps.list_wallet(principal.wallet, limit=limit, offset=offset)]
+                for item in request.app.state.dex_swaps.list_wallet(
+                    principal.wallet, limit=limit, offset=offset, executed_only=executed_only,
+                    network=request.app.state.settings.solana_network,
+                )]
     except DexPersistenceError as exc:
         raise persistence_error(exc) from exc
 

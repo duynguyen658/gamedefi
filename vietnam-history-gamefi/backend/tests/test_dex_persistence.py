@@ -1,4 +1,4 @@
-from app.dex.interface import DexOrder
+from app.dex.interface import DexExecution, DexOrder
 from app.dex.persistence import DexOrderUnavailable, DexSwapRepository, intent_digest
 
 
@@ -56,3 +56,24 @@ def test_expired_order_is_persisted_as_expired():
     except DexOrderUnavailable:
         pass
     assert repository.list_wallet("wallet")[0].status == "expired"
+
+
+def test_history_can_exclude_automatic_quotes_and_other_networks():
+    repository = DexSwapRepository("sqlite+pysqlite://", create_schema=True)
+    for network, request_id in (("devnet", "quote-only"), ("devnet", "completed"),
+                                ("mainnet-beta", "other-network")):
+        digest = intent_digest(
+            wallet="wallet", network=network, input_symbol="SOL", output_symbol="USDC",
+            amount="1000000000", slippage_bps=50,
+        )
+        repository.save_order(
+            network=network, wallet="wallet", key=request_id, digest=digest,
+            order=sample_order(request_id=request_id),
+        )
+    repository.reserve_execution(request_id="completed", wallet="wallet", signature="signature-completed")
+    repository.mark_execution("completed", DexExecution("Success", "signature-completed", 0, None, None))
+    repository.reserve_execution(request_id="other-network", wallet="wallet", signature="signature-mainnet")
+    repository.mark_execution("other-network", DexExecution("Success", "signature-mainnet", 0, None, None))
+
+    history = repository.list_wallet("wallet", network="devnet", executed_only=True)
+    assert [item.request_id for item in history] == ["completed"]
