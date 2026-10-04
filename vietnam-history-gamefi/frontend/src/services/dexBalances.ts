@@ -36,6 +36,14 @@ export function dexTokens(network = SOLANA_NETWORK): DexToken[] {
 export { formatBaseUnits, maximumSpendable, validateSwapAmount } from './dexMath';
 import { formatBaseUnits } from './dexMath';
 
+export async function estimateDexReserveLamports(): Promise<number> {
+  const connection = new Connection(SOLANA_RPC_URL, 'confirmed');
+  const tokenAccountRent = await connection.getMinimumBalanceForRentExemption(165);
+  // Allow for a destination token account and a temporary wrapped-SOL account.
+  // The actual transaction is simulated before it is sent to the wallet.
+  return tokenAccountRent * 2 + 1_020_000;
+}
+
 export async function loadDexBalances(walletAddress: string): Promise<DexBalances> {
   const owner = new PublicKey(walletAddress);
   const connection = new Connection(SOLANA_RPC_URL, 'confirmed');

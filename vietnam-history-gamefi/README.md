@@ -69,6 +69,7 @@ Không commit keypair trong `target/`. Không có deployment được tự thự
 ## Trạng thái hiện tại
 
 - SOL Devnet là tài sản dùng cho phần thưởng chiến dịch và DEX. Trận thắng thưởng 0,0001 SOL thử; nhiệm vụ thưởng 0,0002 SOL thử. Ví phân phối cần được cấu hình bằng secret trên Render và nạp SOL Devnet.
+- Để bật phát thưởng trên Render, đặt `SOL_REWARD_SIGNER_KEYPAIR_BASE64` bằng base64 của keypair 64 byte và `SOL_REWARD_SIGNER_ADDRESS` bằng public key tương ứng trong phần Environment của dịch vụ backend. Nạp SOL **Devnet** vào đúng địa chỉ đó, triển khai lại rồi kiểm tra `/api/health/ready` có `checks.reward_signer: true`. Giữ keypair trong Render secret; không đưa vào Git hay gửi trong chat.
 - DEX cho phép SOL ↔ USDC thử và SOL ↔ USDT thử qua hai pool Raydium Devnet đã kiểm tra mint/vault on-chain. Giá trên Devnet không đại diện cho thị trường Mainnet. Ví người chơi tự ký, backend xác minh đúng program/pool của từng báo giá rồi gửi RPC.
 - Swap intent, trạng thái và chữ ký được lưu trong PostgreSQL để chống gửi trùng và đối soát. Lịch sử token cũ được giữ trong cơ sở dữ liệu; token cũ không còn nằm trong luồng sản phẩm hiện tại.
 - Mainnet chưa được bật cho người dùng. Nhánh Jupiter trong mã cần API key và kiểm thử riêng trước khi bật.

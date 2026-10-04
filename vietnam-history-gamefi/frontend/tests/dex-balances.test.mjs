@@ -24,6 +24,7 @@ test('validates amount precision and available balance', () => {
 
 test('keeps a SOL reserve for transaction fees when using max', () => {
   assert.equal(maximumSpendable('5', 'SOL'), '4.99');
+  assert.equal(maximumSpendable('5', 'SOL', 5_000_000), '4.995');
   assert.equal(maximumSpendable('5', 'USDC'), '5');
   assert.equal(maximumSpendable('0.005', 'SOL'), '0');
 });

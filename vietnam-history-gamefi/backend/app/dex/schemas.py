@@ -101,6 +101,9 @@ class DexSwapHistoryOut(BaseModel):
     output_symbol: str
     in_amount: str
     out_amount: str
+    total_input_amount: str | None
+    total_output_amount: str | None
+    network_fee_lamports: int | None
     input_decimals: int
     output_decimals: int
     provider: str

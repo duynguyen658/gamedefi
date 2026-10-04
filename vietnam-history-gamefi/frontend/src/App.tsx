@@ -102,8 +102,8 @@ export const App: React.FC = () => {
   };
 
   // After wallet connection succeeds
-  const handleConnectWallet = async (chosenChain: ChainType) => {
-    const p = await connectAndAuth(chosenChain);
+  const handleConnectWallet = async (chosenChain: ChainType, walletKind: 'phantom' | 'solflare') => {
+    const p = await connectAndAuth(chosenChain, walletKind);
     if (resumeDexAfterAuth) {
       setResumeDexAfterAuth(false);
       setStep('defi');

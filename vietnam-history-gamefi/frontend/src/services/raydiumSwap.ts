@@ -2,34 +2,38 @@ import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { Buffer } from 'buffer';
 import BN from 'bn.js';
 import { CurveCalculator, DEV_API_URLS, FeeOn, Raydium, TxVersion } from '@raydium-io/raydium-sdk-v2';
-import type { DexOrder } from '../types/dex';
+import type { DexConfig, DexOrder } from '../types/dex';
 import { SOLANA_NETWORK, SOLANA_RPC_URL } from './solana';
 
-const PROGRAM_ID = import.meta.env?.VITE_RAYDIUM_CPMM_PROGRAM_ID?.trim()
-  || 'DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb';
 const WSOL_MINT = 'So11111111111111111111111111111111111111112';
-const DEVNET_POOLS = {
-  USDC: {
-    pool: 'FeRts7d5DfXKXq1hGMkeiGEHayDdjsmSyJ41rHVcKo8t',
-    mint: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
-  },
-  USDT: {
-    pool: 'Bw9gaeKqQy5aTpi1BiSdV2p21REATtVXDdhjPUFjgq6N',
-    mint: '9jWfcfEZToquBQmkoEViNSCt72veXwcvRGFQERXRjEk1',
-  },
-} as const;
 const DEVNET_GENESIS = 'EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG';
+
+export interface PreparedRaydiumSwap {
+  transaction: string;
+  networkFeeLamports: number;
+  lastValidBlockHeight: number;
+}
+
+export async function isSwapBlockhashValid(lastValidBlockHeight: number | null): Promise<boolean> {
+  if (lastValidBlockHeight === null) return true;
+  const connection = new Connection(SOLANA_RPC_URL, 'confirmed');
+  return await connection.getBlockHeight('confirmed') + 5 < lastValidBlockHeight;
+}
 
 export async function buildRaydiumSwapTransaction(
   order: DexOrder,
   expectedWallet: string,
-): Promise<string> {
+  config: DexConfig,
+): Promise<PreparedRaydiumSwap> {
   if (SOLANA_NETWORK !== 'devnet' || order.provider !== 'raydium') {
     throw new Error('Lệnh này không thuộc Raydium Devnet.');
   }
   const otherSymbol = order.input_symbol === 'SOL' ? order.output_symbol : order.input_symbol;
-  const pair = DEVNET_POOLS[otherSymbol as keyof typeof DEVNET_POOLS];
-  if (!pair || ![order.input_symbol, order.output_symbol].includes('SOL') || order.router !== pair.pool) {
+  const pool = config.pools[otherSymbol];
+  const tokenMint = config.tokens.find((token) => token.symbol === otherSymbol)?.mint;
+  if (config.network !== 'devnet' || config.provider !== 'raydium'
+      || !config.program_id || !pool || !tokenMint
+      || ![order.input_symbol, order.output_symbol].includes('SOL') || order.router !== pool) {
     throw new Error('Báo giá không khớp cặp SOL/USDC hoặc SOL/USDT thử.');
   }
 
@@ -48,16 +52,16 @@ export async function buildRaydiumSwapTransaction(
     blockhashCommitment: 'finalized',
     urlConfigs: DEV_API_URLS,
   });
-  const { poolInfo, poolKeys, rpcData } = await raydium.cpmm.getPoolInfoFromRpc(pair.pool);
-  if (poolInfo.programId !== PROGRAM_ID || poolInfo.id !== pair.pool) {
+  const { poolInfo, poolKeys, rpcData } = await raydium.cpmm.getPoolInfoFromRpc(pool);
+  if (poolInfo.programId !== config.program_id || poolInfo.id !== pool) {
     throw new Error('Program hoặc pool Raydium không khớp cấu hình.');
   }
   if (new Set([poolInfo.mintA.address, poolInfo.mintB.address]).size !== 2
-      || ![WSOL_MINT, pair.mint].every((mint) => [poolInfo.mintA.address, poolInfo.mintB.address].includes(mint))) {
+      || ![WSOL_MINT, tokenMint].every((mint) => [poolInfo.mintA.address, poolInfo.mintB.address].includes(mint))) {
     throw new Error('Pool Raydium không chứa đúng mint SOL/token đã chọn.');
   }
 
-  const inputMint = order.input_symbol === 'SOL' ? WSOL_MINT : pair.mint;
+  const inputMint = order.input_symbol === 'SOL' ? WSOL_MINT : tokenMint;
   const baseIn = inputMint === poolInfo.mintA.address;
   const inputAmount = new BN(order.in_amount);
   const creatorFeeOnInput = rpcData.feeOn === FeeOn.BothToken || rpcData.feeOn === FeeOn.OnlyTokenB;
@@ -96,9 +100,10 @@ export async function buildRaydiumSwapTransaction(
     throw new Error('Raydium không tạo giao dịch legacy hợp lệ.');
   }
   built.transaction.feePayer = owner;
-  built.transaction.recentBlockhash = (await connection.getLatestBlockhash('finalized')).blockhash;
+  const latestBlockhash = await connection.getLatestBlockhash('finalized');
+  built.transaction.recentBlockhash = latestBlockhash.blockhash;
   const staticKeys = built.transaction.compileMessage().accountKeys.map((key) => key.toBase58());
-  if (!staticKeys.includes(PROGRAM_ID) || !staticKeys.includes(pair.pool) || staticKeys[0] !== expectedWallet) {
+  if (!staticKeys.includes(config.program_id) || !staticKeys.includes(pool) || staticKeys[0] !== expectedWallet) {
     throw new Error('Giao dịch Raydium không khớp ví hoặc pool đã chọn.');
   }
   // Phantom may report only "Unexpected error" for a transaction that cannot run.
@@ -110,8 +115,16 @@ export async function buildRaydiumSwapTransaction(
     const detail = programError || JSON.stringify(simulation.value.err);
     throw new Error(`Giao dịch không qua mô phỏng Devnet: ${detail}. Hãy lấy báo giá mới và kiểm tra số dư SOL để trả phí.`);
   }
-  return Buffer.from(built.transaction.serialize({
+  const networkFeeLamports = await connection.getFeeForMessage(built.transaction.compileMessage(), 'confirmed');
+  if (networkFeeLamports.value === null) {
+    throw new Error('RPC chưa ước tính được phí mạng. Hãy thử lại sau.');
+  }
+  return {
+    transaction: Buffer.from(built.transaction.serialize({
     requireAllSignatures: false,
     verifySignatures: false,
-  })).toString('base64');
+    })).toString('base64'),
+    networkFeeLamports: networkFeeLamports.value,
+    lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+  };
 }

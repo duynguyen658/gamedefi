@@ -31,9 +31,9 @@ export function validateSwapAmount(value: string, balance: string, decimals: num
   return null;
 }
 
-export function maximumSpendable(balance: string, symbol: DexTokenSymbol): string {
+export function maximumSpendable(balance: string, symbol: DexTokenSymbol, reserveLamports = 10_000_000): string {
   const available = Number(balance);
   if (!Number.isFinite(available) || available <= 0) return '';
-  const reserve = symbol === 'SOL' ? 0.01 : 0;
+  const reserve = symbol === 'SOL' ? reserveLamports / 1_000_000_000 : 0;
   return Math.max(0, available - reserve).toFixed(symbol === 'SOL' ? 6 : 2).replace(/\.?0+$/, '');
 }

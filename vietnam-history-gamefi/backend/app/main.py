@@ -1,3 +1,7 @@
+import asyncio
+import logging
+from contextlib import asynccontextmanager, suppress
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -11,6 +15,7 @@ from app.core.readiness import check_mainnet_readiness
 from app.core.security import NonceStore, SessionStore
 from app.dex.market_price import MarketPriceService
 from app.dex.persistence import DexSwapRepository
+from app.dex.reconciliation import reconcile_wallet
 from app.dex.resolver import create_dex_provider
 from app.rewards.persistence import RewardPersistenceError, RewardRepository
 
@@ -18,7 +23,18 @@ from app.rewards.persistence import RewardPersistenceError, RewardRepository
 def create_app() -> FastAPI:
     settings = get_settings()
     validate_mainnet_configuration(settings)
-    app = FastAPI(title="Hào Khí Đại Việt — Gameplay-First Strategy Game")
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        task = asyncio.create_task(reconcile_dex_forever())
+        try:
+            yield
+        finally:
+            task.cancel()
+            with suppress(asyncio.CancelledError):
+                await task
+
+    app = FastAPI(title="Hào Khí Đại Việt — Gameplay-First Strategy Game", lifespan=lifespan)
 
     @app.exception_handler(SolanaAdapterError)
     async def solana_unavailable(_request, exc):
@@ -46,6 +62,22 @@ def create_app() -> FastAPI:
     app.state.market_price = MarketPriceService()
     app.state.dex_swaps = DexSwapRepository(settings.database_url, create_schema=settings.database_auto_create)
     app.state.reward_claims = RewardRepository(settings.database_url, create_schema=settings.database_auto_create)
+
+    def reconcile_dex_queue() -> None:
+        adapter = app.state.resolver.get("solana")
+        for wallet in app.state.dex_swaps.wallets_needing_reconciliation(limit=20):
+            try:
+                reconcile_wallet(app.state.dex_swaps, adapter, wallet)
+            except Exception:
+                logging.getLogger(__name__).exception("DEX reconciliation failed for wallet %s", wallet)
+
+    async def reconcile_dex_forever() -> None:
+        while True:
+            try:
+                await asyncio.to_thread(reconcile_dex_queue)
+            except Exception:
+                logging.getLogger(__name__).exception("DEX reconciliation queue failed")
+            await asyncio.sleep(30)
 
     app.include_router(auth.router)
     app.include_router(faction.router)

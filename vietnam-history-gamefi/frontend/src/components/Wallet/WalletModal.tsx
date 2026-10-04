@@ -1,12 +1,13 @@
 import React, { useEffect, useRef } from 'react';
-import { ArrowRight, ShieldCheck, Wallet, X } from 'lucide-react';
+import { ShieldCheck, Wallet, X } from 'lucide-react';
 import { ChainType } from '../../types';
+import type { SolanaWalletKind } from '../../services/solana';
 import './WalletModal.css';
 
 interface WalletModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConnect: (chain: ChainType) => Promise<void>;
+  onConnect: (chain: ChainType, walletKind: SolanaWalletKind) => Promise<void>;
   isConnecting: boolean;
   authStep: string;
   error: string | null;
@@ -38,10 +39,10 @@ export const WalletModal: React.FC<WalletModalProps> = ({
 
   if (!isOpen) return null;
 
-  const connect = async () => {
+  const connect = async (walletKind: SolanaWalletKind) => {
     onPlayGong();
     try {
-      await onConnect('solana');
+      await onConnect('solana', walletKind);
       onClose();
     } catch {
       // useWallet exposes the error in the dialog so the player can retry.
@@ -63,7 +64,10 @@ export const WalletModal: React.FC<WalletModalProps> = ({
           <div className="wallet-assurance"><ShieldCheck aria-hidden="true" /><span>Ví sẽ yêu cầu bạn ký thông điệp xác thực. Trang này không yêu cầu khóa riêng hay cụm từ khôi phục.</span></div>
           {error && <p className="wallet-error" role="alert">{error}</p>}
           {isConnecting && <p className="wallet-progress" role="status">{authStep || 'Đang kết nối ví…'}</p>}
-          <button type="button" className="wallet-connect" disabled={isConnecting} onClick={() => void connect()}><Wallet aria-hidden="true" /> {isConnecting ? 'Đang kết nối…' : 'Kết nối ví Solana'} <ArrowRight aria-hidden="true" /></button>
+          <div className="wallet-provider-actions">
+            <button type="button" className="wallet-connect" disabled={isConnecting} onClick={() => void connect('phantom')}><Wallet aria-hidden="true" /> {isConnecting ? 'Đang kết nối…' : 'Kết nối Phantom'}</button>
+            <button type="button" className="wallet-connect wallet-connect-secondary" disabled={isConnecting} onClick={() => void connect('solflare')}><Wallet aria-hidden="true" /> Kết nối Solflare</button>
+          </div>
           <button type="button" className="wallet-play" disabled={isConnecting} onClick={() => { onPlayDrum(); onClose(); }}>Để sau</button>
         </div>
       </section>

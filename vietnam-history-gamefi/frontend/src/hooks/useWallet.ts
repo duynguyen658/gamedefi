@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ChainType, Player, WalletVerifyRequest } from '../types';
 import { apiService, SessionExpiredError } from '../services/api';
-import { solanaAdapter } from '../services/solana';
+import { solanaAdapter, type SolanaWalletKind } from '../services/solana';
 
 const STORAGE_KEY = 'vnhistory_gamefi_player_session';
 
@@ -89,7 +89,7 @@ export function useWallet() {
     };
   }, [player?.wallet, player?.access_token, player?.is_guest]);
 
-  const connectAndAuth = useCallback(async (selectedChain: ChainType) => {
+  const connectAndAuth = useCallback(async (selectedChain: ChainType, walletKind: SolanaWalletKind) => {
     setIsConnecting(true);
     setError(null);
     setSessionExpired(false);
@@ -98,6 +98,7 @@ export function useWallet() {
     try {
       setAuthStep('1/3: Kết nối ví...');
       const adapter = solanaAdapter;
+      adapter.selectWallet(walletKind);
       const walletAddress = await adapter.connect();
       setAddress(walletAddress);
 

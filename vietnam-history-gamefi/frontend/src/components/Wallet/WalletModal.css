@@ -16,6 +16,8 @@
 .wallet-error { padding: 10px; border: 1px solid #bc5952; border-radius: 4px; color: #ffd7d2; background: #60221e66; font-size: .72rem; }
 .wallet-progress { color: #e8c58d; font-size: .73rem; }
 .wallet-connect { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; min-height: 48px; padding: 10px 16px; border: 1px solid #f2ba75; border-radius: 5px; color: #fff1d6; background: linear-gradient(180deg, #c54232, #8b1b19); box-shadow: 0 0 18px #b1332955; font-size: .85rem; font-weight: 800; }
+.wallet-provider-actions { display: grid; gap: 9px; }
+.wallet-connect-secondary { border-color: #6d8491; background: #0c2838; box-shadow: none; }
 .wallet-connect:hover:not(:disabled) { filter: brightness(1.15); }
 .wallet-connect svg { width: 17px; height: 17px; }
 .wallet-connect svg:last-child { margin-left: auto; }

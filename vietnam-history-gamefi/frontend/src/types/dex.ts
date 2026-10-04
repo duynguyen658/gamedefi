@@ -69,6 +69,9 @@ export interface DexSwapHistory {
   output_symbol: DexTokenSymbol;
   in_amount: string;
   out_amount: string;
+  total_input_amount: string | null;
+  total_output_amount: string | null;
+  network_fee_lamports: number | null;
   input_decimals: number;
   output_decimals: number;
   provider: string;

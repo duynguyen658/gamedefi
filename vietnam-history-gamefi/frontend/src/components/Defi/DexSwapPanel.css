@@ -287,6 +287,12 @@
   text-align: right;
   overflow-wrap: anywhere;
 }
+.dex-quote-expiry { margin: -4px 0 12px; color: var(--dex-muted); font-size: .71rem; }
+.dex-review { display: grid; gap: 7px; margin-bottom: 14px; padding: 12px; border: 1px solid var(--dex-border); border-radius: 7px; color: var(--dex-muted); background: var(--dex-field); font-size: .75rem; line-height: 1.45; }
+.dex-review strong { color: var(--dex-gold-light); font-size: .79rem; }
+.dex-impact-confirm { display: flex; align-items: start; gap: 8px; margin-top: 4px; color: #f2c777; cursor: pointer; }
+.dex-impact-confirm input { margin-top: 3px; accent-color: #d79538; }
+.dex-signed-link { display: inline-flex; align-items: center; gap: 5px; margin: -4px 0 12px; color: var(--dex-gold-light); font-size: .73rem; text-decoration: underline; overflow-wrap: anywhere; }
 .dex-message,
 .dex-operation-status {
   display: flex;
@@ -418,6 +424,7 @@
 }
 .dex-history-list li:last-child { border-bottom: 0; padding-bottom: 0; }
 .dex-history-pair { color: var(--dex-text); font-weight: 700; overflow-wrap: anywhere; }
+.dex-history-fee { display: block; margin-top: 3px; color: var(--dex-muted); font-size: .69rem; font-weight: 400; }
 .dex-history-list time { color: var(--dex-muted); }
 .dex-history-status { color: var(--dex-muted); }
 .dex-history-status.is-confirmed { color: var(--dex-positive); }

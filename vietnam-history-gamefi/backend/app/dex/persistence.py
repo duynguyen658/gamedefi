@@ -69,6 +69,7 @@ class DexSwapModel(Base):
     code: Mapped[int | None] = mapped_column(Integer)
     total_input_amount: Mapped[str | None] = mapped_column(String(40))
     total_output_amount: Mapped[str | None] = mapped_column(String(40))
+    network_fee_lamports: Mapped[int | None] = mapped_column(BigInteger)
     error: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utcnow, onupdate=utcnow)
@@ -107,6 +108,7 @@ class DexSwapRecord:
     code: int | None
     total_input_amount: str | None
     total_output_amount: str | None
+    network_fee_lamports: int | None
     error: str | None
     created_at: datetime
     updated_at: datetime
@@ -146,6 +148,9 @@ class DexSwapRepository:
                     connection.execute(text(
                         "ALTER TABLE dex_swaps ADD COLUMN price_impact_bps INTEGER NOT NULL DEFAULT 0"
                     ))
+            if "network_fee_lamports" not in columns:
+                with self.engine.begin() as connection:
+                    connection.execute(text("ALTER TABLE dex_swaps ADD COLUMN network_fee_lamports BIGINT"))
 
     @staticmethod
     def _record(row: DexSwapModel) -> DexSwapRecord:
@@ -279,6 +284,44 @@ class DexSwapRepository:
                 return [self._record(row) for row in rows]
         except SQLAlchemyError as exc:
             raise DexPersistenceError("Không thể đọc hàng đợi đối soát DEX") from exc
+
+    def unsettled_wallet(self, wallet: str, *, limit: int = 50) -> list[DexSwapRecord]:
+        try:
+            with self.sessions() as db:
+                rows = db.scalars(select(DexSwapModel).where(
+                    DexSwapModel.wallet == wallet,
+                    DexSwapModel.status == "confirmed",
+                    DexSwapModel.signature.is_not(None),
+                    DexSwapModel.total_output_amount.is_(None),
+                ).order_by(DexSwapModel.updated_at.asc()).limit(limit)).all()
+                return [self._record(row) for row in rows]
+        except SQLAlchemyError as exc:
+            raise DexPersistenceError("Không thể đọc giao dịch DEX cần bổ sung kết quả") from exc
+
+    def wallets_needing_reconciliation(self, *, limit: int = 100) -> list[str]:
+        try:
+            with self.sessions() as db:
+                rows = db.scalars(select(DexSwapModel.wallet).where(
+                    (DexSwapModel.status == "pending_confirmation")
+                    | ((DexSwapModel.status == "confirmed") & DexSwapModel.total_output_amount.is_(None)),
+                    DexSwapModel.signature.is_not(None),
+                ).distinct().limit(limit)).all()
+                return list(rows)
+        except SQLAlchemyError as exc:
+            raise DexPersistenceError("Không thể đọc ví cần đối soát DEX") from exc
+
+    def save_settlement(self, request_id: str, *, input_amount: str | None,
+                        output_amount: str | None, network_fee_lamports: int | None) -> None:
+        try:
+            with self.sessions.begin() as db:
+                row = db.scalar(select(DexSwapModel).where(DexSwapModel.request_id == request_id).with_for_update())
+                if row and row.status == "confirmed":
+                    row.total_input_amount = input_amount or row.total_input_amount
+                    row.total_output_amount = output_amount or row.total_output_amount
+                    row.network_fee_lamports = network_fee_lamports
+                    row.updated_at = utcnow()
+        except SQLAlchemyError as exc:
+            raise DexPersistenceError("Không thể lưu kết quả on-chain của DEX") from exc
 
     def mark_reconciled(self, request_id: str, status: str) -> None:
         if status not in {"confirmed", "failed"}:

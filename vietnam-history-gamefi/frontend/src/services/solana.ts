@@ -15,14 +15,29 @@ interface WalletProvider {
   disconnect?(): Promise<void>;
 }
 
+export type SolanaWalletKind = 'phantom' | 'solflare';
+const WALLET_SELECTION_KEY = 'gamefi_solana_wallet_provider';
+
+function selectedWallet(): SolanaWalletKind | null {
+  if (typeof window === 'undefined') return null;
+  const value = window.localStorage.getItem(WALLET_SELECTION_KEY);
+  return value === 'phantom' || value === 'solflare' ? value : null;
+}
+
 function provider(): WalletProvider {
   const win = window as unknown as { phantom?: { solana?: WalletProvider }; solana?: WalletProvider; solflare?: WalletProvider };
-  const wallet = win.phantom?.solana || win.solana || win.solflare;
-  if (!wallet) throw new Error('Hãy cài Phantom hoặc Solflare để kết nối Solana.');
+  const selected = selectedWallet();
+  const wallet = selected === 'phantom' ? (win.phantom?.solana || win.solana)
+    : selected === 'solflare' ? win.solflare
+      : win.phantom?.solana || win.solana || win.solflare;
+  if (!wallet) throw new Error(selected
+    ? `Không tìm thấy ${selected === 'phantom' ? 'Phantom' : 'Solflare'} trong trình duyệt này.`
+    : 'Hãy cài Phantom hoặc Solflare để kết nối Solana.');
   return wallet;
 }
 
 export const solanaAdapter = {
+  selectWallet: (kind: SolanaWalletKind) => window.localStorage.setItem(WALLET_SELECTION_KEY, kind),
   isAvailable: () => {
     if (typeof window === 'undefined') return false;
     try { provider(); return true; } catch { return false; }
@@ -59,7 +74,9 @@ export const solanaAdapter = {
       const code = typeof walletError?.code === 'number' || typeof walletError?.code === 'string'
         ? ` (mã ${walletError.code})` : '';
       if (/unexpected error/i.test(message)) {
-        throw new Error(`Phantom từ chối ký giao dịch${code}: ${message}.`);
+        const name = selectedWallet() === 'solflare'
+          || (window as unknown as { solflare?: WalletProvider }).solflare === wallet ? 'Solflare' : 'Phantom';
+        throw new Error(`${name} từ chối ký giao dịch${code}: ${message}.`);
       }
       throw reason;
     }

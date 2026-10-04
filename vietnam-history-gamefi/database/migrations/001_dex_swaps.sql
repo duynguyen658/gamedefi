@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS dex_swaps (
   code INTEGER,
   total_input_amount TEXT,
   total_output_amount TEXT,
+  network_fee_lamports BIGINT,
   error TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -41,3 +42,4 @@ CREATE INDEX IF NOT EXISTS ix_dex_swaps_wallet_created ON dex_swaps (wallet, cre
 CREATE INDEX IF NOT EXISTS ix_dex_swaps_reconcile ON dex_swaps (status, updated_at) WHERE status = 'pending_confirmation';
 
 ALTER TABLE dex_swaps ADD COLUMN IF NOT EXISTS price_impact_bps INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE dex_swaps ADD COLUMN IF NOT EXISTS network_fee_lamports BIGINT;
