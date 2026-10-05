@@ -189,11 +189,15 @@ CREATE TABLE dex_swaps (
   expires_at BIGINT,
   last_valid_block_height BIGINT,
   warning TEXT,
+  price_impact_bps INTEGER NOT NULL DEFAULT 0,
   status TEXT NOT NULL CHECK (status IN ('quoted', 'simulated', 'pending_confirmation', 'confirmed', 'failed', 'expired')),
   signature TEXT UNIQUE,
+  recent_blockhash VARCHAR(64),
+  reconciliation_checked_at TIMESTAMPTZ,
   code INTEGER,
   total_input_amount TEXT,
   total_output_amount TEXT,
+  network_fee_lamports BIGINT,
   error TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -204,6 +208,7 @@ CREATE TABLE dex_swaps (
 
 CREATE INDEX ix_dex_swaps_wallet_created ON dex_swaps (wallet, created_at DESC);
 CREATE INDEX ix_dex_swaps_reconcile ON dex_swaps (status, updated_at) WHERE status = 'pending_confirmation';
+CREATE INDEX ix_dex_swaps_reconcile_checked ON dex_swaps (status, reconciliation_checked_at) WHERE signature IS NOT NULL AND status IN ('pending_confirmation', 'confirmed');
 
 -- 13. Durable reward payout lifecycle (see migrations/002_reward_claims.sql)
 -- Phase 6: durable gameplay reward eligibility, payout lifecycle, and reconciliation.

@@ -16,6 +16,8 @@ python -m pip install -r requirements.txt
 psql "$DATABASE_URL" -f ../database/migrations/002_reward_claims.sql
 psql "$DATABASE_URL" -f ../database/migrations/003_sol_reward_asset.sql
 psql "$DATABASE_URL" -f ../database/migrations/004_archive_reward_assets.sql
+psql "$DATABASE_URL" -f ../database/migrations/005_auth_sessions.sql
+psql "$DATABASE_URL" -f ../database/migrations/006_dex_reconciliation.sql
 python -m pytest -q
 uvicorn app.main:app --reload
 ```

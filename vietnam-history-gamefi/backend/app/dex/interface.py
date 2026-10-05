@@ -14,6 +14,11 @@ class DexProviderError(RuntimeError):
     pass
 
 
+class DexSubmissionRejected(DexProviderError):
+    """The RPC definitively rejected a signed transaction before accepting it."""
+
+
+
 @dataclass(frozen=True)
 class DexToken:
     symbol: str

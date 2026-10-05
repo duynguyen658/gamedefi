@@ -13,6 +13,9 @@ interface WalletProvider {
   signMessage(message: Uint8Array, encoding?: string): Promise<{ signature: Uint8Array }>;
   signTransaction<T extends Transaction | VersionedTransaction>(transaction: T): Promise<T>;
   disconnect?(): Promise<void>;
+  on?(event: string, handler: (...args: unknown[]) => void): void;
+  off?(event: string, handler: (...args: unknown[]) => void): void;
+  removeListener?(event: string, handler: (...args: unknown[]) => void): void;
 }
 
 export type SolanaWalletKind = 'phantom' | 'solflare';
@@ -41,6 +44,22 @@ export const solanaAdapter = {
   isAvailable: () => {
     if (typeof window === 'undefined') return false;
     try { provider(); return true; } catch { return false; }
+  },
+  onWalletChange: (listener: (wallet: string | null) => void): (() => void) => {
+    let wallet: WalletProvider;
+    try { wallet = provider(); } catch { return () => {}; }
+    const changed = (next?: unknown) => {
+      const key = next as { toBase58?: () => string } | null;
+      listener(typeof next === 'string' ? next : key?.toBase58?.() ?? null);
+    };
+    const disconnected = () => listener(null);
+    wallet.on?.('accountChanged', changed);
+    wallet.on?.('disconnect', disconnected);
+    return () => {
+      const remove = wallet.off ?? wallet.removeListener;
+      remove?.call(wallet, 'accountChanged', changed);
+      remove?.call(wallet, 'disconnect', disconnected);
+    };
   },
   connect: async (): Promise<string> => (await provider().connect()).publicKey.toBase58(),
   signMessage: async (message: string): Promise<string> => {

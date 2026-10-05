@@ -14,6 +14,7 @@ MIGRATIONS = (
     ROOT / "database" / "migrations" / "003_sol_reward_asset.sql",
     ROOT / "database" / "migrations" / "004_archive_reward_assets.sql",
     ROOT / "database" / "migrations" / "005_auth_sessions.sql",
+    ROOT / "database" / "migrations" / "006_dex_reconciliation.sql",
 )
 
 

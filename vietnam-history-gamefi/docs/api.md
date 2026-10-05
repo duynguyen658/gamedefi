@@ -26,7 +26,7 @@ Chain duy nhất là `solana`; địa chỉ base58 phân biệt hoa/thường.
 - `GET /dex/config`: trả network, token registry, provider và public Raydium pool/program IDs.
 - `POST /dex/order`: Devnet đọc reserve on-chain và tính quote CPMM SOL/USDC hoặc SOL/USDT thử; `idempotency_key` bảo đảm retry cùng payload trả lại order đã lưu.
 - `POST /dex/execute`: khóa order theo ví/chữ ký; trên Devnet còn xác minh đúng một lệnh Raydium, mint/vault, số lượng bán, mức nhận tối thiểu, tài khoản token của ví và các bước tạo/đóng WSOL trước khi gửi Solana RPC. Mainnet chuyển signed transaction tới Jupiter khi được bật.
-- `GET /dex/history`: lịch sử của ví trong session và tự đối soát giao dịch đang chờ. Hỗ trợ `limit`, `offset` và `executed_only=true` để chỉ lấy lệnh đã gửi (đang chờ, thành công hoặc thất bại).
-- `POST /dex/reconcile`: chạy đối soát chủ động.
+- `GET /dex/history`: đọc lịch sử đã lưu của ví trong session, không phụ thuộc RPC Solana tại thời điểm tải trang. Hỗ trợ `limit`, `offset` và `executed_only=true` để chỉ lấy lệnh đã gửi.
+- `POST /dex/reconcile`: chạy đối soát chủ động. Tác vụ nền cũng đối soát định kỳ, kiểm tra chữ ký trước khi kết luận blockhash đã hết hạn.
 
-Production dùng `DATABASE_URL=postgresql+psycopg://...` và áp dụng lần lượt các migration `001`, `002`, `003` trong `database/migrations/`. DEX không lưu private key của người chơi; chỉ lưu quote, trạng thái và public signature. Reward SOL lưu giao dịch đã ký để retry/đối soát an toàn; secret ví phân phối nằm ngoài Git.
+Production dùng `DATABASE_URL=postgresql+psycopg://...` và áp dụng lần lượt các migration `001`–`006` trong `database/migrations/`. DEX không lưu private key của người chơi; chỉ lưu quote, trạng thái và public signature. Reward SOL lưu giao dịch đã ký để retry/đối soát an toàn; secret ví phân phối nằm ngoài Git.

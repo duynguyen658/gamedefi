@@ -78,8 +78,14 @@ class SolanaAdapter(BlockchainAdapter):
         )[0]
 
     def get_transaction(self, digest: str) -> TransactionInfo | None:
+        return self._get_transaction_encoded(digest, "json")
+
+    def get_dex_transaction(self, digest: str) -> TransactionInfo | None:
+        return self._get_transaction_encoded(digest, "jsonParsed")
+
+    def _get_transaction_encoded(self, digest: str, encoding: str) -> TransactionInfo | None:
         result = self._rpc("getTransaction", [digest, {
-            "encoding": "json", "commitment": "finalized", "maxSupportedTransactionVersion": 0,
+            "encoding": encoding, "commitment": "finalized", "maxSupportedTransactionVersion": 0,
         }])
         if not result:
             return None
@@ -92,6 +98,22 @@ class SolanaAdapter(BlockchainAdapter):
             timestamp_ms=(result.get("blockTime") or 0) * 1000 or None,
             events=[], raw=result,
         )
+
+    def get_signature_status(self, digest: str) -> str | None:
+        result = self._rpc("getSignatureStatuses", [[digest], {"searchTransactionHistory": True}])
+        values = result.get("value") if isinstance(result, dict) else None
+        status = values[0] if isinstance(values, list) and values else None
+        if not isinstance(status, dict):
+            return None
+        if status.get("err") is not None:
+            return "failed"
+        return "success" if status.get("confirmationStatus") in {"confirmed", "finalized"} else "pending"
+
+    def is_blockhash_valid(self, blockhash: str) -> bool:
+        result = self._rpc("isBlockhashValid", [blockhash, {"commitment": "confirmed"}])
+        if not isinstance(result, dict) or not isinstance(result.get("value"), bool):
+            raise SolanaAdapterError("RPC không trả trạng thái blockhash hợp lệ")
+        return result["value"]
 
 
     def _get_proof(self, address: Pubkey) -> tuple[str, str, str, str] | None:

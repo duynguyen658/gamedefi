@@ -74,6 +74,7 @@ def test_verifies_exact_mint_instruction_for_wallet_pda_and_faction():
     def handler(request):
         body = json.loads(request.content)
         assert body["method"] == "getTransaction"
+        assert body["params"][1]["encoding"] == "json"
         return httpx.Response(200, json={"result": {
             "blockTime": 1_700_000_000,
             "meta": {"err": None},
@@ -105,3 +106,19 @@ def test_verifies_exact_mint_instruction_for_wallet_pda_and_faction():
     assert not adapter.verify_faction_mint(
         VECTOR["wallet"], VECTOR["program_id"], VECTOR["faction_id"], "signature"
     )
+
+
+def test_dex_reads_parsed_transaction_without_changing_gameplay_reader():
+    def handler(request):
+        body = json.loads(request.content)
+        assert body["method"] == "getTransaction"
+        assert body["params"][1]["encoding"] == "jsonParsed"
+        return httpx.Response(200, json={"result": {
+            "meta": {"err": None},
+            "transaction": {"message": {"accountKeys": [{"pubkey": VECTOR["wallet"]}]}},
+        }})
+
+    adapter = SolanaAdapter(Settings(), httpx.Client(transport=httpx.MockTransport(handler)))
+    transaction = adapter.get_dex_transaction("signature")
+    assert transaction.status == "success"
+    assert transaction.sender == VECTOR["wallet"]

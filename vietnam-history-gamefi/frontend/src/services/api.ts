@@ -23,6 +23,10 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || (
     : 'http://127.0.0.1:8000'
 );
 
+export class ApiRequestError extends Error {
+  constructor(message: string, public readonly status: number) { super(message); }
+}
+
 async function apiError(response: Response): Promise<Error> {
   if (response.status === 401) {
     if (typeof window !== 'undefined') window.dispatchEvent(new Event('gamefi:session-expired'));
@@ -30,9 +34,9 @@ async function apiError(response: Response): Promise<Error> {
   }
   try {
     const payload = await response.json();
-    return new Error(typeof payload?.detail === 'string' ? payload.detail : `HTTP error ${response.status}`);
+    return new ApiRequestError(typeof payload?.detail === 'string' ? payload.detail : `HTTP error ${response.status}`, response.status);
   } catch {
-    return new Error(`HTTP error ${response.status}`);
+    return new ApiRequestError(`HTTP error ${response.status}`, response.status);
   }
 }
 

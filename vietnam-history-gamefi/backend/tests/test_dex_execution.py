@@ -10,7 +10,7 @@ from solders.transaction import VersionedTransaction
 
 from app.api.dex import signed_transaction_signature
 from app.blockchain.interface import TransactionInfo
-from app.dex.interface import DexExecution, DexOrder
+from app.dex.interface import DexExecution, DexOrder, DexSubmissionRejected
 from conftest import login
 
 
@@ -209,3 +209,43 @@ def test_history_is_wallet_scoped_and_reconciles_pending_signature(client, adapt
     assert response.json() == {"checked": 1, "confirmed": 1, "failed": 0, "pending": 0}
     assert client.get("/dex/history", headers=headers(other)).json() == []
     assert client.get("/dex/history", headers=headers(owner)).json()[0]["status"] == "confirmed"
+
+
+def test_rpc_preflight_rejection_is_failed_not_pending(client):
+    owner_key = Keypair()
+    wallet, player = login(client, owner_key)
+
+    class RejectingProvider(ExecutableDexProvider):
+        def execute(self, signed_transaction, request_id):
+            raise DexSubmissionRejected("Transaction simulation failed · InsufficientFunds")
+
+    client.app.state.dex_provider = RejectingProvider()
+    order = client.post("/dex/order", headers=headers(player), json=order_body(wallet)).json()
+    response = client.post("/dex/execute", headers=headers(player), json={
+        "wallet": wallet, "request_id": order["request_id"],
+        "signed_transaction": signed_transaction(owner_key),
+    })
+    assert response.status_code == 422
+    assert "InsufficientFunds" in response.json()["detail"]
+    history = client.get("/dex/history?executed_only=true", headers=headers(player))
+    assert history.status_code == 200
+    assert history.json()[0]["status"] == "failed"
+    assert "InsufficientFunds" in history.json()[0]["error"]
+
+
+def test_saved_history_survives_rpc_outage(client, adapter):
+    owner_key = Keypair()
+    wallet, player = login(client, owner_key)
+    client.app.state.dex_provider = ExecutableDexProvider()
+    order = client.post("/dex/order", headers=headers(player), json=order_body(wallet)).json()
+    client.app.state.dex_swaps.reserve_execution(
+        request_id=order["request_id"], wallet=wallet, signature="pending-signature",
+    )
+
+    def offline(_signature):
+        raise RuntimeError("RPC offline")
+
+    adapter.get_transaction = offline
+    response = client.get("/dex/history?executed_only=true", headers=headers(player))
+    assert response.status_code == 200
+    assert response.json()[0]["status"] == "pending_confirmation"

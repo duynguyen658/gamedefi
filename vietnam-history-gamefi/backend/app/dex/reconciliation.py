@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import timedelta, timezone
 
 from app.blockchain.interface import BlockchainAdapter
-from app.dex.persistence import DexSwapRepository
+from app.dex.persistence import DexSwapRepository, utcnow
 from app.dex.settlement import extract_settlement
 
 
@@ -21,8 +22,35 @@ def reconcile_wallet(repository: DexSwapRepository, adapter: BlockchainAdapter, 
     for swap in repository.pending_wallet(wallet):
         checked += 1
         processed.add(swap.request_id)
-        transaction = adapter.get_transaction(swap.signature or "")
+        repository.mark_reconciliation_checked(swap.request_id)
+        read_transaction = getattr(adapter, "get_dex_transaction", adapter.get_transaction)
+        transaction = read_transaction(swap.signature or "")
         if transaction is None or transaction.status == "pending":
+            # A finalized lookup can lag a confirmed signature. Check history
+            # before declaring an old, no-longer-valid blockhash expired.
+            submitted_at = swap.submitted_at
+            if submitted_at and submitted_at.tzinfo is None:
+                submitted_at = submitted_at.replace(tzinfo=timezone.utc)
+            if (transaction is None and submitted_at
+                    and utcnow() - submitted_at > timedelta(minutes=3)
+                    and hasattr(adapter, "get_signature_status")):
+                signature_status = adapter.get_signature_status(swap.signature or "")
+                if signature_status == "failed":
+                    repository.mark_reconciled(swap.request_id, "failed")
+                    failed += 1
+                    continue
+                if signature_status is None and (
+                    (swap.recent_blockhash and hasattr(adapter, "is_blockhash_valid")
+                     and not adapter.is_blockhash_valid(swap.recent_blockhash))
+                    or (not swap.recent_blockhash
+                        and utcnow() - submitted_at > timedelta(minutes=30))
+                ):
+                    repository.mark_submission_uncertain(
+                        swap.request_id, "Blockhash đã hết hạn và không tìm thấy giao dịch trên Solana",
+                    )
+                    repository.mark_reconciled(swap.request_id, "failed")
+                    failed += 1
+                    continue
             pending += 1
         elif transaction.status == "success" and transaction.sender == swap.wallet:
             repository.mark_reconciled(swap.request_id, "confirmed")
@@ -43,7 +71,9 @@ def reconcile_wallet(repository: DexSwapRepository, adapter: BlockchainAdapter, 
     for swap in repository.unsettled_wallet(wallet):
         if swap.request_id in processed:
             continue
-        transaction = adapter.get_transaction(swap.signature or "")
+        repository.mark_reconciliation_checked(swap.request_id)
+        read_transaction = getattr(adapter, "get_dex_transaction", adapter.get_transaction)
+        transaction = read_transaction(swap.signature or "")
         if transaction is None or transaction.status != "success" or transaction.sender != swap.wallet:
             continue
         settlement = extract_settlement(swap, transaction.raw)

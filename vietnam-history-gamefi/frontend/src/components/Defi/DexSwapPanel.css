@@ -157,7 +157,7 @@
 }
 .dex-token-meta > span:last-child { text-align: right; overflow-wrap: anywhere; }
 .dex-balance-actions { display: inline-flex; align-items: center; justify-content: flex-end; gap: 5px; }
-.dex-balance-actions button { display: inline-grid; place-items: center; width: 28px; height: 28px; flex: none; border-radius: 6px; color: var(--dex-gold-light); }
+.dex-balance-actions button { display: inline-grid; place-items: center; width: 44px; height: 44px; flex: none; border-radius: 6px; color: var(--dex-gold-light); }
 .dex-balance-actions button:hover:not(:disabled) { background: rgba(213, 173, 74, .1); }
 .dex-balance-actions button:disabled { opacity: .45; cursor: not-allowed; }
 .dex-amount-input,
@@ -178,6 +178,7 @@
 }
 .dex-amount-input::placeholder { color: #657080; opacity: 1; }
 .dex-amount-input:focus { outline: none; }
+.dex-amount-hint { display: block; margin-top: 7px; color: #ffb0a9; font-size: .75rem; line-height: 1.4; }
 .dex-output-amount.is-placeholder {
   color: #818d9e;
   font-size: clamp(1.13rem, 2.4vw, 1.45rem);
@@ -223,7 +224,7 @@
 .dex-token-picker img,
 .dex-token-fixed img { width: 26px; height: 26px; flex: none; border-radius: 50%; }
 .dex-token-picker select {
-  min-height: 30px;
+  min-height: 44px;
   padding-right: 2px;
   border: 0;
   background: transparent;
@@ -374,8 +375,6 @@
 .dex-market-rate span,
 .dex-market-rate small { color: var(--dex-muted); font-size: .75rem; line-height: 1.4; }
 .dex-market-rate strong { color: var(--dex-gold-light); font-size: clamp(1rem, 2vw, 1.22rem); line-height: 1.35; overflow-wrap: anywhere; }
-.dex-market-reference { margin-top: 10px; }
-.dex-market-reference strong { color: var(--dex-text); }
 .dex-market-facts { display: grid; gap: 0; margin-top: 16px; }
 .dex-market-facts > div {
   display: flex;
@@ -391,7 +390,7 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  min-height: 42px;
+  min-height: 44px;
   margin-top: 12px;
   color: var(--dex-gold-light);
   font-size: .78rem;
@@ -405,12 +404,12 @@
 .dex-history-heading h3 svg { color: var(--dex-gold); flex: none; }
 .dex-history-heading > span { color: var(--dex-muted); font-size: .73rem; text-align: right; }
 .dex-history-tools { display: inline-flex; align-items: center; gap: 8px; color: var(--dex-muted); font-size: .73rem; text-align: right; }
-.dex-history-tools button { display: inline-grid; place-items: center; width: 30px; height: 30px; flex: none; border-radius: 6px; color: var(--dex-gold-light); }
+.dex-history-tools button { display: inline-grid; place-items: center; width: 44px; height: 44px; flex: none; border-radius: 6px; color: var(--dex-gold-light); }
 .dex-history-tools button:hover:not(:disabled) { background: rgba(213, 173, 74, .1); }
 .dex-history-tools button:disabled { opacity: .45; cursor: not-allowed; }
 .dex-history-empty { padding: 19px 0 2px; color: var(--dex-muted); font-size: .79rem; line-height: 1.5; }
 .dex-history-empty.is-error { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; color: #f2c777; }
-.dex-history-empty button { min-height: 39px; color: var(--dex-gold-light); text-decoration: underline; }
+.dex-history-empty button { min-height: 44px; color: var(--dex-gold-light); text-decoration: underline; }
 .dex-history-list { margin: 0; padding: 0; list-style: none; }
 .dex-history-list li {
   display: grid;
@@ -431,8 +430,9 @@
 .dex-history-status.is-pending_confirmation { color: #f2c777; }
 .dex-history-status.is-failed,
 .dex-history-status.is-expired { color: #ff9d97; }
-.dex-history-link { display: inline-flex; align-items: center; gap: 4px; min-height: 35px; color: var(--dex-gold-light); text-decoration: underline; }
-.dex-history-more { display: block; min-height: 42px; margin: 18px auto 0; padding: 0 18px; border: 1px solid var(--dex-border); border-radius: 8px; color: var(--dex-gold-light); font-size: .78rem; font-weight: 700; }
+.dex-history-link { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; color: var(--dex-gold-light); text-decoration: underline; }
+.dex-history-error { grid-column: 1 / -1; color: #ffb0a9; font-size: .71rem; line-height: 1.4; overflow-wrap: anywhere; }
+.dex-history-more { display: block; min-height: 44px; margin: 18px auto 0; padding: 0 18px; border: 1px solid var(--dex-border); border-radius: 8px; color: var(--dex-gold-light); font-size: .78rem; font-weight: 700; }
 .dex-history-more:hover { border-color: var(--dex-gold); background: rgba(218, 166, 75, .08); }
 .dex-history-more:disabled { cursor: wait; opacity: .6; }
 .dex-history-page-error { margin: 10px 0 0; color: #ff9d97; font-size: .76rem; }

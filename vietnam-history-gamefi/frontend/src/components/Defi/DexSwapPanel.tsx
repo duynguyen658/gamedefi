@@ -10,7 +10,7 @@ import {
   WalletCards,
 } from 'lucide-react';
 import { Player } from '../../types';
-import { apiService } from '../../services/api';
+import { ApiRequestError, apiService } from '../../services/api';
 import { SOLANA_NETWORK, solanaAdapter } from '../../services/solana';
 import { signedDexTransactionSignature } from '../../services/dexSignature';
 import {
@@ -24,7 +24,7 @@ import {
 } from '../../services/dexBalances';
 import { formatBaseUnits, uiAmountToBaseUnits } from '../../services/dexMath';
 import { buildRaydiumSwapTransaction, isSwapBlockhashValid } from '../../services/raydiumSwap';
-import type { DexConfig, DexExecution, DexMarketPrice, DexOrder, DexSwapHistory, QuickSwapIntent } from '../../types/dex';
+import type { DexConfig, DexExecution, DexOrder, DexSwapHistory, QuickSwapIntent } from '../../types/dex';
 import { SolRewardCard } from './SolRewardCard';
 import './DexSwapPanel.css';
 
@@ -77,8 +77,6 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum, 
   const [toToken, setToToken] = useState<DexTokenSymbol>(initialSwap?.fromToken && initialSwap.fromToken !== 'SOL' ? 'SOL' : QUOTE_TOKEN);
   const [amount, setAmount] = useState(initialSwap?.amount ?? '');
   const [slippageBps, setSlippageBps] = useState(STANDARD_SLIPPAGE_BPS);
-  const [referencePrice, setReferencePrice] = useState<DexMarketPrice | null>(null);
-  const [referenceStatus, setReferenceStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [balances, setBalances] = useState<DexBalances>(EMPTY_BALANCES);
   const [dexConfig, setDexConfig] = useState<DexConfig | null>(null);
   const [reserveLamports, setReserveLamports] = useState(10_000_000);
@@ -200,27 +198,6 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum, 
     return () => window.clearInterval(timer);
   }, [history, historyStatus, player.is_guest]);
 
-  useEffect(() => {
-    let active = true;
-    const refreshReferencePrice = async () => {
-      try {
-        const next = await apiService.getDexMarketPrice();
-        if (active) {
-          setReferencePrice(next);
-          setReferenceStatus('ready');
-        }
-      } catch {
-        if (active) {
-          setReferencePrice(null);
-          setReferenceStatus('error');
-        }
-      }
-    };
-    void refreshReferencePrice();
-    const timer = window.setInterval(() => void refreshReferencePrice(), 30_000);
-    return () => { active = false; window.clearInterval(timer); };
-  }, []);
-
   const clearQuote = () => {
     quoteVersion.current += 1;
     quoteAbort.current?.abort();
@@ -233,6 +210,19 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum, 
     setError(null);
     setRequestStatus((status) => status === 'quoting' ? 'idle' : status);
   };
+
+  useEffect(() => {
+    if (player.is_guest) return;
+    return solanaAdapter.onWalletChange((wallet) => {
+      if (wallet === player.wallet) {
+        void refreshBalances();
+        return;
+      }
+      clearQuote();
+      setBalanceStatus('error');
+      setError('Ví đã đổi tài khoản hoặc ngắt kết nối. Hãy kết nối lại để tiếp tục swap.');
+    });
+  }, [player.wallet, player.is_guest]);
 
   const reversePair = () => {
     onPlayDrum();
@@ -344,6 +334,7 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum, 
     setError(null);
     setExecution(null);
     let signed = false;
+    let submitted = false;
     try {
       if (!await isSwapBlockhashValid(preparedSwap.lastValidBlockHeight)) {
         setPreparedSwap(null);
@@ -360,6 +351,7 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum, 
         throw new Error('Blockhash hết hạn trong lúc ví ký. Giao dịch chưa được gửi; hãy lấy báo giá mới.');
       }
       setRequestStatus('executing');
+      submitted = true;
       const result = await apiService.executeDexOrder({
         wallet: player.wallet,
         request_id: order.request_id,
@@ -378,7 +370,9 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum, 
       }
       await refreshHistory();
     } catch (executeError) {
-      setError(signed
+      const rejected = executeError instanceof ApiRequestError && executeError.status === 422;
+      if (!submitted || rejected) setSignedSignature(null);
+      setError(submitted && !rejected
         ? `${apiError(executeError)} Hãy kiểm tra lịch sử hoặc Explorer trước khi tạo lệnh khác.`
         : apiError(executeError));
       if (signed) {
@@ -467,7 +461,11 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum, 
                 aria-invalid={Boolean(amount && amountError)}
                 aria-describedby={amount && amountError ? 'dex-amount-error' : undefined}
               />
-              {amount && amountError && <span id="dex-amount-error" className="sr-only">{amountError}</span>}
+              {amount && amountError && (
+                <span id="dex-amount-error" className="dex-amount-hint" role="status">
+                  {amountError.includes('Số dư') ? 'Vượt số dư khả dụng. Chọn MAX để tiếp tục.' : amountError}
+                </span>
+              )}
               <div className="dex-token-actions">
                 <button
                   type="button"
@@ -649,12 +647,6 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum, 
             <span>Tỷ giá swap</span>
             <strong>{rateDisplay ?? 'Chưa có báo giá'}</strong>
           </div>
-          <div className="dex-market-rate dex-market-reference" aria-live="polite">
-            <span>Giá thị trường tham khảo</span>
-            <strong>{referencePrice
-              ? `1 SOL ≈ ${Number(referencePrice.price).toLocaleString('vi-VN', { maximumFractionDigits: 2 })} USD`
-              : referenceStatus === 'loading' ? 'Đang tải giá thị trường…' : 'Chưa có giá thị trường'}</strong>
-          </div>
           <dl className="dex-market-facts">
             <div><dt>Định tuyến</dt><dd>{SOLANA_NETWORK === 'devnet' ? 'Raydium CPMM' : 'Jupiter'}</dd></div>
             <div><dt>Mạng</dt><dd>{networkLabel}</dd></div>
@@ -668,7 +660,7 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum, 
         </aside>
       </div>
 
-      <section className="dex-history-card" aria-labelledby="dex-history-title" aria-live="polite">
+      <section className="dex-history-card" aria-labelledby="dex-history-title">
         <header className="dex-history-heading">
           <div>
             <span className="dex-eyebrow">Hoạt động của ví</span>
@@ -696,15 +688,16 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum, 
         ) : (
           <ul className="dex-history-list">
             {history.map((item) => {
-              const href = item.signature
+              const href = item.signature && !item.error?.startsWith('RPC từ chối giao dịch:')
                 ? `https://explorer.solana.com/tx/${item.signature}${SOLANA_NETWORK === 'mainnet-beta' ? '' : `?cluster=${SOLANA_NETWORK}`}`
                 : null;
               return (
                 <li key={item.request_id}>
                   <span className="dex-history-pair">
                     {formatBaseUnits(BigInt(item.total_input_amount || item.in_amount), item.input_decimals, 4)} {item.input_symbol}
-                    {item.total_output_amount ? ' → ' : ' → ≈ '}
-                    {formatBaseUnits(BigInt(item.total_output_amount || item.out_amount), item.output_decimals, 4)} {item.output_symbol}
+                    {item.status === 'failed'
+                      ? ' → giao dịch không hoàn tất'
+                      : ` → ${item.total_output_amount ? '' : '≈ '}${formatBaseUnits(BigInt(item.total_output_amount || item.out_amount), item.output_decimals, 4)} ${item.output_symbol}`}
                     {typeof item.network_fee_lamports === 'number' && (
                       <small className="dex-history-fee">Phí mạng: {(item.network_fee_lamports / 1_000_000_000).toLocaleString('vi-VN', { maximumFractionDigits: 9 })} SOL</small>
                     )}
@@ -712,6 +705,7 @@ export const DexSwapPanel: React.FC<DexSwapPanelProps> = ({ player, onPlayDrum, 
                   <time dateTime={item.created_at}>{new Date(item.created_at).toLocaleString('vi-VN')}</time>
                   <span className={`dex-history-status is-${item.status}`}>{STATUS_LABELS[item.status]}</span>
                   {href && <a href={href} target="_blank" rel="noreferrer" className="dex-history-link">Explorer <ExternalLink size={14} aria-hidden="true" /></a>}
+                  {item.status === 'failed' && item.error && <small className="dex-history-error">{item.error}</small>}
                 </li>
               );
             })}

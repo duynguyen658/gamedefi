@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { ShieldCheck, Wallet, X } from 'lucide-react';
 import { ChainType } from '../../types';
-import type { SolanaWalletKind } from '../../services/solana';
+import { solanaAdapter, type SolanaWalletKind } from '../../services/solana';
 import './WalletModal.css';
 
 interface WalletModalProps {
@@ -39,6 +39,11 @@ export const WalletModal: React.FC<WalletModalProps> = ({
 
   if (!isOpen) return null;
 
+  const mobileWithoutProvider = /Android|iPhone|iPad|iPod/i.test(window.navigator.userAgent)
+    && !solanaAdapter.isAvailable();
+  const currentUrl = encodeURIComponent(window.location.href);
+  const ref = encodeURIComponent(window.location.origin);
+
   const connect = async (walletKind: SolanaWalletKind) => {
     onPlayGong();
     try {
@@ -64,10 +69,18 @@ export const WalletModal: React.FC<WalletModalProps> = ({
           <div className="wallet-assurance"><ShieldCheck aria-hidden="true" /><span>Ví sẽ yêu cầu bạn ký thông điệp xác thực. Trang này không yêu cầu khóa riêng hay cụm từ khôi phục.</span></div>
           {error && <p className="wallet-error" role="alert">{error}</p>}
           {isConnecting && <p className="wallet-progress" role="status">{authStep || 'Đang kết nối ví…'}</p>}
-          <div className="wallet-provider-actions">
-            <button type="button" className="wallet-connect" disabled={isConnecting} onClick={() => void connect('phantom')}><Wallet aria-hidden="true" /> {isConnecting ? 'Đang kết nối…' : 'Kết nối Phantom'}</button>
-            <button type="button" className="wallet-connect wallet-connect-secondary" disabled={isConnecting} onClick={() => void connect('solflare')}><Wallet aria-hidden="true" /> Kết nối Solflare</button>
-          </div>
+          {mobileWithoutProvider ? (
+            <div className="wallet-provider-actions">
+              <p className="wallet-mobile-hint">Mở trang trong ví, sau đó bấm Kết nối ví tại đây.</p>
+              <a className="wallet-connect" href={`https://phantom.app/ul/browse/${currentUrl}?ref=${ref}`}><Wallet aria-hidden="true" /> Mở trong Phantom</a>
+              <a className="wallet-connect wallet-connect-secondary" href={`https://solflare.com/ul/v1/browse/${currentUrl}?ref=${ref}`}><Wallet aria-hidden="true" /> Mở trong Solflare</a>
+            </div>
+          ) : (
+            <div className="wallet-provider-actions">
+              <button type="button" className="wallet-connect" disabled={isConnecting} onClick={() => void connect('phantom')}><Wallet aria-hidden="true" /> {isConnecting ? 'Đang kết nối…' : 'Kết nối Phantom'}</button>
+              <button type="button" className="wallet-connect wallet-connect-secondary" disabled={isConnecting} onClick={() => void connect('solflare')}><Wallet aria-hidden="true" /> Kết nối Solflare</button>
+            </div>
+          )}
           <button type="button" className="wallet-play" disabled={isConnecting} onClick={() => { onPlayDrum(); onClose(); }}>Để sau</button>
         </div>
       </section>

@@ -17,6 +17,7 @@ from app.dex.interface import (
     DexOrderRequestData,
     DexProvider,
     DexProviderError,
+    DexSubmissionRejected,
     SOL_MINT,
     token_registry,
 )
@@ -76,8 +77,26 @@ class RaydiumDexProvider(DexProvider):
             body = response.json()
         except (httpx.HTTPError, ValueError) as exc:
             raise DexProviderError(f"Không thể kết nối Solana RPC cho Raydium: {method}") from exc
-        if not isinstance(body, dict) or body.get("error"):
-            raise DexProviderError(f"Solana RPC trả lỗi khi xử lý Raydium: {method}")
+        if not isinstance(body, dict):
+            raise DexProviderError(f"Solana RPC trả dữ liệu không hợp lệ: {method}")
+        if body.get("error"):
+            error = body["error"]
+            code = error.get("code") if isinstance(error, dict) else None
+            message = error.get("message") if isinstance(error, dict) else str(error)
+            detail = str(message or "Lỗi không xác định")[:240]
+            rpc_error = f"Solana RPC {method} (mã {code}): {detail}" if code is not None else f"Solana RPC {method}: {detail}"
+            # A simulation/validation error is a definite rejection. Transport and
+            # other RPC errors may happen after the transaction reached the node.
+            if method == "sendTransaction" and (
+                code in {-32002, -32602, -32003}
+                or "simulation failed" in detail.lower()
+                or "signature verification" in detail.lower()
+            ):
+                simulation = error.get("data", {}).get("err") if isinstance(error, dict) and isinstance(error.get("data"), dict) else None
+                if simulation is not None:
+                    rpc_error += f" · {str(simulation)[:160]}"
+                raise DexSubmissionRejected(rpc_error)
+            raise DexProviderError(rpc_error)
         return body.get("result")
 
     @staticmethod

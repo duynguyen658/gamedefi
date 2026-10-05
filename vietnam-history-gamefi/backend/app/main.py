@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from contextlib import asynccontextmanager, suppress
+from time import monotonic
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -63,7 +64,16 @@ def create_app() -> FastAPI:
     app.state.dex_swaps = DexSwapRepository(settings.database_url, create_schema=settings.database_auto_create)
     app.state.reward_claims = RewardRepository(settings.database_url, create_schema=settings.database_auto_create)
 
+    last_quote_cleanup = monotonic() - 3600
+
     def reconcile_dex_queue() -> None:
+        nonlocal last_quote_cleanup
+        if monotonic() - last_quote_cleanup >= 3600:
+            try:
+                app.state.dex_swaps.purge_unused_quotes()
+            except Exception:
+                logging.getLogger(__name__).exception("DEX quote cleanup failed")
+            last_quote_cleanup = monotonic()
         adapter = app.state.resolver.get("solana")
         for wallet in app.state.dex_swaps.wallets_needing_reconciliation(limit=20):
             try:

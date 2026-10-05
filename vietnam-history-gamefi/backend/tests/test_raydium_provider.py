@@ -2,11 +2,12 @@ import base64
 import json
 
 import httpx
+import pytest
 from solders.pubkey import Pubkey
 
 from app.blockchain.solana_adapter import SPL_TOKEN_PROGRAM_ID
 from app.core.config import Settings
-from app.dex.interface import DexOrderRequestData, SOL_MINT, token_registry
+from app.dex.interface import DexOrderRequestData, DexSubmissionRejected, SOL_MINT, token_registry
 from app.dex.raydium_provider import RaydiumDexProvider
 
 
@@ -130,3 +131,17 @@ def test_raydium_uses_separate_allowlisted_pool_for_usdt():
     ))
     assert order.router == settings.raydium_usdt_pool_id
     assert order.out_amount.isdigit() and int(order.out_amount) > 0
+
+
+def test_preflight_rejection_keeps_the_rpc_reason():
+    settings = Settings(database_url="sqlite+pysqlite:///:memory:")
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"error": {
+            "code": -32002, "message": "Transaction simulation failed",
+            "data": {"err": {"InstructionError": [2, "InsufficientFunds"]}},
+        }})
+
+    provider = RaydiumDexProvider(settings, httpx.Client(transport=httpx.MockTransport(handler)))
+    with pytest.raises(DexSubmissionRejected, match="InsufficientFunds"):
+        provider.execute("signed-base64", "order")

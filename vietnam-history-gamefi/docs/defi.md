@@ -4,7 +4,7 @@
 
 - SOL là tài sản gốc. Giao diện chỉ cung cấp cặp SOL/USDC thử và SOL/USDT thử trên Raydium CPMM Devnet.
 - Backend lấy reserve trực tiếp từ pool, xác minh mint, config và vault; frontend dựng giao dịch legacy và mô phỏng trên Devnet trước khi Phantom/Solflare ký; backend xác minh chữ ký, đúng pool, số lượng bán, mức nhận tối thiểu, tài khoản token của ví và các lệnh phụ trước khi gửi RPC.
-- Lịch sử giao dịch hiển thị các lệnh đã gửi qua DEX này, có tải thêm; số token nhận trong danh sách là **lượng dự kiến theo báo giá**. Giao dịch khác thực hiện trực tiếp từ ví ngoài DEX này không nằm trong lịch sử ứng dụng.
+- Lịch sử giao dịch hiển thị các lệnh đã gửi qua DEX này, có tải thêm. Khi đã đối soát được, lượng nhận và phí mạng lấy từ giao dịch on-chain; khi chưa đọc được lượng nhận chính xác, giao diện đánh dấu **≈** là lượng dự kiến. Giao dịch khác thực hiện trực tiếp từ ví ngoài DEX này không nằm trong lịch sử ứng dụng.
 - USDC/USDT ở đây là token thử trên Devnet. Tỷ giá không phản ánh Mainnet và chúng không chuyển được sang Mainnet.
 - Pool USDC thử: `FeRts7d5DfXKXq1hGMkeiGEHayDdjsmSyJ41rHVcKo8t`; mint `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU`.
 - Pool USDT thử: `Bw9gaeKqQy5aTpi1BiSdV2p21REATtVXDdhjPUFjgq6N`; mint `9jWfcfEZToquBQmkoEViNSCt72veXwcvRGFQERXRjEk1`.

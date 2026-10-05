@@ -9,7 +9,7 @@ from solders.transaction import VersionedTransaction
 from app.api.dependencies import require_session, require_wallet
 from app.core.security import SessionPrincipal
 from app.core.mainnet import MAINNET_GENESIS
-from app.dex.interface import DexOrderRequestData, DexProviderError, token_registry
+from app.dex.interface import DexExecution, DexOrderRequestData, DexProviderError, DexSubmissionRejected, token_registry
 from app.dex.market_price import MarketPriceUnavailable
 from app.dex.persistence import (
     DexIdempotencyConflict,
@@ -201,13 +201,20 @@ def execute_order(body: DexExecuteRequest, request: Request, principal: SessionP
     except DexPersistenceError as exc:
         raise persistence_error(exc) from exc
     try:
-        repository.reserve_execution(request_id=body.request_id, wallet=body.wallet, signature=signature)
+        recent_blockhash = str(VersionedTransaction.from_bytes(
+            base64.b64decode(body.signed_transaction)).message.recent_blockhash)
+        repository.reserve_execution(request_id=body.request_id, wallet=body.wallet,
+                                     signature=signature, recent_blockhash=recent_blockhash)
         result = request.app.state.dex_provider.execute(body.signed_transaction, body.request_id)
         if result.signature and result.signature != signature:
             repository.mark_submission_uncertain(body.request_id, "DEX provider trả signature không khớp giao dịch đã ký")
             raise HTTPException(status_code=502, detail="DEX provider trả signature không khớp giao dịch đã ký")
         repository.mark_execution(body.request_id, result)
         return DexExecutionOut(**result.__dict__)
+    except DexSubmissionRejected as exc:
+        repository.mark_execution(body.request_id, DexExecution("Failed", signature, 1, None, None,
+                                                                f"RPC từ chối giao dịch: {exc}"))
+        raise HTTPException(status_code=422, detail=f"RPC từ chối giao dịch: {exc}") from exc
     except DexProviderError as exc:
         repository.mark_submission_uncertain(body.request_id, str(exc))
         raise HTTPException(status_code=503, detail=f"{exc}. Lệnh đã được giữ để đối soát; không gửi lại.") from exc
@@ -226,7 +233,6 @@ def dex_history(
     if principal.is_guest:
         return []
     try:
-        reconcile_wallet(request.app.state.dex_swaps, request.app.state.resolver.get("solana"), principal.wallet)
         return [DexSwapHistoryOut(**{field: getattr(item, field) for field in DexSwapHistoryOut.model_fields})
                 for item in request.app.state.dex_swaps.list_wallet(
                     principal.wallet, limit=limit, offset=offset, executed_only=executed_only,

@@ -4,9 +4,9 @@ import hashlib
 import json
 import uuid
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import BigInteger, Boolean, DateTime, Integer, String, Text, UniqueConstraint, Uuid, create_engine, inspect, select, text
+from sqlalchemy import BigInteger, Boolean, DateTime, Integer, String, Text, UniqueConstraint, Uuid, create_engine, delete, func, inspect, select, text
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -66,6 +66,8 @@ class DexSwapModel(Base):
     price_impact_bps: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     status: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
     signature: Mapped[str | None] = mapped_column(String(128), unique=True)
+    recent_blockhash: Mapped[str | None] = mapped_column(String(64))
+    reconciliation_checked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     code: Mapped[int | None] = mapped_column(Integer)
     total_input_amount: Mapped[str | None] = mapped_column(String(40))
     total_output_amount: Mapped[str | None] = mapped_column(String(40))
@@ -105,6 +107,8 @@ class DexSwapRecord:
     price_impact_bps: int
     status: str
     signature: str | None
+    recent_blockhash: str | None
+    reconciliation_checked_at: datetime | None
     code: int | None
     total_input_amount: str | None
     total_output_amount: str | None
@@ -151,6 +155,12 @@ class DexSwapRepository:
             if "network_fee_lamports" not in columns:
                 with self.engine.begin() as connection:
                     connection.execute(text("ALTER TABLE dex_swaps ADD COLUMN network_fee_lamports BIGINT"))
+            if "recent_blockhash" not in columns:
+                with self.engine.begin() as connection:
+                    connection.execute(text("ALTER TABLE dex_swaps ADD COLUMN recent_blockhash VARCHAR(64)"))
+            if "reconciliation_checked_at" not in columns:
+                with self.engine.begin() as connection:
+                    connection.execute(text("ALTER TABLE dex_swaps ADD COLUMN reconciliation_checked_at TIMESTAMP"))
 
     @staticmethod
     def _record(row: DexSwapModel) -> DexSwapRecord:
@@ -202,7 +212,8 @@ class DexSwapRepository:
         except SQLAlchemyError as exc:
             raise DexPersistenceError("Không thể lưu lệnh DEX") from exc
 
-    def reserve_execution(self, *, request_id: str, wallet: str, signature: str) -> DexSwapRecord:
+    def reserve_execution(self, *, request_id: str, wallet: str, signature: str,
+                          recent_blockhash: str | None = None) -> DexSwapRecord:
         try:
             with self.sessions.begin() as db:
                 row = db.scalar(select(DexSwapModel).where(DexSwapModel.request_id == request_id).with_for_update())
@@ -215,6 +226,7 @@ class DexSwapRepository:
                 else:
                     row.status = "pending_confirmation"
                     row.signature = signature
+                    row.recent_blockhash = recent_blockhash
                     row.submitted_at = utcnow()
                     row.updated_at = utcnow()
             if expired:
@@ -258,6 +270,28 @@ class DexSwapRepository:
         except SQLAlchemyError as exc:
             raise DexPersistenceError("Không thể lưu trạng thái đối soát DEX") from exc
 
+    def mark_reconciliation_checked(self, request_id: str) -> None:
+        try:
+            with self.sessions.begin() as db:
+                row = db.scalar(select(DexSwapModel).where(DexSwapModel.request_id == request_id).with_for_update())
+                if row and row.status in {"pending_confirmation", "confirmed"}:
+                    row.reconciliation_checked_at = utcnow()
+        except SQLAlchemyError as exc:
+            raise DexPersistenceError("Không thể cập nhật lịch đối soát DEX") from exc
+
+    def purge_unused_quotes(self, *, older_than: datetime | None = None) -> int:
+        cutoff = older_than or (utcnow() - timedelta(days=1))
+        try:
+            with self.sessions.begin() as db:
+                result = db.execute(delete(DexSwapModel).where(
+                    DexSwapModel.status.in_(("quoted", "simulated", "expired")),
+                    DexSwapModel.signature.is_(None),
+                    DexSwapModel.created_at < cutoff,
+                ))
+                return result.rowcount or 0
+        except SQLAlchemyError as exc:
+            raise DexPersistenceError("Không thể dọn báo giá DEX đã hết hạn") from exc
+
     def list_wallet(self, wallet: str, *, limit: int = 20, offset: int = 0,
                     executed_only: bool = False, network: str | None = None) -> list[DexSwapRecord]:
         try:
@@ -266,7 +300,7 @@ class DexSwapRepository:
                 if network is not None:
                     query = query.where(DexSwapModel.network == network)
                 if executed_only:
-                    query = query.where(DexSwapModel.status.in_(("pending_confirmation", "confirmed", "failed")))
+                    query = query.where(DexSwapModel.signature.is_not(None))
                 rows = db.scalars(query.order_by(DexSwapModel.created_at.desc())
                     .limit(limit).offset(offset)).all()
                 return [self._record(row) for row in rows]
@@ -280,7 +314,8 @@ class DexSwapRepository:
                     DexSwapModel.wallet == wallet,
                     DexSwapModel.status == "pending_confirmation",
                     DexSwapModel.signature.is_not(None),
-                ).order_by(DexSwapModel.updated_at.asc()).limit(limit)).all()
+                ).order_by(func.coalesce(DexSwapModel.reconciliation_checked_at,
+                                         DexSwapModel.submitted_at, DexSwapModel.created_at).asc()).limit(limit)).all()
                 return [self._record(row) for row in rows]
         except SQLAlchemyError as exc:
             raise DexPersistenceError("Không thể đọc hàng đợi đối soát DEX") from exc
@@ -293,7 +328,8 @@ class DexSwapRepository:
                     DexSwapModel.status == "confirmed",
                     DexSwapModel.signature.is_not(None),
                     DexSwapModel.total_output_amount.is_(None),
-                ).order_by(DexSwapModel.updated_at.asc()).limit(limit)).all()
+                ).order_by(func.coalesce(DexSwapModel.reconciliation_checked_at,
+                                         DexSwapModel.submitted_at, DexSwapModel.created_at).asc()).limit(limit)).all()
                 return [self._record(row) for row in rows]
         except SQLAlchemyError as exc:
             raise DexPersistenceError("Không thể đọc giao dịch DEX cần bổ sung kết quả") from exc
@@ -301,11 +337,16 @@ class DexSwapRepository:
     def wallets_needing_reconciliation(self, *, limit: int = 100) -> list[str]:
         try:
             with self.sessions() as db:
+                next_check = func.min(func.coalesce(
+                    DexSwapModel.reconciliation_checked_at,
+                    DexSwapModel.submitted_at,
+                    DexSwapModel.created_at,
+                ))
                 rows = db.scalars(select(DexSwapModel.wallet).where(
                     (DexSwapModel.status == "pending_confirmation")
                     | ((DexSwapModel.status == "confirmed") & DexSwapModel.total_output_amount.is_(None)),
                     DexSwapModel.signature.is_not(None),
-                ).distinct().limit(limit)).all()
+                ).group_by(DexSwapModel.wallet).order_by(next_check.asc()).limit(limit)).all()
                 return list(rows)
         except SQLAlchemyError as exc:
             raise DexPersistenceError("Không thể đọc ví cần đối soát DEX") from exc
