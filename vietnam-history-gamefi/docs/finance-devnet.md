@@ -33,4 +33,15 @@ Máy triển khai cần Solana CLI và công cụ SBF tương thích Anchor 0.30
 5. Kiểm tra `solana --url devnet program show C4Ys1SQk5PXcPD5GfLP1RL7FdiL54A4mhv49cDf7rYW6` và mở giao diện để khởi tạo Treasury bằng ví người dùng.
 6. Thử lần lượt mở/rút két 1 phút, tạo/hủy khoản vay, nhận/trả/nhận khoản vay, nạp Treasury, khóa SOL, tạo/bỏ phiếu/thực hiện đề xuất chi trên Devnet.
 
+Sau khi triển khai, `cd frontend && node scripts/finance-hub-smoke.mjs` chạy
+giao dịch Devnet thật cho các luồng trên bằng ví thử cục bộ. Ví payer cần còn
+ít nhất 0,2 SOL Devnet; script chờ hết kỳ hạn 1 phút và ghi chữ ký từng giao
+dịch để đối chiếu trên Explorer. Chỉ chạy script này trên Devnet thử.
+
+Trên workspace Windows đã chuẩn bị Solana CLI và hai keypair cục bộ, có thể chạy
+`powershell -File scripts/deploy-finance-hub.ps1 -EstimateOnly` để kiểm tra chi phí
+sau khi đặt `finance_hub.so` trong `blockchain/solana/target/deploy`. Khi đủ
+SOL Devnet, bỏ `-EstimateOnly` để triển khai. Script xác minh cả hai public key
+trước khi gửi bất kỳ giao dịch nào.
+
 Không chuyển Mainnet trước khi kiểm toán bảo mật chương trình và kiểm thử toàn bộ luồng trên Devnet. Frontend tự kiểm tra `executable` của chương trình; khi chưa triển khai, các thao tác của bốn mục này bị khóa và thông báo đúng trạng thái.

@@ -54,7 +54,7 @@ export interface FinanceTreasury { available: bigint; totalStaked: bigint; addre
 export interface FinanceStake { amount: bigint; lockedUntil: number }
 export interface FinanceProposal {
   address: string; proposer: string; recipient: string; nonce: bigint; amount: bigint;
-  endsAt: number; quorum: bigint; yesVotes: bigint; noVotes: bigint; executed: boolean;
+  endsAt: number; quorum: bigint; yesVotes: bigint; noVotes: bigint; executed: boolean; voted: boolean;
 }
 export interface FinanceSnapshot {
   deployed: boolean;
@@ -100,7 +100,7 @@ async function decodeProposal(address: PublicKey, data: Buffer): Promise<Finance
     address: address.toBase58(), proposer: readKey(data, 8), recipient: readKey(data, 40),
     nonce: readU64(data, 72), amount: readU64(data, 80), endsAt: readI64(data, 88),
     quorum: readU64(data, 96), yesVotes: readU64(data, 104), noVotes: readU64(data, 112),
-    executed: data[120] !== 0,
+    executed: data[120] !== 0, voted: false,
   };
 }
 
@@ -123,14 +123,19 @@ export async function loadFinanceSnapshot(wallet: string): Promise<FinanceSnapsh
   ]);
   const loans = await Promise.all([...new Map([...lending, ...borrowing].map((item) => [item.pubkey.toBase58(), item])).values()]
     .map((item) => decodeLoan(item.pubkey, item.account.data)));
-  const proposalList = await Promise.all(proposals.map((item) => decodeProposal(item.pubkey, item.account.data)));
+  const proposalList = (await Promise.all(proposals.map((item) => decodeProposal(item.pubkey, item.account.data))))
+    .sort((a, b) => Number(b.nonce - a.nonce)).slice(0, 50);
+  if (proposalList.length) {
+    const votes = await rpc.getMultipleAccountsInfo(proposalList.map((item) => voteKey(key(item.address), owner)), 'confirmed');
+    proposalList.forEach((item, index) => { item.voted = votes[index] !== null; });
+  }
   return {
     deployed: true, balance,
     saving: saving ? await decodeSaving(saving.data) : null,
     treasury: treasury ? await decodeTreasury(treasury.data) : null,
     stake: stake ? await decodeStake(stake.data) : null,
     loans: loans.sort((a, b) => Number(b.nonce - a.nonce)),
-    proposals: proposalList.sort((a, b) => Number(b.nonce - a.nonce)),
+    proposals: proposalList,
   };
 }
 

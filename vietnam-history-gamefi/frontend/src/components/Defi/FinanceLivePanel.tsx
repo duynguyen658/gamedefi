@@ -184,9 +184,10 @@ export const FinanceLivePanel: React.FC<Props> = ({ module, player, onPlayDrum }
         <div><dt>Đồng ý / Phản đối</dt><dd>{sol(proposal.yesVotes)} / {sol(proposal.noVotes)}</dd></div>
         <div><dt>Quorum</dt><dd>{sol(proposal.quorum)}</dd></div>
         <div><dt>Trạng thái</dt><dd>{proposal.executed ? 'Đã chi' : now < proposal.endsAt ? 'Đang bỏ phiếu' : 'Đã đóng phiếu'}</dd></div>
+        {proposal.voted && <div><dt>Phiếu của bạn</dt><dd>Đã ghi nhận</dd></div>}
       </dl>
       {module === 'dao' && !proposal.executed && <div className="finance-actions">
-        {now < proposal.endsAt && <>
+        {now < proposal.endsAt && !proposal.voted && <>
           {button('Đồng ý', { kind: 'cast_vote', proposal, approve: true }, !stake?.amount)}
           {button('Phản đối', { kind: 'cast_vote', proposal, approve: false }, !stake?.amount)}
         </>}
