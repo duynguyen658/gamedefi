@@ -22,6 +22,7 @@ ASSOCIATED_TOKEN_PROGRAM_ID = "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
 COMPUTE_BUDGET_PROGRAM_ID = "ComputeBudget111111111111111111111111111111"
 SWAP_BASE_INPUT_DISCRIMINATOR = bytes((143, 190, 90, 218, 196, 30, 51, 222))
 TOKEN_ACCOUNT_SIZE = 165
+MAX_PRIORITY_FEE_LAMPORTS = 20_000
 
 
 def _ata(wallet: str, mint: str) -> str:
@@ -98,8 +99,12 @@ def validate_raydium_transaction(
         raise ValueError("Tài khoản WSOL tạm không hợp lệ")
     swap_position = message.instructions.index(swap)
     saw_create = saw_initialize = saw_close = False
-    compute_limit = 200_000
+    # Without an explicit limit, Solana derives one from all instructions. Use
+    # its maximum as a conservative bound instead of assuming a single 200k CU
+    # instruction and accidentally accepting a higher effective priority fee.
+    compute_limit = 1_400_000
     compute_price = 0
+    saw_compute_limit = saw_compute_price = False
     for position, instruction in enumerate(message.instructions):
         program = keys[instruction.program_id_index]
         if program == program_id:
@@ -139,16 +144,26 @@ def validate_raydium_transaction(
             if position >= swap_position or not data:
                 raise ValueError("Lệnh phí mạng không hợp lệ")
             if data[0] == 2 and len(data) == 5:
+                if saw_compute_limit:
+                    raise ValueError("Giao dịch có nhiều lệnh giới hạn compute")
                 compute_limit = int.from_bytes(data[1:], "little")
                 if not 1 <= compute_limit <= 1_400_000:
                     raise ValueError("Giới hạn phí mạng không hợp lệ")
+                saw_compute_limit = True
             elif data[0] == 3 and len(data) == 9:
+                if saw_compute_price:
+                    raise ValueError("Giao dịch có nhiều lệnh đặt phí ưu tiên")
                 compute_price = int.from_bytes(data[1:], "little")
+                saw_compute_price = True
             else:
                 raise ValueError("Lệnh phí mạng không được hỗ trợ")
         else:
             raise ValueError("Giao dịch chứa chương trình ngoài swap")
     if not (saw_create and saw_initialize and saw_close):
         raise ValueError("Giao dịch thiếu bước tạo hoặc hoàn trả WSOL")
-    if compute_limit * compute_price > 20_000 * 1_000_000:
-        raise ValueError("Phí ưu tiên giao dịch vượt giới hạn DEX Devnet")
+    priority_fee_lamports = (compute_limit * compute_price + 999_999) // 1_000_000
+    if priority_fee_lamports > MAX_PRIORITY_FEE_LAMPORTS:
+        raise ValueError(
+            f"Phí ưu tiên giao dịch {priority_fee_lamports} lamports vượt giới hạn "
+            f"{MAX_PRIORITY_FEE_LAMPORTS} lamports của DEX Devnet"
+        )

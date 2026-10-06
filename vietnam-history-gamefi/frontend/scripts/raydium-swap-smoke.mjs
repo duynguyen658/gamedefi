@@ -20,6 +20,7 @@ const POOLS = {
 const PROGRAM_ID = 'DRaycpLY18LhpbydsBWbVJtxpNv9oXPgjRSfpF2bWpYb';
 const WSOL_MINT = 'So11111111111111111111111111111111111111112';
 const DEVNET_GENESIS = 'EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG';
+const DEVNET_SWAP_COMPUTE_BUDGET = { units: 600_000, microLamports: 1_000 };
 
 function argumentsMap() {
   const result = new Map();
@@ -99,6 +100,7 @@ async function main() {
     slippage: slippageBps / 10_000,
     baseIn,
     txVersion,
+    computeBudgetConfig: DEVNET_SWAP_COMPUTE_BUDGET,
   });
   if (!(built.transaction instanceof VersionedTransaction) && !(built.transaction instanceof Transaction)) {
     throw new Error('Expected a Solana transaction');

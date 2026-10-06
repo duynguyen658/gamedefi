@@ -1,6 +1,7 @@
 import base64
 
 import pytest
+from solders.compute_budget import set_compute_unit_limit, set_compute_unit_price
 from solders.hash import Hash
 from solders.instruction import AccountMeta, Instruction
 from solders.keypair import Keypair
@@ -59,7 +60,8 @@ def make_swap(*, amount=1_000_000_000, minimum=99_500_000, output_mint=None,
         ]),
     ]
     if extra_instruction:
-        instructions.insert(2, extra_instruction(owner))
+        extra = extra_instruction(owner)
+        instructions[2:2] = extra if isinstance(extra, list) else [extra]
     transaction = VersionedTransaction(Message.new_with_blockhash(instructions, owner.pubkey(), Hash.default()), [owner])
     quote = DexOrder(
         request_id="raydium_quote", input_symbol=token_symbol if reverse else "SOL",
@@ -81,6 +83,24 @@ def validate(**overrides):
 @pytest.mark.parametrize("overrides", [{}, {"token_symbol": "USDT"}, {"reverse": True}])
 def test_signed_raydium_transaction_matches_quote(overrides):
     validate(**overrides)
+
+
+def test_signed_raydium_transaction_accepts_bounded_priority_fee():
+    validate(extra_instruction=lambda _owner: [set_compute_unit_price(1_000), set_compute_unit_limit(600_000)])
+
+
+@pytest.mark.parametrize("budget", [
+    [set_compute_unit_price(34_000), set_compute_unit_limit(600_000)],
+    [set_compute_unit_price(20_000)],
+])
+def test_signed_raydium_transaction_rejects_excessive_priority_fee(budget):
+    with pytest.raises(ValueError, match="Phí ưu tiên"):
+        validate(extra_instruction=lambda _owner: budget)
+
+
+def test_signed_raydium_transaction_rejects_duplicate_compute_budget():
+    with pytest.raises(ValueError, match="nhiều lệnh đặt phí ưu tiên"):
+        validate(extra_instruction=lambda _owner: [set_compute_unit_price(1_000), set_compute_unit_price(2_000)])
 
 
 @pytest.mark.parametrize("overrides, message", [

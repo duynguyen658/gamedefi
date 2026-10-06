@@ -7,6 +7,9 @@ import { SOLANA_NETWORK, SOLANA_RPC_URL } from './solana';
 
 const WSOL_MINT = 'So11111111111111111111111111111111111111112';
 const DEVNET_GENESIS = 'EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG';
+// Set both values explicitly so the wallet does not have to choose a priority
+// fee. 600_000 * 1_000 / 1_000_000 = 600 lamports, below the server's cap.
+const DEVNET_SWAP_COMPUTE_BUDGET = { units: 600_000, microLamports: 1_000 };
 
 export interface PreparedRaydiumSwap {
   transaction: string;
@@ -95,6 +98,7 @@ export async function buildRaydiumSwapTransaction(
     slippage: transactionSlippageBps / 10_000,
     baseIn,
     txVersion: TxVersion.LEGACY,
+    computeBudgetConfig: DEVNET_SWAP_COMPUTE_BUDGET,
   });
   if (!(built.transaction instanceof Transaction)) {
     throw new Error('Raydium không tạo giao dịch legacy hợp lệ.');
