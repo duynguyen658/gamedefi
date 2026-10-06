@@ -39,6 +39,46 @@ function provider(): WalletProvider {
   return wallet;
 }
 
+async function signWalletTransaction(
+  transactionBase64: string,
+  expectedWallet: string,
+  context: string,
+): Promise<string> {
+  const wallet = provider();
+  const owner = wallet.publicKey ?? (await wallet.connect()).publicKey;
+  if (owner.toBase58() !== expectedWallet) throw new Error('Ví đã đổi tài khoản. Hãy đăng nhập lại.');
+  let transaction: Transaction | VersionedTransaction;
+  try {
+    const bytes = Buffer.from(transactionBase64, 'base64');
+    try {
+      transaction = Transaction.from(bytes);
+    } catch {
+      transaction = VersionedTransaction.deserialize(bytes);
+    }
+  } catch {
+    throw new Error(`${context} trả giao dịch không hợp lệ.`);
+  }
+  const feePayer = transaction instanceof Transaction
+    ? transaction.feePayer : transaction.message.staticAccountKeys[0];
+  if (!feePayer?.equals(owner)) throw new Error('Ví ký không phải người trả phí của giao dịch.');
+  let signed: Transaction | VersionedTransaction;
+  try {
+    signed = await wallet.signTransaction(transaction);
+  } catch (reason) {
+    const walletError = reason as { code?: unknown; message?: unknown } | null;
+    const message = typeof walletError?.message === 'string' ? walletError.message : String(reason);
+    const code = typeof walletError?.code === 'number' || typeof walletError?.code === 'string'
+      ? ` (mã ${walletError.code})` : '';
+    if (/unexpected error/i.test(message)) {
+      const name = selectedWallet() === 'solflare'
+        || (window as unknown as { solflare?: WalletProvider }).solflare === wallet ? 'Solflare' : 'Phantom';
+      throw new Error(`${name} từ chối ký giao dịch${code}: ${message}.`);
+    }
+    throw reason;
+  }
+  return Buffer.from(signed.serialize()).toString('base64');
+}
+
 export const solanaAdapter = {
   selectWallet: (kind: SolanaWalletKind) => window.localStorage.setItem(WALLET_SELECTION_KEY, kind),
   isAvailable: () => {
@@ -66,41 +106,12 @@ export const solanaAdapter = {
     const signed = await provider().signMessage(new TextEncoder().encode(message), 'utf8');
     return bs58.encode(signed.signature);
   },
-  signDexTransaction: async (transactionBase64: string, expectedWallet: string): Promise<string> => {
-    const wallet = provider();
-    const owner = wallet.publicKey ?? (await wallet.connect()).publicKey;
-    if (owner.toBase58() !== expectedWallet) throw new Error('Ví đã đổi tài khoản. Hãy đăng nhập lại.');
-    let transaction: Transaction | VersionedTransaction;
-    try {
-      const bytes = Buffer.from(transactionBase64, 'base64');
-      try {
-        transaction = Transaction.from(bytes);
-      } catch {
-        transaction = VersionedTransaction.deserialize(bytes);
-      }
-    } catch {
-      throw new Error('DEX trả transaction không hợp lệ.');
-    }
-    const feePayer = transaction instanceof Transaction
-      ? transaction.feePayer : transaction.message.staticAccountKeys[0];
-    if (!feePayer?.equals(owner)) throw new Error('Ví ký không phải fee payer của giao dịch DEX.');
-    let signed: Transaction | VersionedTransaction;
-    try {
-      signed = await wallet.signTransaction(transaction);
-    } catch (reason) {
-      const walletError = reason as { code?: unknown; message?: unknown } | null;
-      const message = typeof walletError?.message === 'string' ? walletError.message : String(reason);
-      const code = typeof walletError?.code === 'number' || typeof walletError?.code === 'string'
-        ? ` (mã ${walletError.code})` : '';
-      if (/unexpected error/i.test(message)) {
-        const name = selectedWallet() === 'solflare'
-          || (window as unknown as { solflare?: WalletProvider }).solflare === wallet ? 'Solflare' : 'Phantom';
-        throw new Error(`${name} từ chối ký giao dịch${code}: ${message}.`);
-      }
-      throw reason;
-    }
-    return Buffer.from(signed.serialize()).toString('base64');
-  },
+  signDexTransaction: (transactionBase64: string, expectedWallet: string): Promise<string> =>
+    signWalletTransaction(transactionBase64, expectedWallet, 'DEX'),
+  signPaymentTransaction: (transactionBase64: string, expectedWallet: string): Promise<string> =>
+    signWalletTransaction(transactionBase64, expectedWallet, 'Thanh toán'),
+  signFinanceTransaction: (transactionBase64: string, expectedWallet: string): Promise<string> =>
+    signWalletTransaction(transactionBase64, expectedWallet, 'DeFi'),
   mintFactionNft: async (factionId: number, expectedWallet: string): Promise<{ tx_digest: string; nft_object_id: string }> => {
     const wallet = provider();
     const owner = (await wallet.connect()).publicKey;

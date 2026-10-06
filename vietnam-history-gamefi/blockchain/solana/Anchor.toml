@@ -4,9 +4,11 @@ skip-lint = false
 
 [programs.devnet]
 history_game = "8qUBTgX99v5EhxbAaxuqS94rgfRhnLrTgW66Gh9BvLKN"
+finance_hub = "C4Ys1SQk5PXcPD5GfLP1RL7FdiL54A4mhv49cDf7rYW6"
 
 [programs.localnet]
 history_game = "8qUBTgX99v5EhxbAaxuqS94rgfRhnLrTgW66Gh9BvLKN"
+finance_hub = "C4Ys1SQk5PXcPD5GfLP1RL7FdiL54A4mhv49cDf7rYW6"
 
 [provider]
 cluster = "Devnet"
