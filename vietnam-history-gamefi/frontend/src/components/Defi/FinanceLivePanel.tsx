@@ -66,6 +66,8 @@ export const FinanceLivePanel: React.FC<Props> = ({ module, player, onPlayDrum }
       setSnapshot(next);
       setError(null);
     } catch (reason) {
+      setSnapshot(null);
+      setPrepared(null);
       setError(reason instanceof Error ? reason.message : 'Không đọc được dữ liệu Devnet.');
     } finally {
       setBusy(false);
@@ -286,7 +288,7 @@ export const FinanceLivePanel: React.FC<Props> = ({ module, player, onPlayDrum }
         <h3 id="finance-live-info">Thông tin Devnet</h3></div></header>
       <div className="finance-panel-body">
         <dl className="finance-facts">
-          <div><dt>Chương trình</dt><dd>{snapshot?.deployed ? 'Đã triển khai' : 'Chưa triển khai'}</dd></div>
+          <div><dt>Chương trình</dt><dd>{!snapshot ? 'Chưa kiểm tra' : snapshot.deployed ? 'Đã triển khai' : 'Chưa triển khai'}</dd></div>
           <div><dt>Ví</dt><dd className="finance-address">{player.is_guest ? 'Chưa kết nối' : player.wallet}</dd></div>
           <div><dt>Số dư ví</dt><dd>{snapshot ? sol(BigInt(snapshot.balance)) : 'Đang đọc…'}</dd></div>
           <div><dt>Ngân khố</dt><dd>{treasury ? sol(treasury.available) : 'Chưa tạo'}</dd></div>
