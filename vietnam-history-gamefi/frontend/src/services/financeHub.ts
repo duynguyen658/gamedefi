@@ -1,5 +1,5 @@
 import {
-  Connection, PublicKey, SystemProgram, Transaction, TransactionInstruction,
+  Connection, PublicKey, SYSVAR_CLOCK_PUBKEY, SystemProgram, Transaction, TransactionInstruction,
 } from '@solana/web3.js';
 import { Buffer } from 'buffer';
 import bs58 from 'bs58';
@@ -59,6 +59,7 @@ export interface FinanceProposal {
 export interface FinanceSnapshot {
   deployed: boolean;
   balance: number;
+  chainNow: number;
   saving: FinanceSaving | null;
   treasury: FinanceTreasury | null;
   stake: FinanceStake | null;
@@ -107,11 +108,14 @@ async function decodeProposal(address: PublicKey, data: Buffer): Promise<Finance
 export async function loadFinanceSnapshot(wallet: string): Promise<FinanceSnapshot> {
   const owner = checkPublicWallet(wallet);
   const rpc = await connection();
-  const [program, balance] = await Promise.all([
+  const [program, balance, clock] = await Promise.all([
     rpc.getAccountInfo(FINANCE_PROGRAM_ID, 'confirmed'), rpc.getBalance(owner, 'confirmed'),
+    rpc.getAccountInfo(SYSVAR_CLOCK_PUBKEY, 'confirmed'),
   ]);
+  if (!clock || clock.data.length < 40) throw new Error('Không đọc được đồng hồ Solana Devnet.');
+  const chainNow = Number(clock.data.readBigInt64LE(32));
   if (!program?.executable) {
-    return { deployed: false, balance, saving: null, treasury: null, stake: null, loans: [], proposals: [] };
+    return { deployed: false, balance, chainNow, saving: null, treasury: null, stake: null, loans: [], proposals: [] };
   }
   const [saving, treasury, stake, lending, borrowing, proposals] = await Promise.all([
     rpc.getAccountInfo(savingKey(owner), 'confirmed'),
@@ -130,7 +134,7 @@ export async function loadFinanceSnapshot(wallet: string): Promise<FinanceSnapsh
     proposalList.forEach((item, index) => { item.voted = votes[index] !== null; });
   }
   return {
-    deployed: true, balance,
+    deployed: true, balance, chainNow,
     saving: saving ? await decodeSaving(saving.data) : null,
     treasury: treasury ? await decodeTreasury(treasury.data) : null,
     stake: stake ? await decodeStake(stake.data) : null,

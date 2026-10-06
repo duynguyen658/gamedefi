@@ -147,7 +147,7 @@ export const FinanceLivePanel: React.FC<Props> = ({ module, player, onPlayDrum }
   const stake = snapshot?.stake;
   const loans = snapshot?.loans ?? [];
   const proposals = snapshot?.proposals ?? [];
-  const now = Date.now() / 1000;
+  const now = snapshot?.chainNow ?? 0;
   const headings: Record<Module, [string, string]> = {
     savings: ['Két SOL · Devnet', 'Tiết kiệm'],
     lending: ['Khoản vay ngang hàng · Devnet', 'Lending'],
@@ -213,6 +213,7 @@ export const FinanceLivePanel: React.FC<Props> = ({ module, player, onPlayDrum }
             <strong>Khoản đang khóa: {sol(saving.principal)}</strong>
             <p>Mở khóa: {time(saving.unlockAt)} · APY 0%</p>
             {button('Rút SOL', { kind: 'withdraw_saving' }, now < saving.unlockAt)}
+            {now < saving.unlockAt && <p>Sau khi đến hạn, bấm “Cập nhật dữ liệu” để mở nút rút.</p>}
           </article> : <>
             {field('Số SOL muốn khóa', amount, setAmount, '0.1', true)}
             {termField('Kỳ hạn', termSeconds, setTermSeconds)}
@@ -249,6 +250,7 @@ export const FinanceLivePanel: React.FC<Props> = ({ module, player, onPlayDrum }
             <div className="finance-highlight"><span>SOL đã khóa để bỏ phiếu</span>
               <strong>{sol(stake?.amount ?? 0n)}</strong></div>
             <p className="finance-note">Sau khi bỏ phiếu, SOL bị khóa đến lúc đề xuất kết thúc. Quorum của mỗi đề xuất là 20% tổng SOL khóa khi tạo.</p>
+            {stake && now < stake.lockedUntil && <p className="finance-note">Mở khóa theo đồng hồ Solana: {time(stake.lockedUntil)}. Bấm “Cập nhật dữ liệu” sau thời điểm này.</p>}
             {field('Số SOL khóa / rút', amount, setAmount, '0.1', true)}
             <div className="finance-actions">
               {button('Khóa SOL', { kind: 'stake_sol', amount }, !amount)}
@@ -289,6 +291,7 @@ export const FinanceLivePanel: React.FC<Props> = ({ module, player, onPlayDrum }
       <div className="finance-panel-body">
         <dl className="finance-facts">
           <div><dt>Chương trình</dt><dd>{!snapshot ? 'Chưa kiểm tra' : snapshot.deployed ? 'Đã triển khai' : 'Chưa triển khai'}</dd></div>
+          <div><dt>Đồng hồ Solana</dt><dd>{snapshot ? time(snapshot.chainNow) : 'Chưa đọc'}</dd></div>
           <div><dt>Ví</dt><dd className="finance-address">{player.is_guest ? 'Chưa kết nối' : player.wallet}</dd></div>
           <div><dt>Số dư ví</dt><dd>{snapshot ? sol(BigInt(snapshot.balance)) : 'Đang đọc…'}</dd></div>
           <div><dt>Ngân khố</dt><dd>{treasury ? sol(treasury.available) : 'Chưa tạo'}</dd></div>

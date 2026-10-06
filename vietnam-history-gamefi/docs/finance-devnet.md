@@ -38,6 +38,11 @@ giao dịch Devnet thật cho các luồng trên bằng ví thử cục bộ. V�
 ít nhất 0,2 SOL Devnet; script chờ hết kỳ hạn 1 phút và ghi chữ ký từng giao
 dịch để đối chiếu trên Explorer. Chỉ chạy script này trên Devnet thử.
 
+Script cũng có chế độ validator cục bộ, chỉ khi đặt đồng thời
+`FINANCE_SMOKE_LOCAL=1` và
+`FINANCE_SMOKE_RPC_URL=http://127.0.0.1:8899`. Chế độ này dùng để thử quyền
+ký, kỳ hạn và chống giao dịch lặp trước khi chi SOL Devnet.
+
 Trên workspace Windows đã chuẩn bị Solana CLI và hai keypair cục bộ, có thể chạy
 `powershell -File scripts/deploy-finance-hub.ps1 -EstimateOnly` để kiểm tra chi phí
 sau khi đặt `finance_hub.so` trong `blockchain/solana/target/deploy`. Khi đủ
