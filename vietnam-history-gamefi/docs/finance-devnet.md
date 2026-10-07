@@ -10,6 +10,8 @@ Các mục Thanh toán, Tiết kiệm, Lending, Treasury và DAO dùng cùng gia
 
 Chương trình ở `blockchain/solana/programs/finance_hub`, ID công khai `C4Ys1SQk5PXcPD5GfLP1RL7FdiL54A4mhv49cDf7rYW6`. Keypair của ID nằm cục bộ tại `blockchain/solana/target/deploy/finance_hub-keypair.json`, bị Git bỏ qua. Phải giữ bản sao an toàn của keypair này để triển khai đúng ID; không gửi hoặc commit khóa bí mật.
 
+Đã triển khai trên Solana Devnet ngày 07/10/2026, slot `508183535`. ProgramData `HLghJ1vfg9PUXn9o44KBSagAAucBBxprC6WugK12mBza`, upgrade authority `AsaP4StyFykojoPcJtWAmqDAohQN6mNFNLKThLvvbhdv`. Bản SBF có SHA-256 `fd870e22349148b42cc56abe4b0f6afa7e7cacfec8d6b0c26884816662389cb7`.
+
 ## Kiểm tra
 
 ```bash
@@ -20,7 +22,7 @@ npm test
 npm run build
 ```
 
-CI build tệp `finance_hub.so` bằng công cụ Solana 1.18.17 và xuất artifact `finance-hub-sbf`. Bài kiểm tra Rust trên Windows chỉ biên dịch cho host; chưa xác nhận bytecode SBF hoặc chạy giao dịch Devnet.
+CI build tệp `finance_hub.so` bằng công cụ Solana 1.18.17 và xuất artifact `finance-hub-sbf`. Bytecode này đã chạy trên validator cục bộ và Devnet. Smoke test Devnet ngày 07/10/2026 đã hoàn tất cả Treasury, Tiết kiệm, Lending và DAO, gồm các giao dịch bị từ chối đúng điều kiện.
 
 ## Triển khai
 
@@ -29,8 +31,8 @@ Máy triển khai cần Solana CLI và công cụ SBF tương thích Anchor 0.30
 1. Tải artifact `finance_hub.so` của đúng commit CI, hoặc chạy `cargo build-sbf --manifest-path programs/finance_hub/Cargo.toml`.
 2. Kiểm tra public key của `finance_hub-keypair.json` đúng ID ở trên. Không tạo keypair mới khi triển khai.
 3. Nạp SOL Devnet thử vào ví payer, dùng `solana rent <số byte của .so>` để ước tính tiền thuê account, cộng thêm phí giao dịch.
-4. Chạy `solana --url devnet --keypair <payer.json> program deploy <finance_hub.so> --program-id <finance_hub-keypair.json>`.
-5. Kiểm tra `solana --url devnet program show C4Ys1SQk5PXcPD5GfLP1RL7FdiL54A4mhv49cDf7rYW6` và mở giao diện để khởi tạo Treasury bằng ví người dùng.
+4. Chạy `solana --url devnet --keypair <payer.json> program deploy --buffer <buffer-keypair.json> --program-id <finance_hub-keypair.json> <finance_hub.so>`. Giữ buffer keypair cục bộ để tiếp tục nếu mạng ngắt giữa chừng.
+5. Kiểm tra `solana --url devnet --keypair <payer.json> program show C4Ys1SQk5PXcPD5GfLP1RL7FdiL54A4mhv49cDf7rYW6` và mở giao diện. Treasury được khởi tạo trên Devnet trong smoke test, nên giao diện có thể đọc ngay.
 6. Thử lần lượt mở/rút két 1 phút, tạo/hủy khoản vay, nhận/trả/nhận khoản vay, nạp Treasury, khóa SOL, tạo/bỏ phiếu/thực hiện đề xuất chi trên Devnet.
 
 Sau khi triển khai, `cd frontend && node scripts/finance-hub-smoke.mjs` chạy
@@ -47,6 +49,8 @@ Trên workspace Windows đã chuẩn bị Solana CLI và hai keypair cục bộ,
 `powershell -File scripts/deploy-finance-hub.ps1 -EstimateOnly` để kiểm tra chi phí
 sau khi đặt `finance_hub.so` trong `blockchain/solana/target/deploy`. Khi đủ
 SOL Devnet, bỏ `-EstimateOnly` để triển khai. Script xác minh cả hai public key
-trước khi gửi bất kỳ giao dịch nào.
+trước khi gửi bất kỳ giao dịch nào và giữ keypair buffer trong `target/deploy`
+để tiếp tục từ dữ liệu đã ghi nếu RPC bị giới hạn. Mặc định Solana CLI gửi
+qua TPU; chỉ dùng `-UseRpc` khi cần thử đường gửi qua RPC riêng ổn định.
 
-Không chuyển Mainnet trước khi kiểm toán bảo mật chương trình và kiểm thử toàn bộ luồng trên Devnet. Frontend tự kiểm tra `executable` của chương trình; khi chưa triển khai, các thao tác của bốn mục này bị khóa và thông báo đúng trạng thái.
+Không chuyển Mainnet trước khi kiểm toán bảo mật chương trình. Frontend tự kiểm tra `executable` của chương trình trước khi cho phép thao tác.

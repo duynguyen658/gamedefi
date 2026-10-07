@@ -1,6 +1,8 @@
 param(
     [string]$Binary = "",
-    [switch]$EstimateOnly
+    [string]$BufferKey = "",
+    [switch]$EstimateOnly,
+    [switch]$UseRpc
 )
 
 $ErrorActionPreference = 'Stop'
@@ -13,6 +15,7 @@ $payerKey = Join-Path $targetRoot 'deploy\finance_payer-keypair.json'
 $expectedProgram = 'C4Ys1SQk5PXcPD5GfLP1RL7FdiL54A4mhv49cDf7rYW6'
 $expectedPayer = 'AsaP4StyFykojoPcJtWAmqDAohQN6mNFNLKThLvvbhdv'
 if (-not $Binary) { $Binary = Join-Path $targetRoot 'deploy\finance_hub.so' }
+if (-not $BufferKey) { $BufferKey = Join-Path $targetRoot 'deploy\finance_buffer-keypair.json' }
 
 foreach ($path in @($solana, $keygen, $programKey, $payerKey, $Binary)) {
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
@@ -50,7 +53,16 @@ if ($payerBalance -lt $peakEstimate) {
     throw 'Số dư ví triển khai thấp hơn mức ước tính. Nạp thêm SOL Devnet trước khi chạy lại.'
 }
 
-& $solana --url devnet --keypair $payerKey program deploy --use-rpc --program-id $programKey $Binary
+if (-not (Test-Path -LiteralPath $BufferKey -PathType Leaf)) {
+    & $keygen new --silent --no-bip39-passphrase --outfile $BufferKey
+    if ($LASTEXITCODE -ne 0) { throw 'Không tạo được keypair buffer cục bộ.' }
+}
+$bufferPublicKey = (& $keygen pubkey $BufferKey).Trim()
+if ($LASTEXITCODE -ne 0) { throw 'Không đọc được public key của buffer.' }
+Write-Output "Buffer: $bufferPublicKey"
+$deployArgs = @('--url', 'devnet', '--keypair', $payerKey, 'program', 'deploy', '--buffer', $BufferKey, '--program-id', $programKey, $Binary)
+if ($UseRpc) { $deployArgs += '--use-rpc' }
+& $solana @deployArgs
 if ($LASTEXITCODE -ne 0) { throw 'Lệnh triển khai Solana thất bại.' }
-& $solana --url devnet program show $expectedProgram
+& $solana --url devnet --keypair $payerKey program show $expectedProgram
 if ($LASTEXITCODE -ne 0) { throw 'Chưa xác minh được chương trình sau triển khai.' }
